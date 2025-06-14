@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8e8ff 100%); /* Light lavender gradient like index.html features */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Navigation from index.html */
+        nav {
+            background: rgba(75, 0, 130, 0.95); /* Indigo base */
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            width: 100%;
+            position: sticky; /* Or fixed if preferred */
+            top: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .logo i { margin-right: 8px; }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #DDA0DD; /* Plum for hover */
+            background-color: rgba(255,255,255,0.1);
+        }
+         .nav-links .auth-link {
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .nav-links .auth-link:hover {
+             border-color: #DDA0DD;
+        }
+
+
+        /* Main Container for Login Card */
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px; /* Added more padding */
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 15px; /* Softer radius like index.html feature cards */
+            box-shadow: 0 10px 30px rgba(75,0,130,0.08); /* Softer shadow */
+            border: 1px solid rgba(75, 0, 130, 0.1);
+            padding: 30px 35px; /* Adjusted padding */
+            width: 100%;
+            max-width: 450px; /* Slightly wider */
+            position: relative;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .login-card::before { /* Top accent border */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: #4B0082; /* Indigo */
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .divine-symbol {
+            font-size: 2.5rem; /* Matched feature-icon size */
+            color: #4B0082; /* Indigo */
+            margin-bottom: 15px;
+        }
+
+        .card-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem; /* Consistent with section titles */
+            color: #4B0082; /* Indigo */
+            margin-bottom: 8px;
+        }
+
+        .card-header p {
+            color: #555; /* Darker gray */
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        /* Messages (Django) - styled like index.html */
+        .messages, .django-messages { /* Combined for consistency */
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .messages li, .django-messages li {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            font-weight: 500;
+        }
+        .messages li.success, .django-messages li.success { background-color: #28a745; }
+        .messages li.error, .django-messages li.error { background-color: #dc3545; }
+        .messages li.info, .django-messages li.info { background-color: #17a2b8; }
+        .messages li.warning, .django-messages li.warning { background-color: #ffc107; color: #333; }
+        
+        .error-message-custom { /* For the non-Django error */
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-left: 4px solid #dc3545;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4B0082; /* Indigo */
+            font-size: 1rem; /* Slightly smaller */
+            font-family: 'Georgia', serif;
+        }
+        .form-group label i {
+            margin-right: 6px;
+            color: #8A2BE2; /* BlueViolet for icons */
+        }
+
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px; /* Softer radius */
+            font-size: 0.95rem;
+            font-family: 'Georgia', serif;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4B0082; /* Indigo */
+            box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: #888;
+            opacity: 1;
+        }
+
+        /* Button Styles from index.html */
+        .btn {
+            padding: 12px 25px; /* Adjusted for login form */
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            margin-top: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4B0082, #8A2BE2); /* Indigo to BlueViolet */
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB); /* Lighter purple gradient */
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Register Link */
+        .register-link-container { /* Changed class name */
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .register-link-container p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .register-link-container a {
+            color: #4B0082; /* Indigo */
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .register-link-container a:hover {
+            color: #8A2BE2; /* BlueViolet */
+            text-decoration: underline;
+        }
+        .register-link-container i {
+            color: #DDA0DD; /* Plum for icon */
+        }
+
+
+        /* Footer from index.html */
+        footer {
+            background: #3a2d4c; /* Dark Purple/Brownish */
+            color: #e0e0e0; /* Lighter gray for text */
+            padding: 40px 0 20px; /* Adjusted padding */
+            text-align: center;
+            margin-top: auto; /* Pushes footer to bottom */
+        }
+        .footer-content { /* Simplified for login page */
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .footer-bottom p {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #c0c0c0;
+        }
+        .footer-bottom .bible-verse {
+            font-style: italic;
+            opacity: 0.8;
+            color: #DDA0DD; /* Plum */
+        }
+
+
+        /* Animation for card entrance */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .login-card {
+                margin: 20px;
+                padding: 25px 20px;
+            }
+            .card-header h2 {
+                font-size: 1.8rem;
+            }
+             .form-group input[type="email"],
+             .form-group input[type="password"] {
+                padding: 10px 12px;
+            }
+            .btn {
+                padding: 10px 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo">
+                <i class="fas fa-church"></i> Pentecost Matrimony
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}" class="auth-link"><i class="fas fa-sign-out-alt"></i> Logout ({{ user.username|truncatechars:10 }})</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="auth-link active"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="login-card">
+            <div class="card-header">
+                <div class="divine-symbol"><i class="fas fa-key"></i></div> <!-- Changed symbol -->
+                <h2>Welcome Back</h2>
+                <p>Enter your sacred journey</p>
+            </div>
+
+            {% if messages %}
+                <ul class="messages django-messages"> <!-- Added django-messages class -->
+                    {% for message in messages %}
+                        <li class="{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if error %}
+                <div class="error-message-custom">{{ error }}</div> <!-- Use custom class for non-Django error -->
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Email Address
+                    </label>
+                    <input type="email" id="email" name="email" required placeholder="yourname@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Password
+                    </label>
+                    <input type="password" id="password" name="password" required placeholder="Your password">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="register-link-container">
+                    <a href="{% url 'password_reset' %}" class="d-block mb-2">
+                        <i class="fas fa-key me-1"></i> Forgot password?
+                    </a>
+                <p>
+                    <i class="fas fa-heart" style="margin-right: 6px;"></i>
+                    New to our community? 
+                    <a href="{% url 'register' %}">Create an Account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-bottom">
+                 <p>© {% now "Y" %} Pentecost Matrimony. All rights reserved. | Built with faith and love.</p>
+                 <p class="bible-verse">"And over all these virtues put on love, which binds them all together in perfect unity." - Colossians 3:14</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

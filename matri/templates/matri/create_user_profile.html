@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if object %}Edit{% else %}Create{% endif %} Your Profile - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #333;
+            background: black;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(75, 0, 130, 0.95);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            padding: 15px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .logo i { margin-right: 8px; }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #DDA0DD;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .nav-links .auth-link {
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .nav-links .auth-link:hover {
+             border-color: #DDA0DD;
+        }
+
+        /* Main Container */
+        .main-form-container {
+            flex-grow: 1;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Header Section */
+        .form-header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .form-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #DDA0DD);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .form-header p.subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+
+        .progress-step.active {
+            color: #DDA0DD;
+        }
+
+        .progress-step .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .progress-step.active .step-number {
+            background: linear-gradient(45deg, #DDA0DD, #8A2BE2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(221, 160, 221, 0.4);
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            width: 60px;
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+            margin: 0 20px;
+        }
+
+        /* Django Messages */
+        .django-messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 25px;
+        }
+        .django-messages li {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .django-messages li.success { background: linear-gradient(45deg, #28a745, #20c997); }
+        .django-messages li.warning { background: linear-gradient(45deg, #ffc107, #fd7e14); color: #333; }
+        .django-messages li.error { background: linear-gradient(45deg, #dc3545, #e83e8c); }
+        .django-messages li.info { background: linear-gradient(45deg, #17a2b8, #6610f2); }
+
+        /* Form Sections */
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD);
+        }
+
+        .form-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .form-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #4B0082;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-section-title::before {
+            content: '';
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(45deg, #4B0082, #DDA0DD);
+            border-radius: 2px;
+        }
+
+        .form-section-title i {
+            font-size: 1.5rem;
+            color: #8A2BE2;
+        }
+
+        .section-description {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            font-style: italic;
+            padding-left: 65px;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4B0082;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            font-size: 0.9rem;
+            color: #8A2BE2;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group input[type="date"],
+        .form-group input[type="number"],
+        .form-group input[type="file"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 0.3rem rgba(138, 43, 226, 0.15);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input[type="file"] {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9ff, #e8e8ff);
+            border: 2px dashed #8A2BE2;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+        }
+
+        .form-group input[type="file"]:hover {
+            background: linear-gradient(135deg, #e8e8ff, #d8d8ff);
+            border-color: #4B0082;
+        }
+
+        .form-group .help {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-group .help i {
+            color: #8A2BE2;
+        }
+
+        .form-group .error,
+        .form-group ul.errorlist li {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group .error::before,
+        .form-group ul.errorlist li::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .form-group ul.errorlist { 
+            list-style: none; 
+            padding: 0; 
+        }
+        .form-group ul.errorlist li { 
+            margin-bottom: 5px; 
+        }
+
+        /* Special styling for height/weight fields */
+        .measurement-field {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .measurement-field input {
+            flex: 1;
+        }
+
+        .measurement-unit {
+            background: linear-gradient(45deg, #8A2BE2, #DDA0DD);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            padding: 20px 40px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD);
+            color: white;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            display: block;
+            margin: 40px auto;
+            width: fit-content;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(75, 0, 130, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(75, 0, 130, 0.4);
+            background: linear-gradient(45deg, #8A2BE2, #9370DB, #DDA0DD);
+        }
+
+        .btn-submit:hover::before {
+            left: 100%;
+        }
+
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(58, 45, 76, 0.95);
+            backdrop-filter: blur(10px);
+            color: #e0e0e0;
+            padding: 40px 0 20px;
+            margin-top: auto;
+        }
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .footer-section h4 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 15px;
+            color: #DDA0DD;
+            font-size: 1.2rem;
+        }
+        .footer-section p, .footer-section ul li {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: #c0c0c0;
+        }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin-bottom: 8px; }
+        .footer-section ul li a {
+            color: #c0c0c0;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-section ul li a:hover { color: #DDA0DD; }
+        .footer-socials a { margin-right: 12px; font-size: 1.2rem; }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #5b4c6c;
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+        .footer-bottom p { margin-bottom: 5px; }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 10px; }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+                background: rgba(75, 0, 130, 0.98);
+                padding-bottom: 10px;
+            }
+            .main-form-container {
+                margin: 20px 10px;
+                padding: 0 10px;
+            }
+            .form-header h2 { font-size: 2.2rem; }
+            .form-section { padding: 25px 20px; }
+            .form-section-title { font-size: 1.5rem; }
+            .section-description { padding-left: 0; }
+            .btn-submit { padding: 15px 30px; font-size: 1rem;}
+            .footer-content { grid-template-columns: 1fr; text-align: center;}
+            .footer-socials { text-align: center; margin-top: 10px;}
+            .progress-indicator { display: none; }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .form-section:nth-child(2) { animation-delay: 0.1s; }
+        .form-section:nth-child(3) { animation-delay: 0.2s; }
+        .form-section:nth-child(4) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo">
+                <i class="fas fa-church"></i> Pentecost Matrimony
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                {% if user.is_authenticated %}
+                    {% if user_has_profile %}
+                        <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                        <li><a href="{% url 'edit_user_profile' %}" class="active"><i class="fas fa-edit"></i> Edit Profile</a></li>
+                        <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
+                    {% else %}
+                        <li><a href="{% url 'create_user_profile' %}" class="active"><i class="fas fa-plus-circle"></i> Create Profile</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-form-container">
+        <div class="form-header">
+            <h2>{% if object %}Edit Your Divine Profile{% else %}Create Your Divine Profile{% endif %}</h2>
+            <p class="subtitle">
+                {% if object %}Update your sacred journey and divine preferences{% else %}Begin your sacred journey to find your God-ordained partner{% endif %}
+            </p>
+        </div>
+
+        <div class="progress-indicator">
+            <div class="progress-step active">
+                <div class="step-number">1</div>
+                <span>Personal Details</span>
+            </div>
+            <div class="progress-step">
+                <div class="step-number">2</div>
+                <span>Partner Preferences</span>
+            </div>
+        </div>
+
+        {% if messages %}
+            <ul class="django-messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Personal Information
+                </h3>
+                <p class="section-description">Share your personal details and faith journey with us</p>
+                
+                <div class="form-grid">
+                    {% for field in profile_form %}
+                        {% if field.name == 'bio' or field.name == 'about_partner' %}
+                            <div class="form-group full-width">
+                        {% else %}
+                            <div class="form-group">
+                        {% endif %}
+                            {{ field.label_tag }}
+                            {% if field.name == 'height' %}
+                                <div class="measurement-field">
+                                    {{ field }}
+                                    <div class="measurement-unit">
+                                        <i class="fas fa-ruler-vertical"></i> cm
+                                    </div>
+                                </div>
+                            {% elif field.name == 'weight' %}
+                                <div class="measurement-field">
+                                    {{ field }}
+                                    <div class="measurement-unit">
+                                        <i class="fas fa-weight"></i> kg
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <p class="help"><i class="fas fa-info-circle"></i>{{ field.help_text|safe }}</p>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <p class="error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% for error in profile_form.non_field_errors %}
+                     <p class="error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-heart"></i>
+                    Partner Preferences
+                </h3>
+                <p class="section-description">Share what you seek in your divinely appointed life partner (all fields optional)</p>
+                
+                <div class="form-grid">
+                    {% for field in prefs_form %}
+                        <div class="form-group">
+                            {{ field.label_tag }}
+                            {% if field.name == 'preferred_height_min' or field.name == 'preferred_height_max' %}
+                                <div class="measurement-field">
+                                    {{ field }}
+                                    <div class="measurement-unit">
+                                        <i class="fas fa-ruler-vertical"></i> cm
+                                    </div>
+                                </div>
+                            {% elif field.name == 'preferred_weight_min_kg' or field.name == 'preferred_weight_max_kg' %}
+                                <div class="measurement-field">
+                                    {{ field }}
+                                    <div class="measurement-unit">
+                                        <i class="fas fa-weight"></i> kg
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <p class="help"><i class="fas fa-info-circle"></i>{{ field.help_text|safe }}</p>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <p class="error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% for error in prefs_form.non_field_errors %}
+                     <p class="error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-dove"></i>
+                {% if object %}Update Sacred Profile{% else %}Begin Divine Journey{% endif %}
+            </button>
+        </form>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Pentecost Matrimony</h4>
+                    <p>Dedicated to helping Pentecostal believers find their God-ordained life partners through faith, prayer, and divine guidance.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'index' %}">Home</a></li>
+                        {% if user.is_authenticated and user_has_profile %}
+                        <li><a href="{% url 'search_users' %}">Search Members</a></li>
+                        <li><a href="{% url 'view_user_profile' %}">My Profile</a></li>
+                        {% elif user.is_authenticated and not user_has_profile %}
+                        <li><a href="{% url 'create_user_profile' %}">Create Profile</a></li>
+                        {% else %}
+                        <li><a href="{% url 'login' %}">Login / Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact & Support</h4>
+                    <p>Email: <a href="mailto:keralapentecostmatrimony@gmail.com" style="color:#DDA0DD;">keralapentecostmatrimony@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© {% now "Y" %} Pentecost Matrimony. All rights reserved.</p>
+                <p>"Love binds them all together in perfect unity." - Colossians 3:14</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const genderField = document.getElementById('id_gender');
+        const lookingForField = document.getElementById('id_looking_for');
+
+        if (genderField && lookingForField) {
+            function updateLookingFor() {
+                const selectedGender = genderField.value;
+                let currentlySelectedLookingFor = lookingForField.value; 
+
+                // Enable all options first
+                for (let i = 0; i < lookingForField.options.length; i++) {
+                    lookingForField.options[i].disabled = false;
+                    lookingForField.options[i].style.display = '';
+                }
+
+                if (selectedGender === 'Male') { // If user is Male
+                    // Disable 'Male' in looking_for
+                    for (let i = 0; i < lookingForField.options.length; i++) {
+                        if (lookingForField.options[i].value === 'Male') {
+                            lookingForField.options[i].disabled = true;
+                            lookingForField.options[i].style.display = 'none';
+                            if (currentlySelectedLookingFor === 'Male') currentlySelectedLookingFor = ''; // Reset if current selection is now disabled
+                        }
+                    }
+                    // If current selection is invalid or empty, try to select 'Female'
+                    if (!currentlySelectedLookingFor || (lookingForField.querySelector('option[value="' + currentlySelectedLookingFor + '"]') && lookingForField.querySelector('option[value="' + currentlySelectedLookingFor + '"]').disabled) ) {
+                        let femaleOption = Array.from(lookingForField.options).find(opt => opt.value === 'Female' && !opt.disabled);
+                        if (femaleOption) {
+                            lookingForField.value = 'Female';
+                        } else if (lookingForField.options.length > 0 && lookingForField.options[0].value !== '' && !lookingForField.options[0].disabled) {
+                             lookingForField.value = lookingForField.options[0].value; // Fallback to first available if 'Female' is not an option
+                        }  else {
+                             lookingForField.value = ''; // Clear if no valid option
+                        }
+                    } else {
+                        lookingForField.value = currentlySelectedLookingFor; // Keep valid selection
+                    }
+
+                } else if (selectedGender === 'Female') { // If user is Female
+                    // Disable 'Female' in looking_for
+                    for (let i = 0; i < lookingForField.options.length; i++) {
+                        if (lookingForField.options[i].value === 'Female') {
+                            lookingForField.options[i].disabled = true;
+                            lookingFor

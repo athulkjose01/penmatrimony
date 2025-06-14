@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pentecost Matrimony - Find Your God-Given Partner</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link rel="preload" as="image" href="{% static 'images/hero.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Your CSS styles would go here. They have been removed as requested. -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+                        url("{% static 'images/hero.png' %}"); /* Example image */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(75, 0, 130, 0.2); /* Indigo tint */
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 0 20px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700; /* Adjusted for Playfair */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .hero .tagline {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4B0082, #8A2BE2); /* Indigo to BlueViolet */
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB); /* Lighter purple gradient */
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #4B0082; /* Indigo */
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(75, 0, 130, 0.95); /* Indigo base */
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+         .logo i { margin-right: 8px; }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 25px; /* Slightly reduced gap */
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #DDA0DD; /* Plum for hover */
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        /* NEW STYLE FOR MESSAGE COUNT BADGE */
+        .nav-count-badge {
+            display: inline-block;
+            background-color: #3498db; /* Blue for messages */
+            color: white;
+            border-radius: 10px;
+            padding: 1px 7px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 6px;
+            vertical-align: middle;
+            line-height: 1.4; /* Helps with vertical centering */
+        }
+
+        .nav-links .auth-link { /* Special style for login/logout if needed */
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .nav-links .auth-link:hover {
+             border-color: #DDA0DD;
+        }
+
+
+        /* Messages (Django) */
+        .django-messages {
+            list-style: none;
+            padding: 0;
+            margin: 20px auto;
+            max-width: 1100px; /* Match container width */
+            width: calc(100% - 40px);
+        }
+        .django-messages li {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .django-messages li.success { background-color: #28a745; } /* Green */
+        .django-messages li.warning { background-color: #ffc107; color: #333; } /* Yellow */
+        .django-messages li.error { background-color: #dc3545; } /* Red */
+        .django-messages li.info { background-color: #17a2b8; } /* Teal */
+
+
+        /* Features Section */
+        .features {
+            padding: 80px 0; /* Reduced padding */
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8e8ff 100%); /* Light lavender gradient */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem; /* Adjusted to match sacred_union.html was 2.5rem, keeping index.html distinctiveness */
+            color: #4B0082; /* Indigo */
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: #555; /* Darker gray, sacred_union used #666 */
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; /* Reduced gap */
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px; /* Reduced padding */
+            border-radius: 15px; /* Softer radius */
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(75,0,130,0.08); /* Softer shadow */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(75, 0, 130, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(75,0,130,0.12);
+        }
+
+        .feature-icon {
+            font-size: 2.8rem; /* Slightly smaller */
+            color: #4B0082; /* Indigo */
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; /* Slightly smaller */
+            margin-bottom: 10px;
+            color: #4B0082; /* Indigo */
+        }
+        .feature-card p {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+
+        /* Bible Quotes Section */
+        .quotes-section {
+            padding: 80px 0;
+            background: #fff; /* White background */
+            position: relative;
+        }
+        .quotes-section .container {
+             position: relative; /* For quote positioning */
+             min-height: 280px; /* Ensure space for quotes */
+        }
+        .bible-quote {
+            position: absolute; /* For carousel effect */
+            width: calc(100% - 40px); /* Consider container padding */
+            left: 20px; /* Align with container padding */
+            top: 0;
+            background: #fdfcff; /* Very light lavender */
+            padding: 40px 50px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #DDA0DD; /* Plum border */
+            box-shadow: 0 10px 30px rgba(75,0,130,0.08);
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1;
+        }
+        .bible-quote.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            z-index: 2;
+        }
+        .bible-quote::before,
+        .bible-quote::after {
+            content: '“'; /* Changed to smart quote */
+            font-size: 4rem;
+            color: #DDA0DD; /* Plum */
+            position: absolute;
+            opacity: 0.5;
+            font-family: 'Playfair Display', serif;
+        }
+        .bible-quote::before { top: 10px; left: 20px; }
+        .bible-quote::after {
+            content: '”'; /* Changed to smart quote */
+            bottom: 5px; right: 20px;
+        }
+        .bible-quote blockquote {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; /* Adjusted size */
+            font-style: italic;
+            color: #4B0082; /* Indigo */
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        .bible-quote cite {
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            color: #6A0DAD; /* A slightly different purple */
+            font-weight: 600;
+        }
+
+
+        /* Stats Section */
+        .stats {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #4B0082, #8A2BE2); /* Indigo to BlueViolet */
+            color: white;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+        .stat-item h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .stat-item p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Featured Profiles Section - STYLES UPDATED TO MATCH SACRED_UNION.HTML */
+        .profiles {
+            padding: 100px 0; /* Matched sacred_union.html */
+            background: white; /* Matched sacred_union.html */
+        }
+        /* .profiles .section-title h2 uses existing .section-title h2 style */
+        /* .profiles .section-title p uses existing .section-title p style */
+
+        .profiles-grid { /* New: From sacred_union.html */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 35px;
+            margin-top: 60px; /* Spacing from title */
+        }
+
+        .profile-card { /* Updated to match sacred_union.html */
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); /* Matched sacred_union.html */
+            transition: all 0.3s ease; /* Matched sacred_union.html */
+            border: 2px solid transparent;
+            /* max-width, width, opacity removed as grid handles sizing and initial state for animation is handled by JS */
+        }
+        .profile-card:hover {
+            transform: translateY(-5px);
+            border-color: #4B0082; /* Indigo - Matched sacred_union.html */
+        }
+        .profile-image {
+            width: 100%;
+            height: 250px; /* Matched sacred_union.html */
+            object-fit: cover;
+        }
+        .profile-info {
+            padding: 25px;
+            text-align: center; /* Kept from original index.html for h4 and button centering */
+        }
+        .profile-info h4 {
+            font-family: 'Playfair Display', serif; /* Kept from original index.html */
+            font-size: 1.3rem; /* Matched sacred_union.html */
+            margin-bottom: 10px;
+            color: #4B0082; /* Indigo - Matched sacred_union.html */
+        }
+        .profile-details {
+            color: #666; /* Matched sacred_union.html */
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 0; /* Removed specific margin, spacing handled by button's margin-top */
+            text-align: left; /* For left-aligned detail items */
+             /* display: inline-block; To make the block itself center if needed, but spans will be left aligned */
+        }
+        .profile-details span {
+            display: block;
+            margin-bottom: 5px; /* Matched sacred_union.html */
+        }
+        .profile-details i {
+            margin-right: 8px;
+            color: #8A2BE2; /* BlueViolet - Kept from original index.html */
+        }
+        .view-profile-btn { /* Renamed to avoid conflict with .view-profile class if any, used as <a> */
+            background: linear-gradient(45deg, #4B0082, #8A2BE2);
+            color: white;
+            padding: 10px 20px; /* Matched sacred_union.html */
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px; /* Spacing from details */
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-decoration: none; /* For <a> tag */
+            display: inline-block; /* For <a> tag */
+        }
+        .view-profile-btn:hover {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            transform: scale(1.05); /* Matched sacred_union.html */
+        }
+        .no-profiles-message {
+            text-align: center;
+            font-size: 1.1em;
+            color: #555;
+            padding: 40px 20px;
+            background-color: #f9f9f9; /* Lighter than profile section background */
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(75,0,130,0.05);
+            margin-top: 60px; /* if grid would have had margin-top */
+        }
+
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            background: #e8e8ff; /* Light lavender, similar to features */
+            text-align: center;
+        }
+        .cta-section .container .section-title { margin-bottom: 30px; }
+        .cta-section p {
+            font-size: 1.2rem;
+            color: #444; /* Darker gray */
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* Uses .btn, .btn-primary from above */
+
+
+        /* Footer */
+        footer {
+            background: #3a2d4c; /* Dark Purple/Brownish */
+            color: #e0e0e0; /* Lighter gray for text */
+            padding: 60px 0 30px;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px; /* Reduced gap */
+            margin-bottom: 40px;
+        }
+        .footer-section h4 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+            color: #DDA0DD; /* Plum */
+            font-size: 1.3rem;
+        }
+        .footer-section p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #c0c0c0; /* Softer gray */
+        }
+        .footer-section ul {
+            list-style: none;
+        }
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+        .footer-section ul li a {
+            color: #c0c0c0; /* Softer gray */
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-section ul li a:hover {
+            color: #DDA0DD; /* Plum */
+        }
+        .footer-socials a {
+            margin-right: 15px;
+            font-size: 1.3rem;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #5b4c6c; /* Darker separator */
+            color: #aaa; /* Medium gray */
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #4B0082; /* Indigo */
+        }
+
+        /* Style for the PWA Install Button */
+        #install-container {
+            display: none; /* Hidden by default, shown by JS */
+        }
+        #install-btn i {
+            margin-right: 8px; /* Adds spacing between the icon and text */
+        }
+
+
+        /* Notification Styles - Enhanced */
+        #notification-bell {
+            position: relative;
+            cursor: pointer; /* Indicate it's clickable */
+        }
+
+        #notification-count {
+            position: absolute;
+            top: -8px; /* Adjust for better positioning */
+            right: -8px; /* Adjust for better positioning */
+            background-color: #e74c3c; /* Red for visibility */
+            color: white;
+            border-radius: 50%;
+            width: 20px; /* Slightly larger */
+            height: 20px; /* Slightly larger */
+            font-size: 11px; /* Adjust font size */
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid white; /* Optional: white border for contrast */
+        }
+
+        #notification-count.hidden {
+            display: none;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: calc(100% + 10px); /* Position below bell with some space */
+            right: 0;
+            width: 350px; /* Or your preferred width */
+            max-height: 450px; /* Increased max height */
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px; /* Softer radius */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* Softer shadow */
+            z-index: 1001;
+            display: none;
+            color: #333; /* Text color for items */
+        }
+
+        .notification-dropdown.show {
+            display: block;
+            animation: fadeInDown 0.3s ease-out; /* Add a subtle animation */
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+
+        .notification-header {
+            padding: 12px 15px; /* Adjusted padding */
+            border-bottom: 1px solid #f0f0f0; /* Lighter border */
+            background: #4B0082; /* Theme color */
+            color: white;
+            border-top-left-radius: 10px; /* Match dropdown radius */
+            border-top-right-radius: 10px; /* Match dropdown radius */
+        }
+
+        .notification-header h4 {
+            margin: 0;
+            font-size: 1.05rem; /* Slightly smaller */
+            font-weight: 600; /* Bolder */
+        }
+
+        .notification-list {
+            padding: 0; /* Remove default padding */
+        }
+
+        .notification-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0; /* Lighter border */
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Space between avatar and content */
+        }
+        .notification-item:last-child {
+            border-bottom: none; /* No border for the last item before footer */
+        }
+
+        .notification-item:hover {
+            background-color: #f7f7ff; /* Very light lavender hover */
+        }
+
+        .notification-item.unread { /* Kept for semantic, can be used for specific unread styling if needed */
+            /* background-color: #f0f0ff; */ /* Example: if you want a different BG for unread */
+        }
+
+        .notification-sender-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0; /* Prevent avatar from shrinking */
+            border: 1px solid #eee; /* Subtle border */
+        }
+
+        .notification-content {
+            flex-grow: 1;
+            overflow: hidden; /* Prevent long messages from breaking layout */
+        }
+
+        .notification-message {
+            font-size: 0.88rem; /* Slightly adjusted */
+            margin-bottom: 4px;
+            color: #333;
+            line-height: 1.4;
+        }
+        /* Style for the link within the notification message */
+        .notification-message a {
+            color: #4B0082; /* Theme color for link */
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .notification-message a:hover {
+            text-decoration: underline;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: #888; /* Lighter gray for time */
+        }
+
+        .notification-item-empty {
+            padding: 25px 15px;
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .notification-footer {
+            padding: 10px 15px;
+            text-align: center;
+            border-top: 1px solid #f0f0f0;
+            background-color: #fdfdff; /* Very light footer background */
+        }
+
+        .notification-mark-all-read {
+            background: none;
+            border: none;
+            color: #4B0082;
+            cursor: pointer;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .notification-mark-all-read:hover {
+            color: #8A2BE2;
+            text-decoration: underline;
+        }
+
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Floating Hearts Animation */
+        .floating-hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0; /* Behind hero content but above hero BG pseudo element */
+        }
+        .heart {
+            position: absolute;
+            color: rgba(255, 192, 203, 0.5); /* Lighter, more transparent pink */
+            font-size: 20px;
+            animation: float 10s ease-in-out infinite; /* Slower animation */
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; } /* More rotation */
+        }
+
+        .notification-post-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px; /* A squircle looks nice, but 50% is a circle */
+    object-fit: cover; /* Prevents the image from being squashed */
+    margin-left: auto; /* Pushes the image to the far right */
+    flex-shrink: 0; /* Prevents the image from shrinking */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+            .notification-dropdown {
+                right: -10px; /* Adjust dropdown position on smaller screens */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.8rem; }
+            .hero .tagline { font-size: 1.1rem; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+            .cta-buttons .btn { width: 80%; max-width: 300px; }
+
+            .nav-container { flex-direction: column; gap: 10px; }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+            
+    background: rgba(75, 0, 130, 0.98);
+                padding-bottom: 10px;
+            }
+
+            .features-grid, .stats-grid, .profiles-grid { grid-template-columns: 1fr; } /* Added .profiles-grid */
+            /* .profile-card max-width was removed, grid handles it. For mobile, it will be 1fr. */
+
+            .section-title h2 { font-size: 2.2rem; }
+            .bible-quote { padding: 30px 20px; }
+            .bible-quote blockquote { font-size: 1.2rem; }
+            .bible-quote::before, .bible-quote::after { font-size: 3rem; }
+            .footer-content { grid-template-columns: 1fr; text-align: center;}
+            .footer-socials { text-align: center; margin-top: 10px;}
+
+            .notification-dropdown { /* Adjust for mobile */
+                width: calc(100vw - 40px);
+                max-width: 350px; /* still apply max width */
+                right: 50%;
+                transform: translateX(50%);
+            }
+            .nav-links li:has(#notification-bell) { /* Ensure bell is not pushed off screen */
+                 position: static; /* Or adjust as needed if dropdown is child of li */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo">
+                <i class="fas fa-church"></i> Pentecost Matrimony
+            </a>
+            <ul class="nav-links">
+                {% if user.is_authenticated %}
+                    {% if user_has_profile %}
+                        <li><a href="{% url 'view_user_profile' %}" class="{% if request.resolver_match.url_name == 'view_user_profile' %}active{% endif %}"><i class="fas fa-user"></i> My Profile</a></li>
+                        <li><a href="{% url 'search_users' %}" class="{% if request.resolver_match.url_name == 'search_users' %}active{% endif %}"><i class="fas fa-search"></i> Search</a></li>
+                        <li>
+                            <a href="{% url 'chat_room_list' %}" class="{% if request.resolver_match.url_name == 'chat_room_list' %}active{% endif %}">
+                                <i class="fas fa-comments"></i> Messages
+                                {% if unread_messages_count > 0 %}
+                                    <span class="nav-count-badge">{{ unread_messages_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="notification-bell"> <!-- Changed href to #, JS will handle click -->
+                                <i class="fas fa-bell"></i>
+                                <span id="notification-count" class="hidden">0</span> <!-- Start hidden and with 0 -->
+                            </a>
+                            <div id="notification-dropdown" class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h4>Notifications</h4>
+                                </div>
+                                <div class="notification-list">
+                                    <!-- Notifications will be loaded here by AJAX -->
+                                    <div class="notification-item-empty">Loading...</div>
+                                </div>
+                                <!-- Footer for actions like "Mark all as read" will be added here by JS -->
+                            </div>
+                        </li>
+                    {% else %}
+                    <li><a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="{% url 'create_user_profile' %}" class="{% if request.resolver_match.url_name == 'create_user_profile' %}active{% endif %}"><i class="fas fa-plus-circle"></i> Create Profile</a></li>
+                        <li><a href="{% url 'logout' %}" class="auth-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="auth-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}" class="auth-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="floating-hearts">
+            <i class="fas fa-heart heart" style="left: 10%; animation-delay: 0s; font-size: 24px;"></i>
+            <i class="fas fa-heart heart" style="left: 20%; animation-delay: 1.5s;"></i>
+            <i class="fas fa-heart heart" style="left: 30%; animation-delay: 3s; font-size: 18px;"></i>
+            <i class="fas fa-heart heart" style="left: 70%; animation-delay: 4.5s;"></i>
+            <i class="fas fa-heart heart" style="left: 80%; animation-delay: 2s; font-size: 22px;"></i>
+            <i class="fas fa-heart heart" style="left: 90%; animation-delay: 5s;"></i>
+            <i class="fas fa-heart heart" style="left: 50%; animation-delay: 3.5s; font-size: 26px;"></i>
+            <i class="fas fa-heart heart" style="left: 5%; animation-delay: 6s;"></i>
+        </div>
+    <div class="hero-content">
+        <h1>Find Your God-Ordained Partner</h1>
+        <p class="tagline">"He who finds a wife finds what is good and receives favor from the Lord" - Proverbs 18:22</p>
+        <div class="cta-buttons">
+            {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-primary">Join Now</a>
+            {% elif not user_has_profile %}
+                 <a href="{% url 'create_user_profile' %}" class="btn btn-primary">Create Your Profile</a>
+            {% else %}
+            <a href="{% url 'post_feed' %}" class="btn btn-secondary">Community Feed</a>
+            <a href="{% url 'search_users' %}" class="btn btn-secondary"> Search Profiles</a>
+            {% endif %}
+            
+        </div>
+    </div>
+</section>
+
+    <div class="main-content-wrapper"> <!-- Wrapper for sections after hero -->
+        {% if messages %}
+            <ul class="django-messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Why Choose Pentecost Matrimony?</h2>
+                    <p>Building Christ-centered relationships with faith, love, and divine guidance.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-cross"></i></div>
+                        <h3>Faith-Based Matching</h3>
+                        <p>Connect with fellow believers who share your Pentecostal values and commitment to Christ-centered relationships.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Verified Profiles</h3>
+                        <p>We encourage genuine profiles for authentic connections in finding a life partner.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-praying-hands"></i></div>
+                        <h3>Prayer & Community</h3>
+                        <p>Join a community that values prayer and spiritual support in your journey to find your soulmate.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bible Quotes Section -->
+        <section class="quotes-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Words of Wisdom</h2>
+                    <p>Guiding verses for love, marriage, and companionship.</p>
+                </div>
+                <div class="bible-quote active">
+                    <blockquote>"Therefore what God has joined together, let no one separate."</blockquote>
+                    <cite>— Mark 10:9 (NIV)</cite>
+                </div>
+                <div class="bible-quote">
+                    <blockquote>"He who finds a wife finds what is good and receives favor from the Lord."</blockquote>
+                    <cite>— Proverbs 18:22 (NIV)</cite>
+                </div>
+                <div class="bible-quote">
+                    <blockquote>"Two are better than one, because they have a good return for their labor."</blockquote>
+                    <cite>— Ecclesiastes 4:9 (NIV)</cite>
+                </div>
+                <div class="bible-quote">
+                    <blockquote>"Above all, love each other deeply, because love covers over a multitude of sins."</blockquote>
+                    <cite>— 1 Peter 4:8 (NIV)</cite>
+                </div>
+                <div class="bible-quote">
+                    <blockquote>"Husbands, love your wives, just as Christ loved the church and gave himself up for her."</blockquote>
+                    <cite>— Ephesians 5:25 (NIV)</cite>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h3>1,000+</h3>
+                        <p>Active Members</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>100+</h3>
+                        <p>Connections Made</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>Faithful</h3>
+                        <p>Community</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>Global</h3>
+                        <p>Reach</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="container">
+                 {% if not user.is_authenticated %}
+                    <div class="section-title"><h3>Begin Your Sacred Journey Today</h3></div>
+                    <p>Join our blessed community and let God guide you to your perfect match ordained by Him.</p>
+                    <a href="{% url 'register' %}" class="btn btn-primary"><i class="fas fa-heart"></i> Create Your Sacred Profile</a>
+                {% elif not user_has_profile %}
+                    <div class="section-title"><h3>Complete Your Divine Profile</h3></div>
+                    <p>Share your faith journey and connect with fellow believers seeking God's will in marriage.</p>
+                    <a href="{% url 'create_user_profile' %}" class="btn btn-primary"><i class="fas fa-edit"></i> Create Your Profile</a>
+                {% else %}
+                    <div class="section-title"><h3>Welcome Back, {{ user.first_name|default:user.username }}!</h3></div>
+                    <p>Continue your search for your God-ordained partner in this journey of faith and love.</p>
+                    <div class="cta-buttons">
+                        {% if request.user.userprofile.is_premium_member %}
+                        <a href="{% url 'search_users' %}" class="btn btn-primary"><i class="fas fa-search-heart"></i> Discover Your Match</a>
+                        {% else %}
+                        <a href="{% url 'subscribe' %}" class="btn btn-primary">Unlock Premium Features</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div> <!-- End main-content-wrapper -->
+
+    <!-- Footer -->
+    <footer id="footer-contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Pentecost Matrimony</h4>
+                    <p>Dedicated to helping Pentecostal believers find their God-ordained life partners through faith, prayer, and divine guidance in a Christ-centered community.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'index' %}#home">Home</a></li>
+                        <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms_and_conditions' %}">Terms and Conditions</a></li>
+                        {% if user.is_authenticated and user_has_profile %}
+                        <li><a href="{% url 'search_users' %}">Search Members</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact & Support</h4>
+                    <p>For support, please email: <br><a href="mailto:keralapentecostmatrimony@gmail.com" style="color:#DDA0DD;">keralapentecostmatrimony@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© {% now "Y" %} Pentecost Matrimony. All rights reserved. | Built with faith and love.</p>
+                 <p>"And over all these virtues put on love, which binds them all together in perfect unity." - Colossians 3:14</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Define global constants from Django
+        const DEFAULT_AVATAR_URL = "{% static 'matri/images/default_avatar.png' %}";
+        const CSRF_TOKEN = "{{ csrf_token }}";
+
+        // --- All Page Logic (UI, Animations, etc.) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href.startsWith('#') && href.length > 1) {
+                        e.preventDefault();
+                        const targetElement = document.querySelector(href);
+                        if (targetElement) {
+                            const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - (document.querySelector('nav').offsetHeight + 10);
+                            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+
+            // Navigation background change on scroll
+            const nav = document.querySelector('nav');
+            if (nav) {
+                window.addEventListener('scroll', function() {
+                    nav.style.background = (window.scrollY > 80) ? 'rgba(55, 0, 100, 0.98)' : 'rgba(75, 0, 130, 0.95)';
+                    nav.style.boxShadow = (window.scrollY > 80) ? '0 4px 15px rgba(0,0,0,0.2)' : 'none';
+                });
+            }
+
+            // Intersection Observer for animations
+            const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+            const elementsToAnimate = document.querySelectorAll('.feature-card, .stat-item, .profile-card, .section-title, .cta-section .btn, footer .footer-section');
+            const animationObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            elementsToAnimate.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.7s ease-out, transform 0.7s ease-out';
+                animationObserver.observe(el);
+            });
+
+            // Bible quotes carousel
+            const quotes = document.querySelectorAll('.bible-quote');
+            if (quotes.length > 0) {
+                let currentQuoteIndex = 0;
+                quotes[0].classList.add('active');
+                setInterval(() => {
+                    quotes[currentQuoteIndex].classList.remove('active');
+                    currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+                    quotes[currentQuoteIndex].classList.add('active');
+                }, 7000);
+            }
+
+            // --- In-App Notification Bell Logic ---
+            const notificationBell = document.getElementById('notification-bell');
+            const notificationDropdown = document.getElementById('notification-dropdown');
+            if (notificationBell && notificationDropdown) {
+                notificationBell.addEventListener('click', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isShown = notificationDropdown.classList.toggle('show');
+                    if (isShown) loadNotifications();
+                });
+                document.addEventListener('click', e => {
+                    if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                        notificationDropdown.classList.remove('show');
+                    }
+                });
+                setInterval(checkNotificationCount, 30000);
+                checkNotificationCount();
+            }
+        });
+
+        function checkNotificationCount() {
+            fetch("{% url 'get_notifications' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const notificationCountSpan = document.getElementById('notification-count');
+                    if (data.count > 0) {
+                        notificationCountSpan.textContent = data.count > 9 ? '9+' : data.count;
+                        notificationCountSpan.classList.remove('hidden');
+                    } else {
+                        notificationCountSpan.classList.add('hidden');
+                    }
+                })
+                .catch(error => console.error("Error checking notification count:", error));
+        }
+
+        function loadNotifications() {
+            const notificationList = document.querySelector('#notification-dropdown .notification-list');
+            notificationList.innerHTML = '<div class="notification-item-empty">Loading...</div>';
+            fetch("{% url 'get_notifications' %}")
+                .then(response => response.json())
+                .then(data => {
+                    notificationList.innerHTML = '';
+                    if (!data.notifications || data.notifications.length === 0) {
+                        notificationList.innerHTML = '<div class="notification-item-empty">No new notifications</div>';
+                        return;
+                    }
+                    data.notifications.forEach(n => {
+                        const itemLink = document.createElement('a');
+                        itemLink.className = 'notification-item';
+                        itemLink.href = n.click_action_url;
+                        itemLink.dataset.id = n.id;
+                        const pic = n.sender_profile_pic_url || DEFAULT_AVATAR_URL;
+                        const postPreview = n.post_preview_url ? `<img src="${n.post_preview_url}" alt="Post preview" class="notification-post-preview">` : '';
+                        itemLink.innerHTML = `
+                            <img src="${pic}" alt="Avatar" class="notification-sender-avatar">
+                            <div class="notification-content">
+                                <div class="notification-message">${n.message_html}</div>
+                                <div class="notification-time">${n.created_at}</div>
+                            </div>
+                            ${postPreview}`;
+                        itemLink.addEventListener('click', () => markNotificationAsRead(n.id));
+                        notificationList.appendChild(itemLink);
+                    });
+                    document.getElementById('notification-count').classList.add('hidden');
+                    addMarkAllReadFooter();
+                })
+                .catch(error => {
+                    console.error("Error loading notifications:", error);
+                    notificationList.innerHTML = '<div class="notification-item-empty">Could not load.</div>';
+                });
+        }
+        
+        function addMarkAllReadFooter() {
+            const dropdown = document.getElementById('notification-dropdown');
+            let footer = dropdown.querySelector('.notification-footer');
+            if (!footer) {
+                footer = document.createElement('div');
+                footer.className = 'notification-footer';
+                dropdown.appendChild(footer);
+            }
+            footer.innerHTML = `<button class="notification-mark-all-read">Mark all as read</button>`;
+            footer.querySelector('.notification-mark-all-read').addEventListener('click', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                markAllNotificationsAsRead();
+            });
+        }
+
+        function markNotificationAsRead(notificationId) {
+            fetch(`/mark_notification_read/${notificationId}/`, { method: 'POST', headers: { 'X-CSRFToken': CSRF_TOKEN }})
+                .catch(error => console.error("Error marking notification read:", error));
+        }
+
+        function markAllNotificationsAsRead() {
+            fetch("{% url 'mark_all_notifications_read' %}", { method: 'POST', headers: { 'X-CSRFToken': CSRF_TOKEN }})
+                .then(response => response.json())
+                .then(data => { if (data.status === 'success') loadNotifications(); })
+                .catch(error => console.error("Error marking all notifications read:", error));
+        }
+        
+        // --- PWA & Push Notification Logic ---
+
+        // Helper function to convert VAPID key
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        // The main function to subscribe a user
+        async function subscribeUserToPush() {
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                
+                // Check if already subscribed
+                const existingSubscription = await registration.pushManager.getSubscription();
+                if (existingSubscription) {
+                    console.log('User is already subscribed.');
+                    return;
+                }
+                
+                // Get VAPID public key from our server
+                const response = await fetch("{% url 'get_vapid_key' %}");
+                const data = await response.json();
+                if (!data.public_key) {
+                    console.error('VAPID public key not found on server.');
+                    return;
+                }
+                const applicationServerKey = urlBase64ToUint8Array(data.public_key);
+                
+                // Subscribe the user
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: applicationServerKey
+                });
+                console.log('User subscribed successfully.');
+                
+                // Send subscription to the backend
+                await fetch("{% url 'subscribe_to_push' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN
+                    },
+                    body: JSON.stringify(subscription)
+                });
+                console.log('Subscription details sent to server.');
+
+            } catch (error) {
+                console.error('Failed to subscribe user to push notifications:', error);
+            }
+        }
+        
+        // This function initiates the whole process
+        async function initializePushNotifications() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.warn('Push messaging is not supported by this browser.');
+                return;
+            }
+
+            // If permission is already granted, just subscribe
+            if (Notification.permission === 'granted') {
+                console.log('Permission for notifications is already granted.');
+                subscribeUserToPush();
+                return;
+            }
+
+            // If permission is denied, do nothing
+            if (Notification.permission === 'denied') {
+                console.log('Permission for notifications has been denied.');
+                return;
+            }
+
+            // If permission hasn't been asked yet ('default'), prompt the user
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    console.log('Permission for notifications was granted.');
+                    await subscribeUserToPush();
+                } else {
+                    console.log('Permission for notifications was denied.');
+                }
+            } catch (error) {
+                console.error('Error requesting notification permission:', error);
+            }
+        }
+
+        // Register the service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{% url 'service_worker' %}")
+                    .then(registration => {
+                        console.log('✅ Service Worker registered with scope:', registration.scope);
+                        
+                        // --- INITIATE PUSH SUBSCRIPTION FLOW ---
+                        // This block will only run for logged-in users with a profile.
+                        {% if user.is_authenticated and user_has_profile %}
+                            initializePushNotifications();
+                        {% endif %}
+                    })
+                    .catch(error => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Logic for PWA install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // You can optionally show a custom install button here
+            // const installContainer = document.getElementById('install-container');
+            // if(installContainer) installContainer.style.display = 'block';
+        });
+
+    </script>
+</body>
+</html>

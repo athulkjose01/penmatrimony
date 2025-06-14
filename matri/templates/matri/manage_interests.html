@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Manage Interests" }} - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    
+    <!-- EXTERNAL LIBRARIES -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- DJANGO TEMPLATE TAGS -->
+    {% load static %}
+    {% load humanize %}
+
+    <!-- INTERNAL STYLES -->
+    <style>
+        /* --- GLOBAL RESET & BODY STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Georgia', serif; line-height: 1.6; color: #E0E0E0; background: black; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%); pointer-events: none; z-index: -1; }
+
+        /* --- NAVIGATION STYLES (Copied from index.html for consistency) --- */
+ /* Navigation - Keep original style */
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(75, 0, 130, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .logo i { margin-right: 8px; }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #DDA0DD;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .nav-links .auth-link {
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .nav-links .auth-link:hover {
+             border-color: #DDA0DD;
+        }
+
+        /* --- MAIN CONTENT & CONTAINER --- */
+        .main-view-container { 
+            flex-grow: 1; 
+            padding-bottom: 20px; 
+        }
+        .interests-container { max-width: 800px; margin: 40px auto; padding: 30px; background: rgba(20, 20, 20, 0.9); border-radius: 15px; box-shadow: 0 8px 25px rgba(120, 119, 198, 0.15); border: 1px solid rgba(120, 119, 198, 0.3); }
+        .interests-container h1 { text-align: center; color: #DDA0DD; font-family: 'Playfair Display', serif; margin-bottom: 40px; font-size: 2.2rem; }
+        
+        /* --- INTEREST SECTION STYLING --- */
+        .interest-section { margin-bottom: 50px; }
+        .interest-section:last-of-type { margin-bottom: 10px; }
+        .interest-section h2 { color: #E0E0E0; border-bottom: 1px solid rgba(221, 160, 221, 0.2); padding-bottom: 10px; margin-bottom: 20px; font-size: 1.5rem; font-family: 'Playfair Display', serif; }
+        .interest-item { padding: 20px; border-bottom: 1px solid rgba(221, 160, 221, 0.15); display: flex; align-items: center; gap: 20px; transition: background-color 0.2s ease; }
+        .interest-section > .interest-item:last-child { border-bottom: none; }
+        .interest-item:hover { background-color: rgba(221, 160, 221, 0.05); }
+        .interest-actor-avatar a { display: block; }
+        .interest-actor-avatar img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #DDA0DD; transition: transform 0.2s ease; }
+        .interest-actor-avatar img:hover { transform: scale(1.08); }
+        .interest-actor-avatar .avatar-placeholder { width: 60px; height: 60px; border-radius: 50%; background-color: #764ba2; color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; border: 2px solid #DDA0DD; }
+        .interest-content { flex-grow: 1; }
+        .interest-text { font-size: 1.1rem; }
+        .interest-text .user-link { color: #fff; text-decoration: none; font-weight: bold; }
+        .interest-text .user-link:hover { color: #DDA0DD; text-decoration: underline; }
+        .interest-timestamp { font-size: 0.85em; color: #a0a0a0; margin-top: 5px; }
+        .interest-actions { margin-left: auto; display: flex; flex-shrink: 0; gap: 10px; align-items: center; }
+        
+        .no-requests { text-align: center; padding: 40px 20px; color: #aaa; font-style: italic; }
+        .no-requests i { font-size: 2.5rem; margin-bottom: 15px; color: rgba(221, 160, 221, 0.5); }
+
+        /* --- FOOTER STYLES --- */
+        footer { background: rgba(58, 45, 76, 0.95); backdrop-filter: blur(10px); color: #e0e0e0; padding: 40px 0 20px; margin-top: auto; }
+        .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .footer-section h4 { font-family: 'Playfair Display', serif; margin-bottom: 15px; color: #DDA0DD; font-size: 1.2rem; }
+        .footer-section p, .footer-section ul li { font-size: 0.9rem; line-height: 1.7; color: #c0c0c0; }
+        .footer-section ul { list-style: none; padding-left: 0; }
+        .footer-section ul li { margin-bottom: 8px; }
+        .footer-section ul li a { color: #c0c0c0; text-decoration: none; transition: color 0.3s ease; }
+        .footer-section ul li a:hover { color: #DDA0DD; }
+        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
+        .footer-bottom p { margin-bottom: 5px; }
+
+        /* --- RESPONSIVE STYLES (Updated to match index.html nav behavior) --- */
+        @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        }
+
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 10px; }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+                background: rgba(75, 0, 130, 0.98);
+                padding-bottom: 10px;
+            }
+            .interest-item { flex-direction: column; text-align: center; gap: 15px; }
+            .interest-actions { margin-top: 15px; margin-left: 0; }
+            footer { text-align: center; }
+            .footer-content { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ======================= NAVBAR ======================= -->
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo">
+                <i class="fas fa-church"></i> Pentecost Matrimony
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                {% if user.is_authenticated %}
+                        <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                        <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ======================= MAIN CONTENT ======================= -->
+    <div class="main-view-container container">
+        <div class="interests-container">
+            <h1>{{ page_title }}</h1>
+            
+            <!-- SECTION 1: INTEREST REQUESTS RECEIVED (PENDING) -->
+            <div class="interest-section">
+                <h2><center><i class="fas fa-inbox me-2"></i>Interest Requests Received</center></h2>
+                {% for req in incoming_requests %}
+                <div class="interest-item">
+                    <div class="interest-actor-avatar">
+                        <a href="{% url 'view_other_user_profile' profile_id=req.sender.id %}">
+                            {% if req.sender.profile_picture %}
+                                <img src="{{ req.sender.profile_picture.url }}" alt="{{ req.sender.full_name }}">
+                            {% else %}<div class="avatar-placeholder"><i class="fas fa-user"></i></div>{% endif %}
+                        </a>
+                    </div>
+                    <div class="interest-content">
+                        <div class="interest-text"><a href="{% url 'view_other_user_profile' profile_id=req.sender.id %}" class="user-link">{{ req.sender.full_name }}</a> sent you an interest request.</div>
+                        <div class="interest-timestamp">{{ req.created_at|naturaltime }}</div>
+                    </div>
+                    <div class="interest-actions">
+                        <form action="{% url 'accept_interest' interest_id=req.id %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            {% if request.user.userprofile.is_premium_member %}
+                            <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Accept</button>
+                            {% else %}
+                            <a href="{% url 'subscribe' %}" class="btn btn-primary">
+                            <i class="fas fa-crown"></i> Upgrade to Interact
+                        </a>
+                    {% endif %}
+                        </form>
+                        <form action="{% url 'reject_interest' interest_id=req.id %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-requests"><p><i class="fas fa-envelope-open-text"></i></p><p>You have no new interest requests.</p></div>
+                {% endfor %}
+            </div>
+
+            <!-- SECTION 2: INTEREST REQUESTS SENT (PENDING) -->
+            <div class="interest-section">
+                <h2><center><i class="fas fa-paper-plane me-2"></i>Interest Requests Sent</center></h2>
+                {% for req in outgoing_requests %}
+                <div class="interest-item">
+                    <div class="interest-actor-avatar">
+                        <a href="{% url 'view_other_user_profile' profile_id=req.receiver.id %}">
+                            {% if req.receiver.profile_picture %}
+                                <img src="{{ req.receiver.profile_picture.url }}" alt="{{ req.receiver.full_name }}">
+                            {% else %}<div class="avatar-placeholder"><i class="fas fa-user"></i></div>{% endif %}
+                        </a>
+                    </div>
+                    <div class="interest-content">
+                        <div class="interest-text">Your interest request to <a href="{% url 'view_other_user_profile' profile_id=req.receiver.id %}" class="user-link">{{ req.receiver.full_name }}</a> is pending.</div>
+                        <div class="interest-timestamp">Sent {{ req.created_at|naturaltime }}</div>
+                    </div>
+                    <div class="interest-actions">
+                        <form action="{% url 'withdraw_interest' interest_id=req.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-undo"></i> Cancel</button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-requests"><p><i class="fas fa-hourglass-half"></i></p><p>You have no pending sent requests.</p></div>
+                {% endfor %}
+            </div>
+
+            <!-- SECTION 3: ACCEPTED CONNECTIONS ("UN-INTEREST" OPTION) -->
+            <div class="interest-section">
+                <h2><center><i class="fas fa-handshake me-2"></i>Your Connections</center></h2>
+                {% for req in accepted_connections %}
+                    {% comment %} Determine who the "other" person is in this connection {% endcomment %}
+                    {% if req.sender.user == user %}
+                        {% with other_profile=req.receiver %}
+                        <div class="interest-item">
+                            <div class="interest-actor-avatar">
+                                <a href="{% url 'view_other_user_profile' profile_id=other_profile.id %}">
+                                    {% if other_profile.profile_picture %}
+                                        <img src="{{ other_profile.profile_picture.url }}" alt="{{ other_profile.full_name }}">
+                                    {% else %}<div class="avatar-placeholder"><i class="fas fa-user"></i></div>{% endif %}
+                                </a>
+                            </div>
+                            <div class="interest-content">
+                                <div class="interest-text">You are connected with <a href="{% url 'view_other_user_profile' profile_id=other_profile.id %}" class="user-link">{{ other_profile.full_name }}</a>.</div>
+                                <div class="interest-timestamp">Connected on {{ req.updated_at|date:"F j, Y" }}</div>
+                            </div>
+                            <div class="interest-actions">
+                                <form action="{% url 'remove_connection' interest_id=req.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Remove Connection"><i class="fas fa-user-slash"></i> Un-interest</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% else %}
+                        {% with other_profile=req.sender %}
+                        <div class="interest-item">
+                            <div class="interest-actor-avatar">
+                                <a href="{% url 'view_other_user_profile' profile_id=other_profile.id %}">
+                                    {% if other_profile.profile_picture %}
+                                        <img src="{{ other_profile.profile_picture.url }}" alt="{{ other_profile.full_name }}">
+                                    {% else %}<div class="avatar-placeholder"><i class="fas fa-user"></i></div>{% endif %}
+                                </a>
+                            </div>
+                            <div class="interest-content">
+                                <div class="interest-text">You are connected with <a href="{% url 'view_other_user_profile' profile_id=other_profile.id %}" class="user-link">{{ other_profile.full_name }}</a>.</div>
+                                <div class="interest-timestamp">Connected on {{ req.updated_at|date:"F j, Y" }}</div>
+                            </div>
+                            <div class="interest-actions">
+                                <form action="{% url 'remove_connection' interest_id=req.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Remove Connection"><i class="fas fa-user-slash"></i> Un-interest</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endif %}
+                {% empty %}
+                <div class="no-requests"><p><i class="fas fa-link-slash"></i></p><p>You have no accepted connections yet.</p></div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ======================= FOOTER ======================= -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Pentecost Matrimony</h4>
+                    <p>Dedicated to helping Pentecostal believers find their God-ordained life partners through faith, prayer, and divine guidance.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'index' %}">Home</a></li>
+                        {% if user.is_authenticated and user.userprofile %}
+                            <li><a href="{% url 'search_users' %}">Search Members</a></li>
+                            <li><a href="{% url 'view_user_profile' %}">My Profile</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact & Support</h4>
+                    <p>Email: <a href="mailto:keralapentecostmatrimony@gmail.com" style="color:#DDA0DD;">keralapentecostmatrimony@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© {% now "Y" %} Pentecost Matrimony. All rights reserved.</p>
+                <p>"Love binds them all together in perfect unity." - Colossians 3:14</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Your Messages" }} - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #4B0082;
+            --light-purple: #DDA0DD;
+            --accent-purple: #8A2BE2;
+            --dark-bg: #0A0A0A;
+            --card-bg: #1A1A1A;
+            --text-light: #E0E0E0;
+            --text-muted: #B0B0B0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            color: var(--text-light); 
+            background: var(--dark-bg);
+            min-height: 100vh; 
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), 
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), 
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* --- Navigation (Unchanged) --- */
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(75, 0, 130, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding-top: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .logo i { margin-right: 8px; }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #DDA0DD;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        /* Main Content Styles */
+        .main-view-container { 
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-header { 
+            text-align: center; 
+            margin-bottom: 40px; /* Reduced margin */
+            position: relative;
+        }
+
+        .page-header h1 { 
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem; 
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, var(--light-purple), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .page-header p { 
+            font-size: 1.1rem; 
+            color: var(--text-muted); 
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* NEW: Unified Chat List Container */
+        .chat-list-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: rgba(30, 30, 45, 0.9);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* NEW: Unified Chat Item Style */
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            text-decoration: none;
+            color: var(--text-light);
+            transition: background-color 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .chat-item:last-child {
+            border-bottom: none;
+        }
+        .chat-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .avatar-container {
+            position: relative;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .avatar-container img, .avatar-container .avatar-placeholder { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid var(--light-purple);
+        }
+
+        .avatar-container .avatar-placeholder { 
+            background: linear-gradient(45deg, #764ba2, #667eea); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.8rem; 
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            width: 14px;
+            height: 14px;
+            background: #00ff88;
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+        }
+        
+        .message-content { 
+            flex-grow: 1; 
+            overflow: hidden; /* Prevents long text from breaking layout */
+        }
+
+        .user-name { 
+            font-weight: 600; 
+            color: var(--text-light); 
+            font-size: 1.15rem; 
+            margin-bottom: 4px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .last-message { 
+            font-size: 0.95rem; 
+            color: var(--text-muted); 
+            line-height: 1.4;
+            font-weight: 300;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .message-meta { 
+            text-align: right; 
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .timestamp { 
+            font-size: 0.8rem; 
+            color: #999;
+            font-weight: 300;
+            white-space: nowrap;
+        }
+
+        .unread-badge { 
+            background: var(--accent-purple);
+            color: white; 
+            border-radius: 50%; 
+            padding: 0;
+            height: 24px;
+            width: 24px;
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .start-chat-btn { 
+            background: linear-gradient(45deg, var(--accent-purple), #9370DB) !important;
+            border: none !important;
+            color: white !important;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            margin-left: auto; /* Pushes button to the far right */
+            flex-shrink: 0;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .start-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .empty-state { 
+            text-align: center; 
+            padding: 60px 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: var(--accent-purple);
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        .empty-state h3 {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* --- Responsive Design --- */
+        @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        }
+
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 10px; }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+                background: rgba(75, 0, 130, 0.98);
+                padding-bottom: 10px;
+            }
+
+            .main-view-container { padding: 40px 15px; }
+            .page-header h1 { font-size: 2.5rem; }
+            .chat-item { padding: 12px 15px; }
+        }
+
+        @media (max-width: 480px) {
+            .page-header h1 { font-size: 2.2rem; }
+            .page-header p { font-size: 1rem; }
+
+            .avatar-container { margin-right: 15px; }
+            .avatar-container img, .avatar-container .avatar-placeholder {
+                width: 50px;
+                height: 50px;
+            }
+            .user-name { font-size: 1.05rem; }
+            .last-message { font-size: 0.9rem; }
+            .timestamp { font-size: 0.75rem; }
+            .start-chat-btn { font-size: 0.8rem; padding: 6px 14px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo"><i class="fas fa-church"></i> Pentecost Matrimony</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                {% if user.is_authenticated and user_has_profile %}
+                    <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                    <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-view-container">
+        <div class="page-header">
+            <h1>{{ page_title }}</h1>
+            <p>Connect hearts, share stories, and build meaningful relationships</p>
+        </div>
+
+        <div class="chat-list-container">
+            {% if chat_list or chat_suggestions %}
+                <!-- Active Conversations -->
+                {% for chat in chat_list %}
+                <a href="{% url 'chat_room_detail' room_id=chat.room.id %}" class="chat-item">
+                    <div class="avatar-container">
+                        {% if chat.other_user.profile_picture %}
+                            <img src="{{ chat.other_user.profile_picture.url }}" alt="{{ chat.other_user.full_name }}">
+                        {% else %}
+                            <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
+                        {% endif %}
+                        <div class="online-indicator"></div>
+                    </div>
+                    
+                    <div class="message-content">
+                        <div class="user-name">{{ chat.other_user.full_name }}</div>
+                        <div class="last-message">
+                            {% if chat.last_message %}
+                                {% if chat.last_message.sender.user == user %}You: {% endif %}
+                                {{ chat.last_message.content|truncatechars:40 }}
+                            {% else %}
+                                No messages yet.
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="message-meta">
+                        {% if chat.last_message %}
+                            <div class="timestamp">{{ chat.last_message.timestamp|timesince }} ago</div>
+                        {% endif %}
+                        {% if chat.unread_count > 0 %}
+                            <span class="unread-badge">{{ chat.unread_count }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+
+                <!-- New Connections to Chat With -->
+                {% for profile in chat_suggestions %}
+                <div class="chat-item">
+                    <div class="avatar-container">
+                        {% if profile.profile_picture %}
+                            <img src="{{ profile.profile_picture.url }}" alt="{{ profile.full_name }}">
+                        {% else %}
+                            <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="message-content">
+                        <div class="user-name">{{ profile.full_name }}</div>
+                        <div class="last-message">Start the conversation!</div>
+                    </div>
+                    
+                    <a href="{% url 'start_chat' profile_id=profile.id %}" class="start-chat-btn">
+                        <i class="fas fa-paper-plane"></i> Chat
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-comment-dots"></i>
+                    <h3>No Conversations Yet</h3>
+                    <p>When you match with someone, they will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

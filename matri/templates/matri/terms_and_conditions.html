@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms and Conditions - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% csrf_token %}
+    <style>
+        /* --- GLOBAL RESET & BODY STYLES (from your example) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            color: #E0E0E0;
+            background: black;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* Enhanced background (from your example) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                url('https://images.unsplash.com/photo-1519452575417-564c1401ecc0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80') center/cover no-repeat,
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        /* Overlay (from your example) */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(45, 0, 75, 0.5) 50%, rgba(0, 0, 0, 0.9) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* --- HEADER STYLES (from your example) --- */
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: block;
+            background: linear-gradient(135deg, #ffffff, #DDA0DD, #8A2BE2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(221, 160, 221, 0.3);
+        }
+
+        .page-header .logo-title i {
+            margin-right: 12px;
+            color: #DDA0DD;
+            -webkit-text-fill-color: #DDA0DD;
+        }
+
+        /* --- STYLES FOR THE CONTENT --- */
+        .content-container {
+            width: 100%;
+            max-width: 850px;
+            background: linear-gradient(145deg, rgba(25, 25, 35, 0.9) 0%, rgba(15, 15, 25, 0.9) 100%);
+            padding: 40px 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3), 0 0 0 1px rgba(221, 160, 221, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(138, 43, 226, 0.15);
+            text-align: left;
+        }
+
+        .content-container .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: #EAEAEA;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .content-container .effective-date {
+            display: block;
+            text-align: center;
+            color: #A0A0A0;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .content-container h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            color: #DDA0DD;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(221, 160, 221, 0.2);
+        }
+
+        .content-container h3 {
+            font-size: 1.2rem;
+            color: #E0E0E0;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .content-container p, .content-container li {
+            color: #C0C0C0;
+            margin-bottom: 15px;
+        }
+
+        .content-container ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 15px;
+        }
+        
+        /* Default list style (positive/informational) */
+        .content-container ul:not(.prohibited-list) > li {
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .content-container ul:not(.prohibited-list) > li::before {
+            content: "\f058"; /* FontAwesome check-circle */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 4px;
+            color: #8A2BE2;
+        }
+
+        /* Specific list style for prohibited actions */
+        .content-container ul.prohibited-list > li {
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .content-container ul.prohibited-list > li::before {
+            content: "\f00d"; /* FontAwesome times/cross icon */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 4px;
+            color: #ff7675; /* A light red for prohibitions */
+        }
+
+        .content-container a {
+            color: #87CEEB;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .content-container a:hover {
+            text-decoration: underline;
+        }
+
+        /* Style for important disclaimer text */
+        .disclaimer-text {
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #ffc107; /* A warning yellow/gold */
+            text-align: center;
+            display: block;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            border-radius: 8px;
+        }
+
+        .contact-info {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-left: 4px solid #8A2BE2;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Style for lettered sub-lists */
+        .content-container ol[type="a"] {
+            list-style-type: lower-alpha;
+            padding-left: 30px;
+        }
+         .content-container ol[type="a"] > li {
+            margin-bottom: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="page-header">
+        <a href="/" style="text-decoration: none;">
+            <h1 class="logo-title"><i class="fas fa-church"></i> Pentecost Matrimony</h1>
+        </a>
+    </header>
+
+    <main class="content-container">
+        <h1 class="page-title">Terms and Conditions</h1>
+        <span class="effective-date">Last Updated: 13-06-2025</span>
+
+        <p>Welcome to Pentecost Matrimony. These Terms and Conditions ("Terms") govern your use of our website, apps, and other services (collectively, the "Service"). The Service is owned and operated by [Your Company Name, if applicable] ("Pentecost Matrimony," "we," "us," or "our").</p>
+        <p>By creating an account and using our Service, you agree to be bound by these Terms, our <a href="{% url 'privacy_policy' %}">Privacy Policy</a>, and any other policies referenced herein. If you do not agree to these Terms, you must not use our Service.</p>
+
+        <h2>1. Eligibility</h2>
+        <p>To register as a member of Pentecost Matrimony and use this Service, you must meet the following criteria:</p>
+        <ul>
+            <li><strong>Age:</strong> You must be at least 18 years of age (or the legal age of majority in your country of residence).</li>
+            <li><strong>Marital Status:</strong> You must be legally single (never married, divorced, or widowed) and have the legal capacity to enter into marriage.</li>
+            <li><strong>Intent:</strong> You must be using the Service with a bona fide intention of finding a life partner for marriage.</li>
+            <li><strong>Faith:</strong> This platform is exclusively for individuals who identify with the Pentecostal Christian faith.</li>
+        </ul>
+        <p>Misrepresentation of any of the above eligibility criteria is a violation of these Terms and may result in the immediate termination of your account without a refund.</p>
+
+        <h2>2. Account Registration and Security</h2>
+        <ul>
+            <li><strong>Accurate Information:</strong> You agree to provide accurate, current, and complete information during registration and to keep it updated.</li>
+            <li><strong>Account Security:</strong> You are solely responsible for maintaining the confidentiality of your password and for all activities that occur under your account.</li>
+            <li><strong>One Account:</strong> You agree to create only one unique profile for the Service.</li>
+        </ul>
+
+        <h2>3. Membership, Subscriptions, and Payments</h2>
+        <h3>Free and Premium Membership</h3>
+        <p>You can register as a free member. Certain features are only available to paying, premium members.</p>
+        <h3>Subscriptions and Billing</h3>
+        <p>All subscription fees are outlined on our website. When you purchase a subscription, you authorize us or our third-party payment processor to charge your chosen payment method.</p>
+        <h3>Automatic Renewal</h3>
+        <p>To ensure uninterrupted service, your subscription will automatically renew for the same duration at the then-current price, unless you cancel it before the end of the current subscription period.</p>
+        <h3>Refund Policy</h3>
+        <p>All payments made for any subscription or service are final and non-refundable. There are no refunds or credits for partially used periods. We may, at our sole discretion, issue a refund or credit in exceptional circumstances.</p>
+
+        <h2>4. User Conduct and Responsibilities</h2>
+        <p>You agree to use the Service in a manner consistent with its purpose and in compliance with all applicable laws. You agree NOT to:</p>
+        <ul class="prohibited-list">
+            <li>Post any content that is defamatory, abusive, obscene, profane, offensive, threatening, harassing, or illegal.</li>
+            <li>Use the Service for any commercial purpose, such as advertising or soliciting.</li>
+            <li>Impersonate any person or entity or misrepresent your identity, faith, or affiliation.</li>
+            <li>Post personal contact information in your public profile.</li>
+            <li>Solicit money from or defraud any other member.</li>
+            <li>Engage in "spamming," "phishing," or sending chain letters.</li>
+            <li>Use any robot, spider, or data mining tool on the Service.</li>
+            <li>Harass, stalk, or intimidate any other member.</li>
+            <li>Post any copyrighted material without the owner's consent.</li>
+        </ul>
+        <p>Violation of these conduct rules may lead to the immediate termination of your account.</p>
+
+        <h2>5. Content Posted on the Service</h2>
+        <p>You are solely responsible for all content you post ("Content"). By posting Content, you grant Pentecost Matrimony a non-exclusive, worldwide, perpetual, royalty-free license to use and display it. We reserve the right to review and remove any Content that violates these Terms.</p>
+        
+        <h2>6. Safety and Interactions with Other Members</h2>
+        <p class="disclaimer-text">PENTECOST MATRIMONY IS A VENUE FOR INTRODUCTION. WE ARE NOT RESPONSIBLE FOR THE CONDUCT OF OUR MEMBERS.</p>
+        <p>You are solely responsible for your interactions with others. Pentecost Matrimony does NOT conduct criminal background checks or verify all information provided by its members. You must use caution and common sense.</p>
+        
+        <h2>7. Termination</h2>
+        <p>You may terminate your membership at any time through your account settings. We may terminate or suspend your account at any time, without notice, if we believe you have breached these Terms. No refunds will be provided for terminated accounts.</p>
+
+        <h2>8. Disclaimers of Warranty</h2>
+        <p>The Service is provided "AS IS" and "AS AVAILABLE". We disclaim all warranties and do not guarantee that:</p>
+        <ol type="a">
+            <li>The Service will meet your requirements.</li>
+            <li>The Service will be uninterrupted or error-free.</li>
+            <li>You will find a suitable match or get married.</li>
+        </ol>
+
+        <h2>9. Limitation of Liability</h2>
+        <p>In no event will Pentecost Matrimony be liable for any indirect, incidental, special, or consequential damages resulting from your use of the Service, the conduct of other members, or unauthorized access to your content. Our total liability will not exceed the amount you paid us in the last 12 months.</p>
+
+        <h2>10. Indemnification</h2>
+        <p>You agree to indemnify and hold Pentecost Matrimony harmless from any claim or damage arising out of your use of the Service in violation of these Terms.</p>
+        
+        <h2>11. Governing Law and Dispute Resolution</h2>
+        <p>These Terms shall be governed by the laws of [Your State/Country]. Any disputes will be resolved exclusively in the courts located in [Your City, State].</p>
+
+        <h2>12. Modifications to Terms</h2>
+        <p>We reserve the right to modify these Terms at any time. We will notify you by posting the new Terms and updating the "Last Updated" date. Your continued use of the Service constitutes acceptance of the new Terms.</p>
+
+        <h2>13. Contact Information</h2>
+        <p>If you have any questions about these Terms, please contact us at:</p>
+        <div class="contact-info">
+            <p style="margin-bottom: 5px;"><strong>Pentecost Matrimony</strong></p>
+            <p style="margin-bottom: 5px;"><strong>Email:</strong> <a href="mailto:keralapentecostmatrimony@gmail.com">keralapentecostmatrimony@gmail.com</a></p>
+            <p style="margin-bottom: 0;"><strong>Phone:</strong> <a href="tel:+918078538160">8078538160</a></p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/" class="form-link" style="color: #DDA0DD; font-size: 1rem; text-decoration: underline;">Back to Home Page</a>
+        </div>
+    </main>
+
+</body>
+</html>

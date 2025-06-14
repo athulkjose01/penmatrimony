@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile.full_name }}'s Profile - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    {% csrf_token %}
+    <style>
+        /* All your CSS styles are perfect and remain unchanged. */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Georgia', serif; line-height: 1.6; color: #E0E0E0; background: black; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%); pointer-events: none; z-index: -1; }
+        nav { position: sticky; top: 0; width: 100%; background: rgba(75, 0, 130, 0.95); backdrop-filter: blur(10px); z-index: 1000; padding: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: bold; color: white; text-decoration: none; }
+        .logo i { margin-right: 8px; }
+        .nav-links { display: flex; list-style: none; gap: 25px; }
+        .nav-links a { color: white; text-decoration: none; transition: color 0.3s ease, background-color 0.3s ease; font-weight: 500; padding: 5px 10px; border-radius: 4px; }
+        .nav-links a:hover, .nav-links a.active { color: #DDA0DD; background-color: rgba(255,255,255,0.1); }
+        .nav-links .auth-link { border: 1px solid rgba(255,255,255,0.5); }
+        .nav-links .auth-link:hover { border-color: #DDA0DD; }
+        .main-view-container { flex-grow: 1; margin-top: 50px; margin-bottom: 40px; }
+        body.full-post-view-active .main-view-container, body.full-post-view-active nav, body.full-post-view-active footer { display: none; }
+        .profile-display-header { text-align: center; margin-bottom: 40px; color: white; }
+        .profile-display-header .page-main-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); background: linear-gradient(45deg, #fff, #DDA0DD); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .profile-display-header .profile-subtitle { font-size: 1.1rem; opacity: 0.9; font-style: italic; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); margin-bottom: 20px; }
+        .profile-picture-wrapper { margin-bottom: 20px; position: relative; display: inline-block; }
+        .profile-picture-large { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid #DDA0DD; box-shadow: 0 10px 30px rgba(138, 43, 226, 0.3); background-color: #333; }
+        .profile-no-picture { width: 180px; height: 180px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: #DDA0DD; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1rem; font-weight: 600; border: 5px solid #8A2BE2; box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .profile-no-picture i { font-size: 3rem; margin-bottom: 0.3em; }
+        .full-page-post-image-container { position: relative; cursor: pointer; }
+        .like-heart-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 80px; color: rgba(255, 255, 255, 0.85); opacity: 0; transition: transform 0.3s ease-out, opacity 0.3s ease-out; pointer-events: none; text-shadow: 0 0 15px rgba(0, 0, 0, 0.3); }
+        .django-messages { list-style: none; padding: 0; margin-bottom: 25px; }
+        .django-messages li { padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; backdrop-filter: blur(10px); }
+        .django-messages li.success { background: linear-gradient(45deg, #28a745, #20c997); }
+        .django-messages li.warning { background: linear-gradient(45deg, #ffc107, #fd7e14); color: #333; }
+        .django-messages li.error { background: linear-gradient(45deg, #dc3545, #e83e8c); }
+        .django-messages li.info { background: linear-gradient(45deg, #17a2b8, #6610f2); }
+        .profile-view-grid.row { background-image: linear-gradient(45deg, rgba(221, 160, 221, 0.03) 25%, transparent 25%, transparent 75%, rgba(221, 160, 221, 0.03) 75%), linear-gradient(45deg, rgba(221, 160, 221, 0.03) 25%, transparent 25%, transparent 75%, rgba(221, 160, 221, 0.03) 75%); background-size: 30px 30px; background-position: 0 0, 15px 15px; position: relative; }
+        .profile-detail-section { background: rgba(30, 0, 40, 0.85); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; z-index: 1; height: 100%; }
+        .profile-detail-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD); border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 2; }
+        .profile-detail-section:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.25); }
+        .profile-section-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #DDA0DD; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid rgba(221, 160, 221, 0.3); position: relative; z-index: 1; }
+        .profile-section-title i { font-size: 1.3rem; color: #8A2BE2; }
+        .profile-detail-item { margin-bottom: 15px; font-size: 0.95rem; color: #C0C0C0; display: flex; flex-wrap: wrap; line-height: 1.5; position: relative; z-index: 1; }
+        .profile-detail-item strong { font-weight: 600; color: #E0E0E0; min-width: 150px; margin-right: 10px; flex-shrink: 0; padding-bottom: 2px; }
+        .detail-value { color: #B0B0B0; flex-grow: 1; }
+        .not-specified { font-style: italic; color: #888; }
+        .about-text { white-space: pre-wrap; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 10px; color: #D0D0D0; border: 1px solid rgba(255,255,255,0.08); line-height: 1.7; font-size: 1rem; position: relative; z-index: 1; }
+        .posts-grid { margin-top: 15px; }
+        .post-item { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.2); aspect-ratio: 1 / 1; cursor: pointer; background-color: #222; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; width: 100%; height: 100%; }
+        .post-item:hover { transform: scale(1.03); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+        .post-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .post-item .post-caption-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: white; padding: 5px 8px; font-size: 0.75rem; opacity: 0; transform: translateY(100%); transition: opacity 0.3s ease, transform 0.3s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+        .post-item:hover .post-caption-overlay { opacity: 1; transform: translateY(0); }
+        .no-posts-message { text-align: center; color: #aaa; font-style: italic; padding: 20px 0; font-size: 0.9rem; width: 100%; }
+        .full-page-post-details { padding: 15px 20px; }
+        .full-page-post-actions { margin-bottom: 15px; }
+        .full-page-post-actions .action-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #cccccc; transition: all 0.3s ease; padding: 0.3rem; }
+        .full-page-post-actions .action-btn:hover i { color: #DDA0DD; transform: scale(1.1); }
+        .full-page-post-actions .action-btn .fas.fa-heart { color: #e74c3c; }
+        .full-page-post-caption { padding: 0; border-top: none; background-color: transparent; }
+        .full-page-post-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; overflow-y: auto; padding-top: 60px; display: none; background-size: cover; background-position: center center; background-attachment: fixed; }
+        .full-page-post-view::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.65); z-index: 0; }
+        .full-page-post-view.visible { display: block; }
+        .full-page-post-close-btn { position: fixed; top: 15px; left: 15px; background: rgba(50, 50, 50, 0.7); color: white; border: none; border-radius: 8px; padding: 10px 15px; font-size: 1rem; font-family: 'Georgia', serif; cursor: pointer; z-index: 2001; transition: background-color 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .full-page-post-close-btn:hover { background: rgba(221, 160, 221, 0.5); }
+        .full-page-post-close-btn i { font-size: 1.1rem; }
+        .full-page-post-scroller { max-width: 700px; margin: 0 auto; padding: 20px 10px; position: relative; z-index: 1; }
+        .full-page-post-item-wrapper { background-color: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 5px 25px rgba(0,0,0,0.3); overflow: hidden; }
+        .full-page-post-header { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #333; }
+        .full-page-post-author-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 12px; background-color: #444; }
+        .full-page-post-author-name { font-weight: bold; color: #e0e0e0; font-size: 1rem; }
+        .full-page-post-image { display: block; width: 100%; max-height: 80vh; object-fit: contain; background-color: #101010; }
+        .full-page-post-caption { padding: 20px 25px; font-size: 1rem; color: #e8e8e8; line-height: 1.7; white-space: pre-wrap; background-color: rgba(15, 15, 15, 0.75); border-top: 1px solid rgba(255, 255, 255, 0.15); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+        .full-page-post-caption:empty { display: none; }
+        footer { background: rgba(58, 45, 76, 0.95); backdrop-filter: blur(10px); color: #e0e0e0; padding: 40px 0 20px; margin-top: auto; }
+        .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .footer-section h4 { font-family: 'Playfair Display', serif; margin-bottom: 15px; color: #DDA0DD; font-size: 1.2rem; }
+        .footer-section p, .footer-section ul li { font-size: 0.9rem; line-height: 1.7; color: #c0c0c0; }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin-bottom: 8px; }
+        .footer-section ul li a { color: #c0c0c0; text-decoration: none; transition: color 0.3s ease; }
+        .footer-section ul li a:hover { color: #DDA0DD; }
+        .footer-socials a { margin-right: 12px; font-size: 1.2rem; color: #DDA0DD; }
+        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
+        .footer-bottom p { margin-bottom: 5px; }
+        @media (max-width: 768px) { .nav-container { flex-direction: column; gap: 10px; } .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; } .main-view-container { margin-top: 20px; margin-bottom: 20px; padding: 0 10px; } .profile-display-header .page-main-title { font-size: 2.2rem; } .profile-detail-section { padding: 20px; } .profile-section-title { font-size: 1.5rem; } .footer-content { grid-template-columns: 1fr; text-align: center;} .footer-socials { text-align: center; margin-top: 10px;} .profile-picture-large, .profile-no-picture { width: 150px; height: 150px;} .profile-detail-item strong { min-width: 120px; } .full-page-post-scroller { padding: 10px 5px; } .full-page-post-close-btn { top: 10px; left: 10px; padding: 8px 12px; font-size: 0.9rem;} .full-page-post-view { padding-top: 50px; } }
+        @media (max-width: 992px) { .nav-links { gap: 15px; } .nav-links a { font-size: 0.9rem; padding: 5px 8px;} }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .profile-display-header, .profile-detail-section { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+        .section-user-posts { animation-delay: 0.1s !important; } .section-personal-details { animation-delay: 0.15s !important; } .section-about-interests { animation-delay: 0.25s !important; } .section-partner-prefs { animation-delay: 0.35s !important; } .section-physical-diet { animation-delay: 0.2s !important; } .section-education-career { animation-delay: 0.3s !important; } .section-location-details { animation-delay: 0.4s !important; } .section-lifestyle-choices { animation-delay: 0.45s !important; } .section-family-background { animation-delay: 0.5s !important; }
+        /* These button styles should be available for the subscribe CTA */
+        .btn { padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; display: inline-block; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-primary { background: linear-gradient(45deg, #4B0082, #8A2BE2); color: white; border: 2px solid transparent; }
+        .btn-secondary { background: #6c757d; color: white; border: 2px solid transparent; } /* Bootstrap's secondary color */
+        .btn-success { background: #198754; color: white; border: 2px solid transparent; } /* Bootstrap's success color */
+        .btn-info { background: #0dcaf0; color: white; border: 2px solid transparent; } /* Bootstrap's info color */
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo">
+                <i class="fas fa-church"></i> Pentecost Matrimony
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                {% if user.is_authenticated %}
+                    {% if user_has_profile %}
+                        <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                        <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
+                    {% else %}
+                        <li><a href="{% url 'create_user_profile' %}"><i class="fas fa-plus-circle"></i> Create Profile</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-view-container container-fluid container-lg">
+        {% if messages %}
+            <ul class="django-messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+
+
+
+        <div class="profile-display-header">
+            <div class="profile-picture-wrapper">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="{{ profile.full_name }}" class="profile-picture-large">
+                {% else %}
+                    <div class="profile-no-picture"><i class="fas fa-user-alt"></i><span>No Picture</span></div>
+                {% endif %}
+            </div>
+            <h2 class="page-main-title">{{ profile.full_name }}</h2>
+            
+            <!-- ======================= MODIFIED ACTION BUTTONS BLOCK ======================= -->
+            <div class="profile-actions mt-3">
+                
+                {% if interest_status == 'sent_pending' %}
+                    <!-- This status is informational and shown to everyone -->
+                    <button class="btn btn-secondary" disabled>
+                        <i class="fas fa-hourglass-start"></i> Interest Sent (Pending)
+                    </button>
+                
+                {% elif interest_status == 'accepted' %}
+                    <!-- This status is informational, but the MESSAGE button is gated -->
+                    <p class="text-success fw-bold"><i class="fas fa-handshake"></i> Interest Accepted</p>
+                    <p>Now you can see the contact number or chat with the user.</p>
+                    <div class="mt-2">
+                        {% if request.user.userprofile.is_premium_member %}
+                            <a href="{% url 'start_chat' profile_id=profile.id %}" class="btn btn-info">
+                                <i class="fas fa-comments"></i> Message {{ profile.full_name|truncatechars:15 }}
+                            </a>
+                        {% else %}
+                            <a href="{% url 'subscribe' %}" class="btn btn-primary">
+                                <i class="fas fa-crown"></i> Upgrade to Message
+                            </a>
+                        {% endif %}
+                    </div>
+
+                {% else %}
+                    <!-- For 'none' and 'received_pending', the action itself requires premium -->
+                    {% if request.user.userprofile.is_premium_member %}
+                        
+                        {% if interest_status == 'none' %}
+                            <form action="{% url 'send_interest' profile_id=profile.id %}" method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary" style="background-color: #8A2BE2; border-color: #8A2BE2;">
+                                    <i class="fas fa-paper-plane"></i> Send Interest Request
+                                </button>
+                                <br><small class="mt-2 d-block">Contact details will be visible after they accept.</small>
+                            </form>
+                        
+                        {% elif interest_status == 'received_pending' %}
+                            <form action="{% url 'accept_interest' interest_id=interest_request.id %}" method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-heart"></i> Accept Interest Request
+                                </button>
+                            </form>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- Non-premium user trying to send or accept an interest -->
+                        <a href="{% url 'subscribe' %}" class="btn btn-primary">
+                            <i class="fas fa-crown"></i> Upgrade to Interact
+                        </a>
+                        <br><small class="mt-2 d-block">Become a premium member to send or accept interests.</small>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+            <!-- ===================== END OF MODIFIED BLOCK ===================== -->
+
+        </div>
+
+
+        <div class="profile-view-grid row g-lg-4 g-md-3 g-3">
+            <!-- Section 1: Photo Gallery -->
+            <div class="col-12 order-1">
+                <div class="profile-detail-section section-user-posts">
+                    <h3 class="profile-section-title"><i class="fas fa-images"></i>{{ profile.full_name|truncatechars:15 }}'s Photo Gallery</h3>
+                    <div class="posts-grid row g-2 g-sm-3 row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4">
+                        {% for post in user_posts %}
+                        <div class="col">
+                            <div class="post-item" data-post-id="{{ post.id }}" data-img-src="{{ post.image.url }}" data-caption="{{ post.caption|default:''|escapejs }}" data-is-liked="{% if post.is_liked_by_user %}true{% else %}false{% endif %}" aria-label="View post: {{ post.caption|default:'User photo'|truncatechars:50 }}">
+                                <img src="{{ post.image.url }}" alt="{{ post.caption|default:'User post'|truncatechars:30 }}">
+                                {% if post.caption %}<div class="post-caption-overlay">{{ post.caption|truncatechars:50 }}</div>{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p class="no-posts-message" {% if not user_posts %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                        {{ profile.full_name }} hasn't added any photos yet.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Section 2: Left Column Content -->
+            <div class="col-12 col-lg-7 order-2">
+                <div class="row g-lg-4 g-md-3 g-3">
+                    <div class="col-12 order-lg-1">
+                        <div class="profile-detail-section section-personal-details">
+                            <h3 class="profile-section-title"><i class="fas fa-user-circle"></i>Personal Details</h3>
+                            <p class="profile-detail-item"><strong>Full Name:</strong> <span class="detail-value">{{ profile.full_name|default:"-" }}</span></p>
+
+                            {% if interest_status == 'accepted' and request.user.userprofile.is_premium_member %}
+                                <p class="profile-detail-item">
+                                    <strong> Phone Number:</strong>
+                                    <span class="detail-value fw-bold text-light">
+                                        {% if contact_phone and contact_phone != 'Not Provided' %}
+                                            {{ contact_phone }}
+                                        {% else %}
+                                            <span class="not-specified">Not available</span>
+                                        {% endif %}
+                                    </span>
+                                </p>
+                            {% endif %}
+                            
+                            <p class="profile-detail-item"><strong>Gender:</strong> <span class="detail-value">{{ profile.get_gender_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Age:</strong> <span class="detail-value">{% if profile.age %}{{ profile.age }} years{% else %}<span class="not-specified">Not specified</span>{% endif %}</span></p>
+                            <p class="profile-detail-item"><strong>Date of Birth:</strong> <span class="detail-value">{{ profile.date_of_birth|date:"F d, Y"|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Religion:</strong> <span class="detail-value">{{ profile.religion|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Community:</strong> <span class="detail-value">{{ profile.category|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Mother Tongue:</strong> <span class="detail-value">{{ profile.mother_tongue|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Marital Status:</strong> <span class="detail-value">{{ profile.get_marital_status_display|default:"-" }}</span></p>
+                        </div>
+                    </div>
+                    <!-- Other sections like 'About Me', 'Partner Prefs' etc. remain unchanged -->
+                    <div class="col-12 order-lg-2">
+                        <div class="profile-detail-section section-about-interests">
+                            <h3 class="profile-section-title"><i class="fas fa-info-circle"></i>About {{ profile.full_name|truncatechars:15 }} & Interests</h3>
+                            <p class="profile-detail-item"><strong>Looking For:</strong> <span class="detail-value">{{ profile.get_looking_for_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Hobbies:</strong> <span class="detail-value">{{ profile.hobbies|default:"-" }}</span></p>
+                            {% if profile.about_me %}
+                            <p class="profile-detail-item"><strong>About {{ profile.full_name|truncatechars:15 }}:</strong></p>
+                            <div class="about-text">{{ profile.about_me }}</div>
+                            {% else %}
+                            <p class="profile-detail-item"><strong>About {{ profile.full_name|truncatechars:15 }}:</strong> <span class="detail-value"><span class="not-specified">Nothing shared yet.</span></span></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12 order-lg-3">
+                         {% if partner_prefs %}
+                        <div class="profile-detail-section section-partner-prefs">
+                            <h3 class="profile-section-title"><i class="fas fa-heart"></i>Partner Preferences</h3>
+                            <p class="profile-detail-item"><strong>Preferred Age Range:</strong>
+                                <span class="detail-value">
+                                    {% if partner_prefs.preferred_age_min and partner_prefs.preferred_age_max %}
+                                        {{ partner_prefs.preferred_age_min }} - {{ partner_prefs.preferred_age_max }} years
+                                    {% elif partner_prefs.preferred_age_min %} Min {{ partner_prefs.preferred_age_min }} years
+                                    {% elif partner_prefs.preferred_age_max %} Max {{ partner_prefs.preferred_age_max }} years
+                                    {% else %} <span class="not-specified">Any age</span> {% endif %}
+                                </span>
+                            </p>
+                            <p class="profile-detail-item"><strong>Preferred Height Range:</strong>
+                                <span class="detail-value">
+                                    {% if partner_prefs.preferred_height_min and partner_prefs.preferred_height_max %}
+                                        {{ partner_prefs.preferred_height_min|floatformat:"0" }} - {{ partner_prefs.preferred_height_max|floatformat:"0" }} cm
+                                    {% elif partner_prefs.preferred_height_min %} Min {{ partner_prefs.preferred_height_min|floatformat:"0" }} cm
+                                    {% elif partner_prefs.preferred_height_max %} Max {{ partner_prefs.preferred_height_max|floatformat:"0" }} cm
+                                    {% else %} <span class="not-specified">Any height</span> {% endif %}
+                                </span>
+                            </p>
+                             <p class="profile-detail-item"><strong>Preferred Weight Range:</strong>
+                                <span class="detail-value">
+                                    {% if partner_prefs.preferred_weight_min_kg and partner_prefs.preferred_weight_max_kg %}
+                                        {{ partner_prefs.preferred_weight_min_kg|floatformat:"1" }} - {{ partner_prefs.preferred_weight_max_kg|floatformat:"1" }} kg
+                                    {% elif partner_prefs.preferred_weight_min_kg %} Min {{ partner_prefs.preferred_weight_min_kg|floatformat:"1" }} kg
+                                    {% elif partner_prefs.preferred_weight_max_kg %} Max {{ partner_prefs.preferred_weight_max_kg|floatformat:"1" }} kg
+                                    {% else %} <span class="not-specified">Any weight</span> {% endif %}
+                                </span>
+                            </p>
+                            <p class="profile-detail-item"><strong>Preferred Marital Status:</strong> <span class="detail-value">{{ partner_prefs.get_preferred_marital_status_display|default_if_none:"Any" }}</span></p>
+                            <p class="profile-detail-item"><strong>Preferred Education:</strong> <span class="detail-value">{{ partner_prefs.preferred_education|default_if_none:"Any" }}</span></p>
+                            <p class="profile-detail-item"><strong>Preferred Profession:</strong> <span class="detail-value">{{ partner_prefs.preferred_profession|default_if_none:"Any" }}</span></p>
+                            <p class="profile-detail-item"><strong>Preferred Diet:</strong> <span class="detail-value">{{ partner_prefs.get_preferred_diet_display|default_if_none:"Any" }}</span></p>
+                            <p class="profile-detail-item"><strong>Preferred Smoking Habit:</strong> <span class="detail-value">{{ partner_prefs.get_preferred_smoking_display|default_if_none:"Any" }}</span></p>
+                            <p class="profile-detail-item"><strong>Preferred Drinking Habit:</strong> <span class="detail-value">{{ partner_prefs.get_preferred_drinking_display|default_if_none:"Any" }}</span></p>
+                            {% if partner_prefs.expectations_about_partner %}
+                                <p class="profile-detail-item"><strong>Expectations About Partner:</strong></p>
+                                <div class="about-text">{{ partner_prefs.expectations_about_partner }}</div>
+                            {% else %}
+                                <p class="profile-detail-item"><strong>Expectations About Partner:</strong> <span class="detail-value"><span class="not-specified">Nothing shared yet.</span></span></p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                         <div class="profile-detail-section section-partner-prefs">
+                            <h3 class="profile-section-title"><i class="fas fa-heart"></i>Partner Preferences</h3>
+                            <p class="profile-detail-item"><span class="not-specified">Partner preferences have not been set for this profile.</span></p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Right Column Content (Unchanged) -->
+            <div class="col-12 col-lg-5 order-3">
+                <div class="row g-lg-4 g-md-3 g-3">
+                    <div class="col-12 order-lg-1">
+                        <div class="profile-detail-section section-physical-diet">
+                            <h3 class="profile-section-title"><i class="fas fa-ruler-combined"></i>Physical Attributes & Diet</h3>
+                            <p class="profile-detail-item"><strong>Height:</strong> <span class="detail-value">{% if profile.height %}{{ profile.height|floatformat:"0" }} cm{% else %}<span class="not-specified">Not specified</span>{% endif %}</span></p>
+                            <p class="profile-detail-item"><strong>Weight:</strong> <span class="detail-value">{% if profile.weight %}{{ profile.weight|floatformat:"1" }} kg{% else %}<span class="not-specified">Not specified</span>{% endif %}</span></p>
+                            <p class="profile-detail-item"><strong>Diet:</strong> <span class="detail-value">{{ profile.get_diet_display|default:"-" }}</span></p>
+                        </div>
+                    </div>
+                    <div class="col-12 order-lg-2">
+                        <div class="profile-detail-section section-education-career">
+                            <h3 class="profile-section-title"><i class="fas fa-graduation-cap"></i>Education & Career</h3>
+                            <p class="profile-detail-item"><strong>Education:</strong> <span class="detail-value">{{ profile.education|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Profession:</strong> <span class="detail-value">{{ profile.profession|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Monthly Income:</strong> <span class="detail-value">{{ profile.Monthly_income|default:"-" }}</span></p>
+                        </div>
+                    </div>
+                    <div class="col-12 order-lg-3">
+                        <div class="profile-detail-section section-location-details">
+                            <h3 class="profile-section-title"><i class="fas fa-map-marker-alt"></i>Location Details</h3>
+                            <p class="profile-detail-item"><strong>Country:</strong> <span class="detail-value">{{ profile.country|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>State:</strong> <span class="detail-value">{{ profile.state|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>City:</strong> <span class="detail-value">{{ profile.city|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>House Name:</strong> <span class="detail-value">{{ profile.housename|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Current Location:</strong> <span class="detail-value">{{ profile.current_location|default:"-" }}</span></p>
+                        </div>
+                    </div>
+                    <div class="col-12 order-lg-4">
+                        <div class="profile-detail-section section-lifestyle-choices">
+                            <h3 class="profile-section-title"><i class="fas fa-concierge-bell"></i>Lifestyle Choices</h3>
+                            <p class="profile-detail-item"><strong>Smoking:</strong> <span class="detail-value">{{ profile.get_smoking_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Drinking:</strong> <span class="detail-value">{{ profile.get_drinking_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Owns a Car:</strong> <span class="detail-value">{% if profile.has_own_a_car is True %}Yes{% elif profile.has_own_a_car is False %}No{% else %}<span class="not-specified">Not specified</span>{% endif %}</span></p>
+                        </div>
+                    </div>
+                    <div class="col-12 order-lg-5">
+                        <div class="profile-detail-section section-family-background">
+                            <h3 class="profile-section-title"><i class="fas fa-users"></i>Family Background</h3>
+                            <p class="profile-detail-item"><strong>Father's Name:</strong> <span class="detail-value">{{ profile.father_name|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Mother's Name:</strong> <span class="detail-value">{{ profile.mother_name|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Family Status:</strong> <span class="detail-value">{{ profile.get_family_status_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Family Type:</strong> <span class="detail-value">{{ profile.get_family_type_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Siblings:</strong> <span class="detail-value">{% if profile.siblings is not None %}{{ profile.siblings }}{% else %}<span class="not-specified">Not specified</span>{% endif %}</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End .profile-view-grid .row -->
+    </div> <!-- End .main-view-container -->
+
+    <div id="fullPagePostView" class="full-page-post-view">
+        <button id="fullPagePostCloseBtn" class="full-page-post-close-btn">
+            <i class="fas fa-arrow-left"></i> Back to Profile
+        </button>
+        <div id="fullPagePostScroller" class="full-page-post-scroller">
+            <!-- Posts will be dynamically inserted here by JavaScript -->
+        </div>
+    </div>
+
+
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Pentecost Matrimony</h4>
+                    <p>Dedicated to helping Pentecostal believers find their God-ordained life partners through faith, prayer, and divine guidance.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'index' %}">Home</a></li>
+                        {% if user.is_authenticated and user_has_profile %}
+                        <li><a href="{% url 'search_users' %}">Search Members</a></li>
+                        <li><a href="{% url 'view_user_profile' %}">My Profile</a></li>
+                        {% elif user.is_authenticated and not user_has_profile %}
+                        <li><a href="{% url 'create_user_profile' %}">Create Profile</a></li>
+                        {% else %}
+                        <li><a href="{% url 'login' %}">Login / Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact & Support</h4>
+                    <p>Email: <a href="mailto:keralapentecostmatrimony@gmail.com" style="color:#DDA0DD;">keralapentecostmatrimony@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© {% now "Y" %} Pentecost Matrimony. All rights reserved.</p>
+                <p>"Love binds them all together in perfect unity." - Colossians 3:14</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        // All your JavaScript remains unchanged. The logic is handled by the template.
+        // This includes the full-page post viewer and like functionality.
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Navigation Active Link Script ---
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-links a');
+        navLinks.forEach(link => {
+            let targetUrl = link.getAttribute('href');
+            if (targetUrl === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // --- Full Page Post View Functionality ---
+        const fullPagePostView = document.getElementById('fullPagePostView');
+        const fullPagePostScroller = document.getElementById('fullPagePostScroller');
+        const fullPagePostCloseBtn = document.getElementById('fullPagePostCloseBtn');
+        const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                        (document.cookie.match(/csrftoken=([^;]+)/) || [])[1];
+
+        let postImageSources = [];
+
+        function initializePostItems() {
+            postImageSources = [];
+            document.querySelectorAll('.posts-grid .post-item').forEach((item) => {
+                const postData = {
+                    id: item.dataset.postId,
+                    src: item.dataset.imgSrc,
+                    caption: item.dataset.caption,
+                    isLiked: item.dataset.isLiked === 'true',
+                    elementId: `full-post-${item.dataset.postId}`
+                };
+                postImageSources.push(postData);
+                item.addEventListener('click', () => openFullPagePostView(postData.id));
+            });
+        }
+
+        function createFullPagePostElement(postData) {
+            const postWrapper = document.createElement('div');
+            postWrapper.classList.add('full-page-post-item-wrapper');
+            postWrapper.id = postData.elementId;
+
+            const authorName = "{{ profile.full_name|escapejs }}";
+            const authorAvatarUrl = "{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% endif %}";
+            let avatarImgHtml = `<div class="full-page-post-author-avatar"><i class="fas fa-user"></i></div>`;
+            if (authorAvatarUrl) {
+                avatarImgHtml = `<img src="${authorAvatarUrl}" alt="${authorName}" class="full-page-post-author-avatar">`;
+            }
+
+            const heartClass = postData.isLiked ? 'fas' : 'far';
+            const likeButtonHtml = `
+                <button class="action-btn like-btn-full-view" data-post-id="${postData.id}">
+                    <i class="${heartClass} fa-heart"></i>
+                </button>
+            `;
+
+            postWrapper.innerHTML = `
+                <div class="full-page-post-header">
+                    ${avatarImgHtml}
+                    <span class="full-page-post-author-name">${authorName}</span>
+                </div>
+                <div class="full-page-post-image-container">
+                    <img src="${postData.src}" alt="${postData.caption || 'User post'}" class="full-page-post-image">
+                    <div class="like-heart-overlay"><i class="fas fa-heart"></i></div>
+                </div>
+                <div class="full-page-post-details">
+                    <div class="full-page-post-actions">
+                        ${likeButtonHtml}
+                    </div>
+                    ${postData.caption ? `<div class="full-page-post-caption">${postData.caption}</div>` : ''}
+                </div>
+            `;
+            return postWrapper;
+        }
+
+        function openFullPagePostView(clickedPostId) {
+            if (!fullPagePostView || !fullPagePostScroller || postImageSources.length === 0) return;
+            
+            fullPagePostScroller.innerHTML = '';
+            postImageSources.forEach(post => {
+                const postElement = createFullPagePostElement(post);
+                fullPagePostScroller.appendChild(postElement);
+            });
+
+            document.body.classList.add('full-post-view-active');
+            document.body.style.overflow = 'hidden';
+            fullPagePostView.classList.add('visible');
+            fullPagePostView.scrollTop = 0;
+            
+            const targetPostElement = document.getElementById(`full-post-${clickedPostId}`);
+            if (targetPostElement) {
+                targetPostElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
+        }
+
+        function closeFullPagePostView() {
+            if (fullPagePostView) fullPagePostView.classList.remove('visible');
+            document.body.classList.remove('full-post-view-active');
+            document.body.style.overflow = 'auto';
+        }
+
+        if (fullPagePostCloseBtn) fullPagePostCloseBtn.addEventListener('click', closeFullPagePostView);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && fullPagePostView?.classList.contains('visible')) {
+                closeFullPagePostView();
+            }
+        });
+
+        function toggleLikeVisual(buttonElement, forceLike = false) {
+            const heartIcon = buttonElement.querySelector('i');
+            const postId = buttonElement.dataset.postId;
+            const isCurrentlyLiked = heartIcon.classList.contains('fas');
+
+            if (forceLike && isCurrentlyLiked) return;
+            
+            heartIcon.classList.toggle('far', isCurrentlyLiked);
+            heartIcon.classList.toggle('fas', !isCurrentlyLiked);
+
+            fetch(`/like_post/${postId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/json' }
+            })
+            .then(response => response.ok ? response.json() : Promise.reject('Server error'))
+            .then(data => {
+                if (data.status === 'success') {
+                    const postInArray = postImageSources.find(p => p.id === postId);
+                    if (postInArray) postInArray.isLiked = (data.action === 'liked');
+                    
+                    if (data.action === 'liked') {
+                        buttonElement.style.transform = 'scale(1.2)';
+                        setTimeout(() => buttonElement.style.transform = 'scale(1)', 200);
+                    }
+                } else {
+                    heartIcon.classList.toggle('far', !isCurrentlyLiked);
+                    heartIcon.classList.toggle('fas', isCurrentlyLiked);
+                }
+            }).catch(error => {
+                console.error("Error liking post:", error);
+                heartIcon.classList.toggle('far', !isCurrentlyLiked);
+                heartIcon.classList.toggle('fas', isCurrentlyLiked);
+            });
+        }
+        
+        function showLikeFeedback(imageContainer) {
+            const heartOverlay = imageContainer.querySelector('.like-heart-overlay');
+            if (!heartOverlay) return;
+
+            heartOverlay.style.transition = 'none';
+            heartOverlay.style.transform = 'translate(-50%, -50%) scale(0)';
+            heartOverlay.style.opacity = '0';
+
+            setTimeout(() => {
+                heartOverlay.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+                heartOverlay.style.transform = 'translate(-50%, -50%) scale(1)';
+                heartOverlay.style.opacity = '1';
+            }, 10);
+
+            setTimeout(() => {
+                heartOverlay.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                heartOverlay.style.opacity = '0';
+            }, 600);
+        }
+
+        fullPagePostScroller.addEventListener('click', function(event) {
+            const likeButton = event.target.closest('.like-btn-full-view');
+            if (likeButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleLikeVisual(likeButton);
+            }
+        });
+
+        fullPagePostScroller.addEventListener('dblclick', function(event) {
+            const imageContainer = event.target.closest('.full-page-post-image-container');
+            if (imageContainer) {
+                const postWrapper = imageContainer.closest('.full-page-post-item-wrapper');
+                const postId = postWrapper.id.split('-').pop();
+                const likeButton = postWrapper.querySelector(`.like-btn-full-view[data-post-id="${postId}"]`);
+                
+                showLikeFeedback(imageContainer);
+                toggleLikeVisual(likeButton, true);
+            }
+        });
+
+        initializePostItems();
+    });
+    </script>
+</body>
+</html>

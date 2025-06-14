@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% csrf_token %}
+    <style>
+        /* --- GLOBAL RESET & BODY STYLES (from your example) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7; /* Increased for better readability of long text */
+            color: #E0E0E0;
+            background: black;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* Enhanced background with multiple layers (from your example) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                url('https://images.unsplash.com/photo-1519452575417-564c1401ecc0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80') center/cover no-repeat,
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        /* Additional overlay for better contrast (from your example) */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(45, 0, 75, 0.5) 50%, rgba(0, 0, 0, 0.9) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* --- HEADER STYLES (from your example) --- */
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: block;
+            background: linear-gradient(135deg, #ffffff, #DDA0DD, #8A2BE2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(221, 160, 221, 0.3);
+        }
+
+        .page-header .logo-title i {
+            margin-right: 12px;
+            color: #DDA0DD;
+            -webkit-text-fill-color: #DDA0DD;
+        }
+
+        /* --- STYLES FOR THE PRIVACY POLICY CONTENT --- */
+        /* Adapted from .form-container */
+        .content-container {
+            width: 100%;
+            max-width: 850px; /* Wider for better text flow */
+            background: linear-gradient(145deg, rgba(25, 25, 35, 0.9) 0%, rgba(15, 15, 25, 0.9) 100%);
+            padding: 40px 50px; /* More padding */
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3), 0 0 0 1px rgba(221, 160, 221, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(138, 43, 226, 0.15);
+            text-align: left; /* Content should be left-aligned */
+        }
+
+        .content-container .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: #EAEAEA;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .content-container .effective-date {
+            display: block;
+            text-align: center;
+            color: #A0A0A0;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .content-container h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            color: #DDA0DD; /* Use accent color for section titles */
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(221, 160, 221, 0.2);
+        }
+
+        .content-container h3 {
+            font-size: 1.2rem;
+            color: #E0E0E0;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .content-container p, .content-container li {
+            color: #C0C0C0;
+            margin-bottom: 15px;
+        }
+
+        .content-container ul {
+            list-style: none; /* Remove default bullets */
+            padding-left: 0;
+            margin-top: 15px;
+        }
+        
+        .content-container ul > li {
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .content-container ul > li::before {
+            content: "\f058"; /* FontAwesome check-circle */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 4px;
+            color: #8A2BE2; /* Use a theme color for the bullet */
+        }
+
+        .content-container a {
+            color: #87CEEB; /* A light blue for links stands out */
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .content-container a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-info {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-left: 4px solid #8A2BE2;
+            border-radius: 0 8px 8px 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="page-header">
+        <a href="/" style="text-decoration: none;">
+            <h1 class="logo-title"><i class="fas fa-church"></i> Pentecost Matrimony</h1>
+        </a>
+    </header>
+
+    <main class="content-container">
+        <h1 class="page-title">Privacy Policy</h1>
+        <span class="effective-date">Effective Date: 13-06-2015</span>
+
+        <h2>1. Introduction</h2>
+        <p>Welcome to Pentecost Matrimony, a dedicated platform for helping members of the Pentecostal Christian community find a life partner in faith. We are referred to as "Pentecost Matrimony," "we," "us," or "our" in this policy.</p>
+        <p>We understand that you are trusting us with highly personal and sensitive information. Your privacy is of the utmost importance to us. This Privacy Policy explains how we collect, use, share, and protect your personal data when you use our services. By registering on Pentecost Matrimony, you agree to the collection and use of your information as described in this policy.</p>
+
+        <h2>2. Information We Collect</h2>
+        <p>We collect information to provide and improve our services. The types of information we collect can be broken down into three categories:</p>
+        
+        <h3>a) Information You Provide Directly</h3>
+        <p>This is the personal information you provide when you register, create your profile, and use our services. This includes:</p>
+        <ul>
+            <li><strong>Account Information:</strong> Your name, email address, password, phone number, and gender.</li>
+            <li><strong>Profile Information:</strong> Your date of birth, height, weight, marital status, and photos.</li>
+            <li><strong>Family Details:</strong> Information about your parents, siblings, and family background.</li>
+            <li><strong>Educational & Professional Details:</strong> Your educational qualifications, profession and income details.</li>
+            <li><strong>Partner Preferences:</strong> Your detailed preferences for a life partner.</li>
+            <li><strong>Communications:</strong> Any communication you have with our customer support team or with other members through our platform's messaging system.</li>
+        </ul>
+
+        <h3>b) Information We Collect Automatically</h3>
+        <p>When you access our website, we automatically collect certain technical information about your device and usage.</p>
+        <ul>
+            <li><strong>Log & Usage Data:</strong> Your IP address, browser type, operating system, pages viewed, time spent on pages, links clicked, and the dates and times of your access.</li>
+            <li><strong>Cookies and Similar Technologies:</strong> We use cookies to help our site function, remember your preferences, and understand how you use our service.</li>
+        </ul>
+
+        <h3>c) Payment Information</h3>
+        <p>If you subscribe to a paid membership, we will require payment information. This is processed securely by our third-party payment gateway. We do not store your full credit card or debit card numbers on our servers.</p>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>We use your information for the following purposes:</p>
+        <ul>
+            <li>To Provide Our Core Service: To create and manage your profile, and to facilitate matchmaking.</li>
+            <li>To Facilitate Communication: To allow you to communicate with other members.</li>
+            <li>To Verify and Secure Your Account: To prevent fraud and ensure community safety.</li>
+            <li>To Improve Our Services: To analyze usage trends and improve user experience.</li>
+            <li>To Provide Customer Support: To respond to your inquiries and resolve issues.</li>
+            <li>To Communicate With You: To send service-related announcements and promotional messages.</li>
+            <li>To Process Payments: To process your subscription fees for premium services.</li>
+            <li>To Enforce Our Terms: To enforce our Terms of Service and other policies.</li>
+        </ul>
+
+        <h2>4. How We Share Your Information</h2>
+        <p>Your privacy is paramount, but the nature of a matrimonial service requires sharing information. Here is who we share it with:</p>
+        <ul>
+            <li><strong>With Other Members:</strong> Your profile information (excluding direct contact details like email and phone number, unless you choose to share them) is visible to other registered members.</li>
+            <li><strong>For Legal Reasons:</strong> We may disclose your information if required by law or to protect our rights and the safety of others.</li>
+            <li><strong>In Case of Business Transfer:</strong> Your information may be transferred if we are involved in a merger, acquisition, or sale of assets.</li>
+        </ul>
+
+        <h2>5. Your Choices and Rights</h2>
+        <p>You have control over your personal information.</p>
+        <ul>
+            <li><strong>Access and Update:</strong> You can review and edit your profile information at any time by logging into your account.</li>
+            <li><strong>Profile Visibility:</strong> You can adjust your profile visibility settings within your account.</li>
+            <li><strong>Account Deletion:</strong> You can delete your account at any time through your settings or by contacting support.</li>
+            <li><strong>Communication Preferences:</strong> You can opt out of promotional emails by using the "unsubscribe" link.</li>
+        </ul>
+
+        <h2>6. Data Security</h2>
+        <p>We implement robust technical and organizational measures to protect your personal data from unauthorized access, alteration, disclosure, or destruction. These measures include SSL encryption, firewalls, and secure server environments. However, no method of transmission over the Internet or electronic storage is 100% secure, so we cannot guarantee absolute security.</p>
+        
+        <h2>7. Data Retention</h2>
+        <p>We will retain your personal information for as long as your account is active or as needed to provide you with our services. We will also retain and use your information as necessary to comply with our legal obligations, resolve disputes, and enforce our agreements.</p>
+        
+        <h2>8. Children's Privacy</h2>
+        <p>Our service is intended for adults aged 18 and over. We do not knowingly collect personal information from children under the age of 18. If we become aware that we have collected data from a child, we will take steps to delete it immediately.</p>
+        
+        <h2>9. Changes to This Privacy Policy</h2>
+        <p>We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new policy on our website and updating the "Effective Date" at the top. We encourage you to review this policy periodically.</p>
+        
+        <h2>10. Contact Us</h2>
+        <p>If you have any questions, concerns, or complaints about this Privacy Policy or our data practices, please contact us at:</p>
+        <div class="contact-info">
+            <p style="margin-bottom: 5px;"><strong>Pentecost Matrimony</strong></p>
+            <p style="margin-bottom: 5px;"><strong>Email:</strong> <a href="mailto:keralapentecostmatrimony@gmail.com">keralapentecostmatrimony@gmail.com</a></p>
+            <p style="margin-bottom: 0;"><strong>Phone:</strong> <a href="tel:+918078538160">8078538160</a></p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/" class="form-link" style="color: #DDA0DD; font-size: 1rem; text-decoration: underline;">Back to Home Page</a>
+        </div>
+    </main>
+
+</body>
+</html>

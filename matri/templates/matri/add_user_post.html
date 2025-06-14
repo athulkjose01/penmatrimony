@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Post - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <style>
+        /* Re-use some base styles from view_user_profile.html for consistency */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Georgia', serif; line-height: 1.6; color: #E0E0E0;
+            background: black; min-height: 100vh; display: flex; flex-direction: column; position: relative;
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            pointer-events: none; z-index: -1;
+        }
+        nav { /* Basic nav styling - copy from view_user_profile.html or use a base template */
+            position: sticky; top: 0; width: 100%; background: rgba(75, 0, 130, 0.95);
+            backdrop-filter: blur(15px); z-index: 1000; padding: 15px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: bold; color: white; text-decoration: none; }
+        .logo i { margin-right: 8px; }
+        .nav-links { display: flex; list-style: none; gap: 25px; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 8px; }
+        .nav-links a:hover, .nav-links a.active { color: #DDA0DD; background-color: rgba(255,255,255,0.1); }
+        .nav-links .auth-link { border: 1px solid rgba(255,255,255,0.5); }
+        .nav-links .auth-link:hover { border-color: #DDA0DD; }
+
+        .main-form-container {
+            flex-grow: 1; max-width: 800px; margin: 40px auto; padding: 30px;
+            background: rgba(30, 0, 40, 0.9); backdrop-filter: blur(10px);
+            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .main-form-container h2 {
+            font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #DDA0DD;
+            margin-bottom: 30px; text-align: center;
+        }
+        .form-group { margin-bottom: 25px; }
+        .form-group label {
+            display: block; font-weight: 600; color: #C0C0C0; margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        .form-control-dark,
+        input[type="file"].form-control-dark {
+            width: 100%; padding: 12px 15px; border-radius: 8px;
+            border: 1px solid rgba(221, 160, 221, 0.3);
+            background: rgba(255,255,255,0.05); color: #E0E0E0;
+            font-family: 'Georgia', serif; font-size: 0.95rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-control-dark:focus {
+            border-color: #DDA0DD;
+            box-shadow: 0 0 0 0.2rem rgba(221, 160, 221, 0.25);
+            outline: none;
+        }
+        textarea.form-control-dark { min-height: 100px; resize: vertical; }
+
+        /* Cropper specific styles */
+        .img-crop-container {
+            width: 100%;
+            max-height: 400px; /* Adjust as needed */
+            margin-bottom: 15px;
+            background: #221122; /* Dark background for preview area */
+            border: 2px dashed rgba(221, 160, 221, 0.4);
+            border-radius: 8px;
+            display: none; /* Initially hidden */
+        }
+        #imageToCrop {
+            display: block;
+            max-width: 100%; /* Important for Cropper.js */
+        }
+        .cropper-info-text {
+            font-size: 0.9rem; color: #aaa; text-align: center; margin-top: 5px;
+        }
+
+        .btn-submit-post {
+            padding: 15px 30px; border: none; border-radius: 50px; font-weight: 700;
+            font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;
+            background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD);
+            color: white; cursor: pointer; font-family: 'Georgia', serif;
+            display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+            transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(75, 0, 130, 0.3);
+            width: 100%; justify-content: center;
+        }
+        .btn-submit-post:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(75, 0, 130, 0.4);
+        }
+        .django-messages { /* Copy from view_user_profile or use base template */
+            list-style: none; padding: 0; margin: 0 auto 25px auto; max-width: 800px;
+        }
+        .django-messages li {
+            padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; backdrop-filter: blur(10px);
+        }
+        .django-messages li.success { background: linear-gradient(45deg, #28a745, #20c997); }
+        .django-messages li.warning { background: linear-gradient(45deg, #ffc107, #fd7e14); color: #333; }
+        .django-messages li.error { background: linear-gradient(45deg, #dc3545, #e83e8c); }
+        .django-messages li.info { background: linear-gradient(45deg, #17a2b8, #6610f2); }
+
+        /* Footer (minimal or copy from view_user_profile) */
+        footer { background: rgba(58, 45, 76, 0.95); color: #e0e0e0; padding: 20px 0; margin-top: auto; text-align: center; font-size: 0.9rem;}
+
+    </style>
+</head>
+<body>
+
+    <div class="main-form-container">
+        {% if messages %}
+            <ul class="django-messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <h2><i class="fas fa-camera-retro"></i> Add New Photo Post</h2>
+
+        <form method="post" enctype="multipart/form-data" id="addPostForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+                {{ form.image }}
+                {% if form.image.errors %}<small class="text-danger">{{ form.image.errors|join:", " }}</small>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Image Preview & Crop</label>
+                <div class="img-crop-container" id="imgCropContainer">
+                    <img id="imageToCrop" src="#" alt="Preview">
+                </div>
+                <p class="cropper-info-text">Select an image to see preview and adjust crop.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.caption.id_for_label }}">{{ form.caption.label }}</label>
+                {{ form.caption }}
+                {% if form.caption.errors %}<small class="text-danger">{{ form.caption.errors|join:", " }}</small>{% endif %}
+            </div>
+
+            <button type="submit" class="btn-submit-post"><i class="fas fa-upload"></i> Upload Post</button>
+             <p style="text-align: center; margin-top: 20px;">
+                <a href="{% url 'view_user_profile' %}" style="color: #DDA0DD; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Back to My Profile
+                </a>
+            </p>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get form elements
+        const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+        const imagePreview = document.getElementById('imageToCrop');
+        const cropContainer = document.getElementById('imgCropContainer');
+        const cropperInfoText = document.querySelector('.cropper-info-text');
+        const addPostForm = document.getElementById('addPostForm');
+        const submitButton = document.querySelector('.btn-submit-post');
+        const captionInput = document.getElementById('{{ form.caption.id_for_label }}');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const messagesContainer = document.querySelector('.django-messages');
+
+        let cropper;
+        let originalFileName = '';
+
+        // Image selection handler
+        imageInput.addEventListener('change', function (event) {
+            const files = event.target.files;
+            
+            if (files && files.length > 0) {
+                const file = files[0];
+                originalFileName = file.name;
+
+                // Validate image type
+                if (!file.type.startsWith('image/')) {
+                    cropperInfoText.textContent = "Please select a valid image file (JPEG, PNG, etc.).";
+                    cropContainer.style.display = 'none';
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+                    imageInput.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    cropContainer.style.display = 'block';
+                    cropperInfoText.textContent = "Adjust the crop as needed.";
+
+                    // Destroy previous cropper instance if exists
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    // Initialize cropper
+                    cropper = new Cropper(imagePreview, {
+                        aspectRatio: 1 / 1,
+                        viewMode: 1,
+                        background: false,
+                        responsive: true,
+                        autoCropArea: 0.8,
+                        movable: true,
+                        zoomable: true,
+                        rotatable: true,
+                        scalable: true
+                    });
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // No file selected
+                imagePreview.src = "#";
+                cropContainer.style.display = 'none';
+                cropperInfoText.textContent = "Select an image to see preview and adjust crop.";
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                originalFileName = '';
+            }
+        });
+
+        // Form submission handler
+        addPostForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Validate image selection
+            if (!cropper || !imageInput.files || imageInput.files.length === 0) {
+                displayMessage('error', 'Please select an image to upload');
+                return;
+            }
+
+            // Update button state
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            submitButton.disabled = true;
+
+            // Get cropped image as blob
+            cropper.getCroppedCanvas({
+                width: 800,
+                height: 800,
+                fillColor: '#fff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            }).toBlob(function (blob) {
+                if (!blob) {
+                    displayMessage('error', 'Could not process the image. Please try again.');
+                    resetButton();
+                    return;
+                }
+
+                // Prepare form data
+                const formData = new FormData();
+                const fileName = originalFileName || 'cropped_image.jpg';
+                formData.append('image', blob, fileName);
+                formData.append('caption', captionInput.value);
+                formData.append('csrfmiddlewaretoken', csrfToken);
+
+                // Send AJAX request
+                fetch(addPostForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // Identify as AJAX request
+                    }
+                })
+                .then(response => {
+                    if (response.ok) return response.json();
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    });
+                })
+                .then(data => {
+                    if (data.success && data.redirect_url) {
+                        // Success with redirect
+                        sessionStorage.setItem('djangoSuccessMessage', data.message || 'Post uploaded successfully!');
+                        window.location.href = data.redirect_url;
+                    } else if (data.success) {
+                        // Success without redirect
+                        displayMessage('success', data.message || 'Post uploaded successfully!');
+                        resetForm();
+                    } else {
+                        // Form validation errors
+                        handleFormErrors(data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Upload error:', error);
+                    displayMessage('error', error.message || 'Upload failed. Please try again.');
+                })
+                .finally(() => {
+                    resetButton();
+                });
+
+            }, 'image/jpeg', 0.9); // Output as JPEG with 90% quality
+
+            // Helper functions
+            function resetButton() {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+
+            function resetForm() {
+                addPostForm.reset();
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                cropContainer.style.display = 'none';
+                imagePreview.src = "#";
+                originalFileName = '';
+            }
+
+            function handleFormErrors(data) {
+                let errorMessage = data.error || 'An error occurred';
+                if (data.errors) {
+                    // Format Django form errors
+                    errorMessage = Object.entries(data.errors)
+                        .map(([field, errors]) => {
+                            const fieldLabel = field === 'image' ? 'Image' : 'Caption';
+                            return `${fieldLabel}: ${errors.join(', ')}`;
+                        })
+                        .join('; ');
+                }
+                displayMessage('error', errorMessage);
+            }
+        });
+
+        // Display message function
+        function displayMessage(type, message) {
+            if (!messagesContainer) {
+                console.error('Messages container not found');
+                return;
+            }
+            
+            // Create message element
+            const li = document.createElement('li');
+            li.className = type;
+            li.innerHTML = `<i class="fas fa-${getIconForType(type)}"></i> ${message}`;
+            
+            // Add to container
+            messagesContainer.appendChild(li);
+            
+            // Auto-remove after delay
+            setTimeout(() => {
+                if (li.parentNode === messagesContainer) {
+                    messagesContainer.removeChild(li);
+                }
+            }, 7000);
+        }
+
+        // Get appropriate icon for message type
+        function getIconForType(type) {
+            switch(type) {
+                case 'success': return 'check-circle';
+                case 'error': return 'exclamation-circle';
+                case 'warning': return 'exclamation-triangle';
+                case 'info': return 'info-circle';
+                default: return 'info-circle';
+            }
+        }
+
+        // Check for success message after redirect
+        const successMessage = sessionStorage.getItem('djangoSuccessMessage');
+        if (successMessage) {
+            displayMessage('success', successMessage);
+            sessionStorage.removeItem('djangoSuccessMessage');
+        }
+    });
+</script>

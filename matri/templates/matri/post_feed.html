@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Community Feed" }} - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    {% csrf_token %}
+    <style>
+        /* All your CSS styles are perfect and remain unchanged. */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Georgia', serif; line-height: 1.6; color: #E0E0E0; background: black; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%); pointer-events: none; z-index: -1; }
+        nav { position: sticky; top: 0; width: 100%; background: rgba(75, 0, 130, 0.95); backdrop-filter: blur(10px); z-index: 1000; padding: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: bold; color: white; text-decoration: none; }
+        .logo i { margin-right: 8px; }
+        .nav-links { display: flex; list-style: none; gap: 25px; }
+        .nav-links a { color: white; text-decoration: none; transition: color 0.3s ease, background-color 0.3s ease; font-weight: 500; padding: 5px 10px; border-radius: 4px; }
+        .nav-links a:hover, .nav-links a.active { color: #DDA0DD; background-color: rgba(255,255,255,0.1); }
+        .nav-links .auth-link { border: 1px solid rgba(255,255,255,0.5); }
+        .nav-links .auth-link:hover { border-color: #DDA0DD; }
+        .main-view-container { flex-grow: 1; margin-top: 10px; margin-bottom: 40px; }
+        .django-messages { max-width: 800px; margin: 20px auto; list-style: none; padding: 0 15px; }
+        .django-messages li { padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; backdrop-filter: blur(10px); }
+        .django-messages li.success { background: linear-gradient(45deg, #28a745, #20c997); }
+        .django-messages li.warning { background: linear-gradient(45deg, #ffc107, #fd7e14); color: #333; }
+        .django-messages li.error { background: linear-gradient(45deg, #dc3545, #e83e8c); }
+        .django-messages li.info { background: linear-gradient(45deg, #17a2b8, #6610f2); }
+        .feed-container { max-width: 550px; margin: 2rem auto; padding: 0 1rem; }
+        .post { background: rgba(20, 20, 20, 0.9); border-radius: 20px; margin-bottom: 2rem; overflow: hidden; box-shadow: 0 8px 25px rgba(120, 119, 198, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(120, 119, 198, 0.3); transform: translateY(20px) scale(0.8); opacity: 0; animation: slideUp 0.6s ease forwards; }
+        @keyframes slideUp { to { transform: translateY(0); opacity: 1; } }
+        .post-header { padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid rgba(221, 160, 221, 0.15); }
+        .avatar-wrapper { width: 45px; height: 45px; border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #8A2BE2, #DDA0DD); }
+        .avatar-wrapper .avatar-img, .avatar-wrapper .avatar-placeholder { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: flex; align-items: center; justify-content: center; background-color: #fff; }
+        .avatar-wrapper .avatar-placeholder i { font-size: 1.2rem; color: #764ba2; }
+        .user-info { flex: 1; }
+        .username, .username-in-caption { font-weight: 600; font-size: 1rem; color: #F0F0F0; margin-bottom: 2px; text-decoration: none; }
+        a.username:hover, a.username-in-caption:hover { color: #DDA0DD; }
+        .post-date { font-size: 0.85rem; color: #b0b0b0; }
+        .post-image-container { width: 100%; background-color: #1a1a1a; cursor: pointer; }
+        .post-image { display: block; width: 100%; max-height: 600px; height: auto; object-fit: cover; }
+        .post-content { padding: 1rem 1.5rem; }
+        .post-actions { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .action-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #cccccc; transition: all 0.3s ease; padding: 0.3rem; }
+        .action-btn:hover i { color: #DDA0DD; transform: scale(1.1); }
+        .action-btn .fas.fa-heart { color: #e74c3c; }
+        .caption { line-height: 1.6; color: #E0E0E0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .username-in-caption { margin-right: 0.5rem; }
+        .pagination { justify-content: center; margin-top: 40px; margin-bottom: 20px; }
+        .pagination .page-item .page-link { background-color: rgba(75, 0, 130, 0.5); border-color: rgba(221, 160, 221, 0.3); color: #DDA0DD; margin: 0 3px; border-radius: 8px; transition: all 0.3s ease; }
+        .pagination .page-item .page-link:hover { background-color: rgba(221, 160, 221, 0.3); border-color: #DDA0DD; color: white; }
+        .pagination .page-item.active .page-link { background-color: #DDA0DD; border-color: #DDA0DD; color: #4B0082; font-weight: bold; }
+        .pagination .page-item.disabled .page-link { background-color: rgba(75, 0, 130, 0.2); border-color: rgba(221, 160, 221, 0.1); color: #888; }
+        .no-feed-items { text-align: center; color: #E0E0E0; font-style: italic; padding: 50px 20px; font-size: 1.1rem; background: rgba(30, 0, 40, 0.85); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .no-feed-items p i { color: #DDA0DD; }
+        .btn-profile-action.btn-add-post { background: linear-gradient(45deg, #28a745, #20c997, #17a2b8); padding: 12px 25px; border: none; border-radius: 50px; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; color: white; cursor: pointer; font-family: 'Georgia', serif; display: inline-flex; align-items: center; gap: 10px; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(32, 121, 89, 0.2); }
+        .btn-profile-action.btn-add-post:hover { box-shadow: 0 15px 40px rgba(32, 121, 89, 0.4); transform: translateY(-3px); }
+        footer { background: rgba(58, 45, 76, 0.95); backdrop-filter: blur(10px); color: #e0e0e0; padding: 40px 0 20px; margin-top: auto; }
+        .footer-container, .footer-content, .footer-section, .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .footer-section h4 { font-family: 'Playfair Display', serif; margin-bottom: 15px; color: #DDA0DD; font-size: 1.2rem; }
+        .footer-section p, .footer-section ul li { font-size: 0.9rem; line-height: 1.7; color: #c0c0c0; }
+        .footer-section ul { list-style: none; padding-left: 0; }
+        .footer-section ul li { margin-bottom: 8px; }
+        .footer-section ul li a { color: #c0c0c0; text-decoration: none; transition: color 0.3s ease; }
+        .footer-section ul li a:hover { color: #DDA0DD; }
+        .footer-socials a { margin-right: 12px; font-size: 1.2rem; color: #DDA0DD; }
+        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
+        .footer-bottom p { margin-bottom: 5px; }
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 10px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; }
+            .feed-container { margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 0 0.5rem; }
+            .post { margin-bottom: 1.5rem; border-radius: 15px; }
+            .post-image { height: 300px; }
+            .post-header { padding: 0.75rem 1rem; }
+            .avatar-wrapper { width: 40px; height: 40px; }
+            .username { font-size: 0.95rem; }
+            .post-date { font-size: 0.75rem; }
+            .post-content { padding: 0.75rem 1rem; }
+            .action-btn { font-size: 1.3rem; }
+            .caption { font-size: 0.9rem; }
+            .footer-content { grid-template-columns: 1fr; text-align: center;}
+            .footer-socials { text-align: center; margin-top: 10px;}
+        }
+         @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo">
+                <i class="fas fa-church"></i> Pentecost Matrimony
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                {% if user.is_authenticated %}
+                    {% if user_has_profile %}
+                        <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                        <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
+                    {% else %}
+                        <li><a href="{% url 'create_user_profile' %}"><i class="fas fa-plus-circle"></i> Create Profile</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-view-container container-fluid">
+        {% if messages %}
+            <ul class="django-messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="feed-container">
+            {% if posts_page.object_list %}
+                {% for post in posts_page %}
+                <div class="post" style="animation-delay: {{ forloop.counter0|stringformat:".2f"|slice:"1:" }}s;">
+                    <div class="post-header">
+                        
+                        <!-- =========== MODIFICATION 1: AVATAR LINK =========== -->
+                        {% if request.user.is_authenticated and request.user.userprofile.is_premium_member or request.user == post.user_profile.user %}
+                            <a href="{% url 'view_other_user_profile' profile_id=post.user_profile.id %}" class="avatar-wrapper">
+                                {% if post.user_profile.profile_picture %}
+                                    <img src="{{ post.user_profile.profile_picture.url }}" alt="{{ post.user_profile.full_name }}" class="avatar-img">
+                                {% else %}
+                                    <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            <a href="{% url 'subscribe' %}" class="avatar-wrapper">
+                                {% if post.user_profile.profile_picture %}
+                                    <img src="{{ post.user_profile.profile_picture.url }}" alt="{{ post.user_profile.full_name }}" class="avatar-img">
+                                {% else %}
+                                    <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
+                                {% endif %}
+                            </a>
+                        {% endif %}
+                        <!-- ===================== END MODIFICATION ===================== -->
+
+                        <div class="user-info">
+                            <!-- =========== MODIFICATION 2: USERNAME LINK =========== -->
+                            {% if request.user.is_authenticated and request.user.userprofile.is_premium_member or request.user == post.user_profile.user %}
+                                <a href="{% url 'view_other_user_profile' profile_id=post.user_profile.id %}" class="username">{{ post.user_profile.full_name }}</a>
+                            {% else %}
+                                <a href="{% url 'subscribe' %}" class="username">{{ post.user_profile.full_name }}</a>
+                            {% endif %}
+                            <!-- ===================== END MODIFICATION ===================== -->
+                            <div class="post-date">{{ post.created_at|date:"F d, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="post-image-container" data-post-id="{{post.id}}">
+                        <img src="{{ post.image.url }}" alt="{{ post.caption|default:'User post'|truncatechars:50 }}" class="post-image">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-actions">
+                            <button class="action-btn like-btn" data-post-id="{{post.id}}">
+                                {% if post.is_liked_by_user %}
+                                    <i class="fas fa-heart"></i>
+                                {% else %}
+                                    <i class="far fa-heart"></i>
+                                {% endif %}
+                            </button>
+                        </div>
+                        {% if post.caption %}
+                        <div class="caption">
+                            <!-- =========== MODIFICATION 3: CAPTION USERNAME LINK =========== -->
+                            {% if request.user.is_authenticated and request.user.userprofile.is_premium_member or request.user == post.user_profile.user %}
+                                <a href="{% url 'view_other_user_profile' profile_id=post.user_profile.id %}" class="username-in-caption">{{ post.user_profile.full_name }}</a>
+                            {% else %}
+                                <a href="{% url 'subscribe' %}" class="username-in-caption">{{ post.user_profile.full_name }}</a>
+                            {% endif %}
+                            <!-- ===================== END MODIFICATION ===================== -->
+                            {{ post.caption }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Pagination (Unchanged) -->
+                {% if posts_page.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if posts_page.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page=1" aria-label="First"><i class="fas fa-angle-double-left"></i></a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.previous_page_number }}" aria-label="Previous"><i class="fas fa-angle-left"></i></a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link" aria-label="First"><i class="fas fa-angle-double-left"></i></span></li>
+                            <li class="page-item disabled"><span class="page-link" aria-label="Previous"><i class="fas fa-angle-left"></i></span></li>
+                        {% endif %}
+                        {% for num in posts_page.paginator.page_range %}
+                            {% if posts_page.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > posts_page.number|add:'-3' and num < posts_page.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                            {% elif num == posts_page.number|add:'-3' or num == posts_page.number|add:'3' %}
+                                 <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if posts_page.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.next_page_number }}" aria-label="Next"><i class="fas fa-angle-right"></i></a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.paginator.num_pages }}" aria-label="Last"><i class="fas fa-angle-double-right"></i></a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link" aria-label="Next"><i class="fas fa-angle-right"></i></span></li>
+                            <li class="page-item disabled"><span class="page-link" aria-label="Last"><i class="fas fa-angle-double-right"></i></span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="no-feed-items">
+                    <p><i class="fas fa-images fa-3x mb-3"></i></p>
+                    <p>No posts in the feed yet. Be the first to inspire!</p>
+                    <p>Encourage members to share their moments by adding photos to their profiles.</p>
+                     {% if user_has_profile %}
+                        <a href="{% url 'add_user_post' %}" class="btn-profile-action btn-add-post mt-3"><i class="fas fa-camera-retro"></i> Add Your Photo</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer>
+        <!-- Your footer content remains unchanged -->
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Pentecost Matrimony</h4>
+                    <p>Dedicated to helping Pentecostal believers find their God-ordained life partners through faith, prayer, and divine guidance.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'index' %}">Home</a></li>
+                        {% if user.is_authenticated and user_has_profile %}
+                        <li><a href="{% url 'search_users' %}">Search Members</a></li>
+                        <li><a href="{% url 'view_user_profile' %}">My Profile</a></li>
+                        {% elif user.is_authenticated and not user_has_profile %}
+                        <li><a href="{% url 'create_user_profile' %}">Create Profile</a></li>
+                        {% else %}
+                        <li><a href="{% url 'login' %}">Login / Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact & Support</h4>
+                    <p>Email: <a href="mailto:keralapentecostmatrimony@gmail.com" style="color:#DDA0DD;">keralapentecostmatrimony@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© {% now "Y" %} Pentecost Matrimony. All rights reserved.</p>
+                <p>"Love binds them all together in perfect unity." - Colossians 3:14</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // Your JavaScript for liking posts and other interactions remains unchanged.
+    document.addEventListener('DOMContentLoaded', function() {
+        const likeButtons = document.querySelectorAll('.like-btn');
+        likeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                toggleLikeVisual(this);
+            });
+        });
+
+        const postImageContainers = document.querySelectorAll('.post-image-container');
+        postImageContainers.forEach(container => {
+            container.addEventListener('dblclick', function() {
+                const postId = this.dataset.postId;
+                const correspondingLikeButton = document.querySelector(`.like-btn[data-post-id="${postId}"]`);
+                if (correspondingLikeButton) {
+                    toggleLikeVisual(correspondingLikeButton);
+                    showLikeFeedback(this);
+                }
+            });
+        });
+
+        function toggleLikeVisual(buttonElement) {
+            const heartIcon = buttonElement.querySelector('i');
+            const postId = buttonElement.dataset.postId;
+            const isCurrentlyLiked = heartIcon.classList.contains('fas');
+            heartIcon.classList.toggle('fas', !isCurrentlyLiked);
+            heartIcon.classList.toggle('far', isCurrentlyLiked);
+
+            fetch(`/like_post/${postId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    heartIcon.classList.toggle('fas');
+                    heartIcon.classList.toggle('far');
+                }
+                return response.json();
+            }).then(data => {
+                if (data.status === 'success') {
+                    if (data.action === 'liked') {
+                        buttonElement.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            buttonElement.style.transform = 'scale(1)';
+                        }, 200);
+                    }
+                } else {
+                    heartIcon.classList.toggle('fas');
+                    heartIcon.classList.toggle('far');
+                    console.error('Like failed:', data.message);
+                }
+            }).catch(error => {
+                heartIcon.classList.toggle('fas');
+                heartIcon.classList.toggle('far');
+                console.error("Network error during like:", error);
+            });
+        }
+
+        function showLikeFeedback(imageContainer) {
+            let heartOverlay = imageContainer.querySelector('.like-heart-overlay');
+            if (!heartOverlay) {
+                heartOverlay = document.createElement('div');
+                heartOverlay.innerHTML = '<i class="fas fa-heart"></i>';
+                heartOverlay.style.position = 'absolute';
+                heartOverlay.style.top = '50%';
+                heartOverlay.style.left = '50%';
+                heartOverlay.style.transform = 'translate(-50%, -50%) scale(0)';
+                heartOverlay.style.fontSize = '80px';
+                heartOverlay.style.color = 'rgba(255, 255, 255, 0.85)';
+                heartOverlay.style.opacity = '0';
+                heartOverlay.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+                heartOverlay.style.pointerEvents = 'none';
+                heartOverlay.classList.add('like-heart-overlay');
+                imageContainer.style.position = 'relative';
+                imageContainer.appendChild(heartOverlay);
+            }
+            setTimeout(() => {
+                heartOverlay.style.transform = 'translate(-50%, -50%) scale(1)';
+                heartOverlay.style.opacity = '1';
+            }, 10);
+            setTimeout(() => {
+                heartOverlay.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                heartOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    if(heartOverlay.parentNode) {
+                       heartOverlay.remove();
+                    }
+                }, 300);
+            }, 700);
+        }
+    });
+    </script>
+</body>
+</html>

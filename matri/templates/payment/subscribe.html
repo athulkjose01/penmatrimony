@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Membership - Pentecost Matrimony</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    
+    <!-- FONT AWESOME & GOOGLE FONTS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+    <style>
+        /* --- CORE STYLES FROM YOUR SITE FOR CONSISTENCY --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #E0E0E0;
+            background: black;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* --- NAVBAR STYLES (Synchronized with profile page) --- */
+        nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(75, 0, 130, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .logo i { margin-right: 8px; }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #DDA0DD;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .nav-links .auth-link {
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .nav-links .auth-link:hover {
+             border-color: #DDA0DD;
+        }
+
+        /* --- MAIN CONTAINER (MODIFIED) --- */
+        .main-view-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* MODIFIED: Reduced padding-top to move the card closer to the nav */
+            padding-top: 30px;
+            padding-bottom: 40px;
+        }
+        
+        /* --- STYLES SPECIFIC TO THIS SUBSCRIBE PAGE --- */
+        .subscription-card {
+            background: rgba(30, 0, 40, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+
+            /* MODIFIED: This is the key to perfect responsiveness */
+            width: 100%;
+            max-width: 750px; /* The card will not grow wider than this */
+            margin: 0 auto; /* Ensures it's centered within its column */
+        }
+
+        .subscription-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        
+        .card-header-icon {
+            font-size: 3rem;
+            color: #DDA0DD;
+            margin-bottom: 0px;
+            text-shadow: 0 0 15px rgba(221, 160, 221, 0.5);
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .card-subtitle {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            margin-bottom: 0px;
+        }
+
+        .price-display {
+            margin-bottom: 30px;
+        }
+
+        .price-display .amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(45deg, #fff, #DDA0DD);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .price-display .duration {
+            font-size: 1rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 30px auto;
+            max-width: 320px; /* Center the list items */
+            text-align: left;
+        }
+
+        .features-list li {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            color: #d0d0d0;
+            display: flex;
+            align-items: center;
+        }
+
+        .features-list i {
+            color: #28a745; /* Green checkmark for positive reinforcement */
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        #pay-btn {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(75, 0, 130, 0.4);
+            background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD);
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #pay-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(75, 0, 130, 0.5);
+        }
+
+        .secure-payment-notice {
+            font-size: 0.9rem;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .secure-payment-notice .fab {
+            font-size: 1.5rem;
+            color: #3399cc; /* Razorpay's color */
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+             .nav-container { flex-direction: column; gap: 10px; }
+             .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+                background: rgba(75, 0, 130, 0.98);
+                padding-bottom: 10px;
+            }
+             .subscription-card { padding: 30px 25px; }
+             .card-title { font-size: 1.8rem; }
+             .price-display .amount { font-size: 3rem; }
+             #pay-btn { padding: 15px 30px; font-size: 1rem; }
+        }
+        
+        @media (max-width: 992px) { /* This breakpoint is for lg in Bootstrap */
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="logo">
+                <i class="fas fa-church"></i> Pentecost Matrimony
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                {% if user.is_authenticated %}
+                    {% if user.userprofile %}
+                        <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                        <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
+                    {% else %}
+                        <li><a href="{% url 'create_user_profile' %}"><i class="fas fa-plus-circle"></i> Create Profile</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-view-container container">
+        <div class="row justify-content-center">
+            <!-- MODIFIED: Simplified column for better control via CSS max-width -->
+            <div class="col-11 col-lg-10 col-xl-8">
+
+                <div class="subscription-card">
+                    <div class="card-header-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <p class="card-subtitle">Get Premium Profile</p>
+
+                    <div class="price-display">
+                        <span class="amount">₹ 500</span>
+                    </div>
+
+                    <ul class="features-list">
+                        <li><i class="fas fa-check-circle"></i> View Unlimited User Profiles</li>
+                        <li><i class="fas fa-check-circle"></i> Send Unlimited Interests</li>
+                        <li><i class="fas fa-check-circle"></i> Message Directly with Matches</li>
+                        <li><i class="fas fa-check-circle"></i> Priority Profile Listing in Search</li>
+                    </ul>
+
+                    <button id="pay-btn"><i class="fas fa-lock"></i> Become a Premium Member</button>
+
+                    <div class="secure-payment-notice">
+                        <i class="fab fa-cc-razorpay"></i> Secure Payment via Razorpay
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <script>
+    // The JavaScript logic remains the same.
+    document.getElementById('pay-btn').onclick = function(e) {
+        var options = {
+            "key": "{{ razorpay_key }}", 
+            "amount": "{{ amount }}",
+            "currency": "{{ currency }}",
+            "name": "Pentecost Matrimony",
+            "description": "Lifetime Premium Membership",
+            "image": "/static/images/your_logo.png", // IMPORTANT: Update this to the path of your logo
+            "order_id": "{{ razorpay_order_id }}", 
+            "handler": function (response){
+                verifyPayment(response);
+            },
+            "prefill": {
+                "name": "{{ user_profile.full_name|default:user.username|escapejs }}",
+                "email": "{{ user.email|escapejs }}",
+                "contact": "{{ user.profile.phone|default:''|escapejs }}"
+            },
+            "notes": {
+                "plan": "Lifetime Premium",
+                "user_id": "{{ user.id }}"
+            },
+            "theme": {
+                "color": "#8A2BE2"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response){
+            console.error(response);
+            alert("Payment Failed: " + response.error.description + ". Please try again or contact support.");
+        });
+        rzp1.open();
+        e.preventDefault();
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function verifyPayment(paymentResponse) {
+        const csrftoken = getCookie('csrftoken');
+        
+        fetch("{% url 'verify_payment' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_signature: paymentResponse.razorpay_signature
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Payment Successful! You are now a Premium Member. You will be redirected to your profile.');
+                window.location.href = "{% url 'view_user_profile' %}";
+            } else {
+                console.error('Verification failed:', data.message);
+                alert('Payment verification failed. Please do not retry payment and contact our support team immediately with your transaction details.');
+            }
+        })
+        .catch(error => {
+            console.error('Error during verification fetch:', error);
+            alert('A critical error occurred while verifying your payment. Please contact support.');
+        });
+    }
+    </script>
+</body>
+</html>
