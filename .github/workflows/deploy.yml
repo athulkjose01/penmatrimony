@@ -1,57 +1,85 @@
 name: Deploy Pentecost Matrimony to EC2
 
 on:
+  # Triggers the workflow on push events but only for the "main" branch
   push:
     branches:
-      - main  
+      - main
 
 jobs:
   deploy:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+      # Step 2: Sets up the SSH agent with the private key from GitHub Secrets
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-    - name: Add EC2 host to known_hosts
-      run: |
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+      # Step 3: Adds the EC2 host's fingerprint to the runner's known_hosts file to avoid interactive prompts
+      - name: Add EC2 host to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Execute deployment script on EC2
-      run: |
-        ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'bash -s' <<'ENDSSH'
-          # Navigate to the project directory
-          cd /var/www/matrimony
+      # Step 4: Connects to the EC2 instance and runs the deployment script
+      - name: Execute deployment script on EC2
+        run: |
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'bash -s' <<'ENDSSH'
+            # --- Start of Script on EC2 ---
 
-          # Pull the latest code from the main branch
-          # If it's the first time, clone it. Otherwise, pull.
-          if [ ! -d ".git" ]; then
-            git clone https://github.com/athulkjose01/penmatrimony.git .
-          else
-            git pull origin main
-          fi
+            # Define the project base and repo directories for clarity
+            PROJECT_BASE_DIR="/var/www/matrimony"
+            REPO_DIR="$PROJECT_BASE_DIR/repo"
 
-          # Create the .env file from the GitHub secret
-          echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+            echo "--- Starting Deployment ---"
 
-          # Activate virtual environment
-          source venv/bin/activate
+            # Create the repo directory if it doesn't exist and ensure the 'ubuntu' user owns it
+            echo "1. Ensuring repository directory exists at $REPO_DIR"
+            sudo mkdir -p $REPO_DIR
+            sudo chown ubuntu:ubuntu $REPO_DIR
 
-          # Install/update dependencies
-          pip install -r requirements.txt
+            # Navigate into the repository directory
+            cd $REPO_DIR
 
-          # Run Django management commands
-          python manage.py collectstatic --noinput
-          python manage.py migrate --noinput
+            # Pull the latest code. If the repo doesn't exist yet, clone it.
+            # This logic handles both the very first deployment and all subsequent updates.
+            if [ -d ".git" ]; then
+              echo "2. Git repository found. Pulling latest code..."
+              git pull origin main
+            else
+              echo "2. Git repository not found. Cloning from GitHub..."
+              git clone https://github.com/athulkjose01/penmatrimony.git .
+            fi
 
-          # Restart Gunicorn and Celery to apply changes
-          sudo systemctl restart gunicorn
-          sudo systemctl restart celery
+            # Create the .env file from the GitHub secret inside the repo directory
+            echo "3. Creating/updating .env file..."
+            echo "${{ secrets.ENV_FILE_CONTENT }}" > $REPO_DIR/.env
 
-          echo "Deployment finished successfully!"
-        ENDSSH
+            # Activate the virtual environment (which is located outside the repo)
+            echo "4. Activating Python virtual environment..."
+            source $PROJECT_BASE_DIR/venv/bin/activate
+
+            # Install/update Python dependencies from the requirements file in the repo
+            echo "5. Installing/updating dependencies with pip..."
+            pip install -r $REPO_DIR/requirements.txt
+
+            # Run Django management commands
+            echo "6. Running Django management commands (collectstatic & migrate)..."
+            python manage.py collectstatic --noinput
+            python manage.py migrate --noinput
+
+            # Restart Gunicorn and Celery services to apply all changes
+            echo "7. Restarting Gunicorn and Celery services..."
+            sudo systemctl restart gunicorn
+            sudo systemctl restart celery
+
+            echo "--- Deployment finished successfully! ---"
+
+            # --- End of Script on EC2 ---
+          ENDSSH
