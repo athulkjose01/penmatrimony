@@ -138,7 +138,7 @@ class Notification(models.Model):
 
 
 
-# models.py (Add this new model at the end of the file)
+# models.py (Add this new model at the end of file)
 
 class InterestRequest(models.Model):
     STATUS_CHOICES = [
