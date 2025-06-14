@@ -3,11 +3,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- UPDATED: Added viewport-fit=cover for better PWA/fullscreen mobile experience -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{{ page_title }} - Pentecost Matrimony</title>
     <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#0a0a0f"> <!-- Changed to match dark background -->
+    <meta name="theme-color" content="#0a0a0f">
     <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
@@ -26,7 +25,6 @@
             --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.3);
             --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.4);
 
-            /* UPDATED: Safe area insets for notched devices */
             --safe-area-top: env(safe-area-inset-top, 0px);
             --safe-area-bottom: env(safe-area-inset-bottom, 0px);
             --safe-area-left: env(safe-area-inset-left, 0px);
@@ -39,20 +37,16 @@
             box-sizing: border-box;
         }
 
-        html {
+        /* UPDATED: Simplified html and body for better mobile keyboard handling */
+        html, body {
             height: 100%;
-            height: 100vh;
-            height: 100dvh;
+            overflow: hidden; /* Prevent the whole page from scrolling */
         }
 
         body {
-            height: 100%;
             font-family: 'Inter', sans-serif;
             background: var(--dark-bg);
             color: var(--text-primary);
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
         }
 
         body::before {
@@ -71,11 +65,11 @@
             z-index: -1;
         }
 
+        /* UPDATED: Changed height to 100% to fill the body stably */
         .chat-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            height: 100dvh;
+            height: 100%; 
             max-width: 900px;
             margin: 0 auto;
             background: var(--glass-bg);
@@ -322,20 +316,11 @@
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
-            html, body {
-                height: 100vh;
-                height: 100dvh;
-                position: fixed;
-                overflow: hidden;
-            }
-
             .chat-container {
                 max-width: 100%;
                 border-radius: 0;
                 border-left: none;
                 border-right: none;
-                height: 100vh;
-                height: 100dvh;
             }
 
             .chat-header {
@@ -472,18 +457,17 @@
         const currentUserProfileId = {{ current_user_profile_id }};
         const room_id = {{ room.id }};
 
-        // Auto-scroll to the bottom with smooth animation
-        function scrollToBottom() {
+        function smoothScrollToBottom() {
             chatLog.scrollTo({
                 top: chatLog.scrollHeight,
                 behavior: 'smooth'
             });
         }
-
-        // Initial scroll to bottom when messages are loaded
-        setTimeout(() => {
-             chatLog.scrollTop = chatLog.scrollHeight;
-        }, 100);
+        
+        // INSTANT scroll to bottom on load
+        function instantScrollToBottom() {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
 
         // WebSocket connection
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -497,13 +481,10 @@
             connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Connected';
             messageInput.disabled = false;
             sendButton.disabled = false;
-             // Hide connection status after a delay
             setTimeout(() => {
                 if (connectionStatus.classList.contains('connected')) {
                     connectionStatus.style.opacity = '0';
-                    setTimeout(() => {
-                        connectionStatus.style.display = 'none';
-                    }, 300);
+                    setTimeout(() => { connectionStatus.style.display = 'none'; }, 300);
                 }
             }, 3000);
         };
@@ -519,13 +500,12 @@
                 messageElement.classList.add('message-received');
             }
             
-            // Basic sanitization to prevent HTML injection
             const content = document.createElement('div');
             content.textContent = data.message;
             
             messageElement.innerHTML = `${content.innerHTML} <span class="timestamp">${data.timestamp}</span>`;
             chatLog.appendChild(messageElement);
-            scrollToBottom();
+            smoothScrollToBottom();
         };
 
         chatSocket.onclose = function(e) {
@@ -555,8 +535,7 @@
                     'message': message
                 }));
                 messageInput.value = '';
-                // Reset textarea height after sending
-                messageInput.style.height = 'auto';
+                messageInput.style.height = 'auto'; // Reset textarea height
                 messageInput.focus();
             }
         }
@@ -569,7 +548,7 @@
         // Auto-resize textarea and Enter key handling
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            const newHeight = Math.min(this.scrollHeight, 120); // 120px is max-height from CSS
+            const newHeight = Math.min(this.scrollHeight, 120);
             this.style.height = newHeight + 'px';
         });
 
@@ -580,9 +559,11 @@
             }
         });
 
-        // Focus input on load
+        // UPDATED: More reliable on-load logic
         window.addEventListener('load', function() {
             messageInput.focus();
+            // Scroll to the bottom after everything (including images) is loaded
+            instantScrollToBottom();
         });
     </script>
 </body>
