@@ -219,9 +219,14 @@ MEDIA_ROOT = BASE_DIR / 'media' # BASE_DIR is usually already defined
 
 STATIC_URL = '/static/'
 
+
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # ✅ tells Django where your static files are
+    os.path.join(BASE_DIR, 'assets'),
 ]
+
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
