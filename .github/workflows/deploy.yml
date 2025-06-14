@@ -1,85 +1,96 @@
-name: Deploy Pentecost Matrimony to EC2
+name: Deploy Pentecost Matrimony to EC2 (Diagnostic Mode)
 
 on:
-  # Triggers the workflow on push events but only for the "main" branch
   push:
     branches:
       - main
 
 jobs:
   deploy:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Sets up the SSH agent with the private key from GitHub Secrets
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      # Step 3: Adds the EC2 host's fingerprint to the runner's known_hosts file to avoid interactive prompts
       - name: Add EC2 host to known_hosts
         run: |
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      # Step 4: Connects to the EC2 instance and runs the deployment script
-      - name: Execute deployment script on EC2
+      - name: Execute Diagnostic Script on EC2
         run: |
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'bash -s' <<'ENDSSH'
-            # --- Start of Script on EC2 ---
+            # --- Start of Diagnostic Script on EC2 ---
 
-            # Define the project base and repo directories for clarity
+            # Define directories for clarity
             PROJECT_BASE_DIR="/var/www/matrimony"
             REPO_DIR="$PROJECT_BASE_DIR/repo"
 
-            echo "--- Starting Deployment ---"
-
-            # Create the repo directory if it doesn't exist and ensure the 'ubuntu' user owns it
-            echo "1. Ensuring repository directory exists at $REPO_DIR"
-            sudo mkdir -p $REPO_DIR
-            sudo chown ubuntu:ubuntu $REPO_DIR
-
-            # Navigate into the repository directory
+            # Go to the repository directory
             cd $REPO_DIR
 
-            # Pull the latest code. If the repo doesn't exist yet, clone it.
-            # This logic handles both the very first deployment and all subsequent updates.
-            if [ -d ".git" ]; then
-              echo "2. Git repository found. Pulling latest code..."
-              git pull origin main
-            else
-              echo "2. Git repository not found. Cloning from GitHub..."
-              git clone https://github.com/athulkjose01/penmatrimony.git .
-            fi
+            # Ensure the code is up-to-date from the 'main' branch
+            git pull origin main
 
-            # Create the .env file from the GitHub secret inside the repo directory
-            echo "3. Creating/updating .env file..."
-            echo "${{ secrets.ENV_FILE_CONTENT }}" > $REPO_DIR/.env
+            echo "---"
+            echo "--- 1. PROVING THE CODE IS UP-TO-DATE ---"
+            echo "The latest commit on the server is:"
+            git log -1 --pretty=format:"%h - %s (%an, %ar)"
+            echo "---"
+            echo
 
-            # Activate the virtual environment (which is located outside the repo)
-            echo "4. Activating Python virtual environment..."
+            echo "---"
+            echo "--- 2. PROVING THE settings.py FILE CONTENT ---"
+            echo "The content of matrimonial/settings.py is:"
+            # IMPORTANT: If your settings.py is not in a 'matrimonial' folder, change the path below
+            cat $REPO_DIR/matrimonial/settings.py
+            echo "---"
+            echo
+
+            echo "---"
+            echo "--- 3. ACTIVATING VIRTUAL ENVIRONMENT ---"
             source $PROJECT_BASE_DIR/venv/bin/activate
+            echo "Virtual environment activated."
+            echo "---"
+            echo
 
-            # Install/update Python dependencies from the requirements file in the repo
-            echo "5. Installing/updating dependencies with pip..."
-            pip install -r $REPO_DIR/requirements.txt
+            echo "---"
+            echo "--- 4. ASKING DJANGO DIRECTLY ABOUT ITS SETTINGS ---"
+            # This is the definitive test. We ask the running application what it sees.
+            python manage.py shell <<EOF
+            import os
+            from django.conf import settings
+            from django.core.exceptions import ImproperlyConfigured
 
-            # Run Django management commands
-            echo "6. Running Django management commands (collectstatic & migrate)..."
-            python manage.py collectstatic --noinput
-            python manage.py migrate --noinput
+            print('--- Django Settings Diagnosis ---')
+            print(f"DJANGO_SETTINGS_MODULE is: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
+            print(f"DEBUG value is: {settings.DEBUG}")
 
-            # Restart Gunicorn and Celery services to apply all changes
-            echo "7. Restarting Gunicorn and Celery services..."
-            sudo systemctl restart gunicorn
-            sudo systemctl restart celery
+            try:
+                print(f"STATIC_ROOT value is: {settings.STATIC_ROOT}")
+            except (ImproperlyConfigured, AttributeError):
+                print("STATIC_ROOT IS NOT DEFINED according to Django.")
 
-            echo "--- Deployment finished successfully! ---"
+            print(f"STATIC_URL value is: {settings.STATIC_URL}")
+            print(f"STATICFILES_DIRS value is: {settings.STATICFILES_DIRS}")
+            print('--- End Diagnosis ---')
+            EOF
+            echo "---"
+            echo
 
-            # --- End of Script on EC2 ---
+            echo "---"
+            echo "--- 5. ATTEMPTING THE ORIGINAL COMMAND (it will likely fail again) ---"
+            # Using --verbosity 2 to get more detailed output
+            python manage.py collectstatic --noinput --verbosity 2
+            echo "---"
+            echo
+
+            echo "--- Diagnostic script finished. ---"
+
+            # --- End of Diagnostic Script on EC2 ---
           ENDSSH
