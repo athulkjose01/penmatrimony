@@ -1,0 +1,57 @@
+name: Deploy Pentecost Matrimony to EC2
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Add EC2 host to known_hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Execute deployment script on EC2
+      run: |
+        ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'bash -s' <<'ENDSSH'
+          # Navigate to the project directory
+          cd /var/www/matrimony
+
+          # Pull the latest code from the main branch
+          # If it's the first time, clone it. Otherwise, pull.
+          if [ ! -d ".git" ]; then
+            git clone https://github.com/athulkjose01/penmatrimony.git .
+          else
+            git pull origin main
+          fi
+
+          # Create the .env file from the GitHub secret
+          echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+
+          # Activate virtual environment
+          source venv/bin/activate
+
+          # Install/update dependencies
+          pip install -r requirements.txt
+
+          # Run Django management commands
+          python manage.py collectstatic --noinput
+          python manage.py migrate --noinput
+
+          # Restart Gunicorn and Celery to apply changes
+          sudo systemctl restart gunicorn
+          sudo systemctl restart celery
+
+          echo "Deployment finished successfully!"
+        ENDSSH
