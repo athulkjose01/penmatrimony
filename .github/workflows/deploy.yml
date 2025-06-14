@@ -1,4 +1,4 @@
-name: Deploy Pentecost Matrimony to EC2 (Diagnostic Mode)
+name: Deploy Pentecost Matrimony to EC2
 
 on:
   push:
@@ -22,11 +22,9 @@ jobs:
         run: |
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Execute Diagnostic Script on EC2
+      - name: Execute deployment script on EC2
         run: |
           ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'bash -s' <<'ENDSSH'
-            # --- Start of Diagnostic Script on EC2 ---
-
             # Define directories for clarity
             PROJECT_BASE_DIR="/var/www/matrimony"
             REPO_DIR="$PROJECT_BASE_DIR/repo"
@@ -34,63 +32,33 @@ jobs:
             # Go to the repository directory
             cd $REPO_DIR
 
-            # Ensure the code is up-to-date from the 'main' branch
-            git pull origin main
+            # Forcefully update the code to match the main branch on GitHub
+            # This discards any local changes/untracked files on the server
+            echo "--- 1. Forcefully updating code from GitHub ---"
+            git fetch origin
+            git reset --hard origin/main
 
-            echo "---"
-            echo "--- 1. PROVING THE CODE IS UP-TO-DATE ---"
-            echo "The latest commit on the server is:"
-            git log -1 --pretty=format:"%h - %s (%an, %ar)"
-            echo "---"
-            echo
+            # Create/update the .env file from the GitHub secret
+            echo "--- 2. Creating/updating .env file ---"
+            echo "${{ secrets.ENV_FILE_CONTENT }}" > $REPO_DIR/.env
 
-            echo "---"
-            echo "--- 2. PROVING THE settings.py FILE CONTENT ---"
-            echo "The content of matrimonial/settings.py is:"
-            # IMPORTANT: If your settings.py is not in a 'matrimonial' folder, change the path below
-            cat $REPO_DIR/matrimonial/settings.py
-            echo "---"
-            echo
-
-            echo "---"
-            echo "--- 3. ACTIVATING VIRTUAL ENVIRONMENT ---"
+            # Activate the virtual environment
+            echo "--- 3. Activating Python virtual environment ---"
             source $PROJECT_BASE_DIR/venv/bin/activate
-            echo "Virtual environment activated."
-            echo "---"
-            echo
 
-            echo "---"
-            echo "--- 4. ASKING DJANGO DIRECTLY ABOUT ITS SETTINGS ---"
-            # This is the definitive test. We ask the running application what it sees.
-            python manage.py shell <<EOF
-            import os
-            from django.conf import settings
-            from django.core.exceptions import ImproperlyConfigured
+            # Install/update Python dependencies
+            echo "--- 4. Installing/updating dependencies ---"
+            pip install -r $REPO_DIR/requirements.txt
 
-            print('--- Django Settings Diagnosis ---')
-            print(f"DJANGO_SETTINGS_MODULE is: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
-            print(f"DEBUG value is: {settings.DEBUG}")
+            # Run Django management commands
+            echo "--- 5. Running Django management commands ---"
+            python manage.py collectstatic --noinput
+            python manage.py migrate --noinput
 
-            try:
-                print(f"STATIC_ROOT value is: {settings.STATIC_ROOT}")
-            except (ImproperlyConfigured, AttributeError):
-                print("STATIC_ROOT IS NOT DEFINED according to Django.")
+            # Restart Gunicorn and Celery to apply all changes
+            echo "--- 6. Restarting services ---"
+            sudo systemctl restart gunicorn
+            sudo systemctl restart celery
 
-            print(f"STATIC_URL value is: {settings.STATIC_URL}")
-            print(f"STATICFILES_DIRS value is: {settings.STATICFILES_DIRS}")
-            print('--- End Diagnosis ---')
-            EOF
-            echo "---"
-            echo
-
-            echo "---"
-            echo "--- 5. ATTEMPTING THE ORIGINAL COMMAND (it will likely fail again) ---"
-            # Using --verbosity 2 to get more detailed output
-            python manage.py collectstatic --noinput --verbosity 2
-            echo "---"
-            echo
-
-            echo "--- Diagnostic script finished. ---"
-
-            # --- End of Diagnostic Script on EC2 ---
+            echo "--- Deployment finished successfully! ---"
           ENDSSH
