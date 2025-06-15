@@ -50,7 +50,7 @@ from django.views.decorators.csrf import csrf_exempt # We will remove this where
 from django.db import transaction # Import transaction
 import logging
 import time
-from webpush.models import SubscriptionInfo, PushInformation, Group
+# from webpush.models import SubscriptionInfo, PushInformation, Group
 
 
 
@@ -1415,60 +1415,60 @@ def verify_payment(request):
 
 
 
-@login_required
-def get_vapid_public_key(request):
-    """Returns the VAPID public key."""
-    public_key = settings.WEBPUSH_SETTINGS.get('VAPID_PUBLIC_KEY')
-    return JsonResponse({'public_key': public_key})
+# @login_required
+# def get_vapid_public_key(request):
+#     """Returns the VAPID public key."""
+#     public_key = settings.WEBPUSH_SETTINGS.get('VAPID_PUBLIC_KEY')
+#     return JsonResponse({'public_key': public_key})
 
 
 
 
 
-@login_required
-@csrf_exempt
-def subscribe_to_push(request):
-    """
-    Subscribes a user to push notifications.
-    This version uses the library's intended and simplest pattern.
-    """
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+# @login_required
+# @csrf_exempt
+# def subscribe_to_push(request):
+#     """
+#     Subscribes a user to push notifications.
+#     This version uses the library's intended and simplest pattern.
+#     """
+#     if request.method != 'POST':
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
-    try:
-        # 1. Get the subscription data
-        subscription_data = json.loads(request.body)
+#     try:
+#         # 1. Get the subscription data
+#         subscription_data = json.loads(request.body)
         
-        # 2. Get or create a Group for the user.
-        # The library is designed to send notifications to Groups.
-        # A "group" can just be one user. We'll name the group after the user's ID.
-        group, created = Group.objects.get_or_create(name=f"user_{request.user.id}")
+#         # 2. Get or create a Group for the user.
+#         # The library is designed to send notifications to Groups.
+#         # A "group" can just be one user. We'll name the group after the user's ID.
+#         group, created = Group.objects.get_or_create(name=f"user_{request.user.id}")
 
-        # 3. Create a PushInformation object and add it to the user's group
-        # This is the single step that creates the subscription and links it.
-        PushInformation.objects.create(
-            subscription_info=subscription_data,
-            group=group
-        )
+#         # 3. Create a PushInformation object and add it to the user's group
+#         # This is the single step that creates the subscription and links it.
+#         PushInformation.objects.create(
+#             subscription_info=subscription_data,
+#             group=group
+#         )
         
-        # We can also add the user directly if we want to use send_user_notification
-        # This part is slightly redundant if using groups, but provides flexibility
-        # and might be what send_user_notification looks for. Let's add it for safety.
-        # First, find the PushInformation object we just made.
-        push_info = PushInformation.objects.get(subscription_info=subscription_data)
+#         # We can also add the user directly if we want to use send_user_notification
+#         # This part is slightly redundant if using groups, but provides flexibility
+#         # and might be what send_user_notification looks for. Let's add it for safety.
+#         # First, find the PushInformation object we just made.
+#         push_info = PushInformation.objects.get(subscription_info=subscription_data)
         
-        SubscriptionInfo.objects.get_or_create(
-            user=request.user,
-            push_information=push_info
-        )
+#         SubscriptionInfo.objects.get_or_create(
+#             user=request.user,
+#             push_information=push_info
+#         )
 
-        return JsonResponse({'status': 'success', 'message': 'Subscription saved.'})
+#         return JsonResponse({'status': 'success', 'message': 'Subscription saved.'})
 
-    except Exception as e:
-        print(f"CRITICAL Error in subscribe_to_push: {e}")
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
+#     except Exception as e:
+#         print(f"CRITICAL Error in subscribe_to_push: {e}")
+#         import traceback
+#         traceback.print_exc()
+#         return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
     
 
 

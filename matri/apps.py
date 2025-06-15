@@ -12,4 +12,4 @@ class MatriConfig(AppConfig):
         This method is called when the app is ready.
         It's the correct place to import signals.
         """
-        import matri.signals  # This line is the only addition needed.
+        # import matri.signals  # This line is the only addition needed.

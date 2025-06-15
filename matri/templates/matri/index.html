@@ -1019,287 +1019,234 @@
     </footer>
 
     <script>
-        // Define global constants from Django
-        const DEFAULT_AVATAR_URL = "{% static 'matri/images/default_avatar.png' %}";
-        const CSRF_TOKEN = "{{ csrf_token }}";
-
-        // --- All Page Logic (UI, Animations, etc.) ---
-        document.addEventListener('DOMContentLoaded', function() {
-            // Smooth scrolling for navigation links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    const href = this.getAttribute('href');
-                    if (href.startsWith('#') && href.length > 1) {
-                        e.preventDefault();
-                        const targetElement = document.querySelector(href);
-                        if (targetElement) {
-                            const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - (document.querySelector('nav').offsetHeight + 10);
-                            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
-                        }
-                    }
-                });
-            });
-
-            // Navigation background change on scroll
-            const nav = document.querySelector('nav');
-            if (nav) {
-                window.addEventListener('scroll', function() {
-                    nav.style.background = (window.scrollY > 80) ? 'rgba(55, 0, 100, 0.98)' : 'rgba(75, 0, 130, 0.95)';
-                    nav.style.boxShadow = (window.scrollY > 80) ? '0 4px 15px rgba(0,0,0,0.2)' : 'none';
-                });
+    // --- Helper Function to get CSRF Token ---
+    // This is the standard, robust way to get the CSRF token for AJAX/Fetch requests.
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
+        }
+        return cookieValue;
+    }
+    // We get the token once and store it in a constant for reuse.
+    const CSRF_TOKEN = getCookie('csrftoken');
+    const DEFAULT_AVATAR_URL = "{% static 'matri/images/default_avatar.png' %}";
 
-            // Intersection Observer for animations
-            const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
-            const elementsToAnimate = document.querySelectorAll('.feature-card, .stat-item, .profile-card, .section-title, .cta-section .btn, footer .footer-section');
-            const animationObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-            elementsToAnimate.forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'opacity 0.7s ease-out, transform 0.7s ease-out';
-                animationObserver.observe(el);
-            });
-
-            // Bible quotes carousel
-            const quotes = document.querySelectorAll('.bible-quote');
-            if (quotes.length > 0) {
-                let currentQuoteIndex = 0;
-                quotes[0].classList.add('active');
-                setInterval(() => {
-                    quotes[currentQuoteIndex].classList.remove('active');
-                    currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
-                    quotes[currentQuoteIndex].classList.add('active');
-                }, 7000);
-            }
-
-            // --- In-App Notification Bell Logic ---
-            const notificationBell = document.getElementById('notification-bell');
-            const notificationDropdown = document.getElementById('notification-dropdown');
-            if (notificationBell && notificationDropdown) {
-                notificationBell.addEventListener('click', e => {
+    // --- All Page Logic (UI, Animations, etc.) ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href.startsWith('#') && href.length > 1) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    const isShown = notificationDropdown.classList.toggle('show');
-                    if (isShown) loadNotifications();
-                });
-                document.addEventListener('click', e => {
-                    if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
-                        notificationDropdown.classList.remove('show');
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                        const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - (document.querySelector('nav').offsetHeight + 10);
+                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
                     }
-                });
-                setInterval(checkNotificationCount, 30000);
-                checkNotificationCount();
-            }
+                }
+            });
         });
 
-        function checkNotificationCount() {
-            fetch("{% url 'get_notifications' %}")
-                .then(response => response.json())
-                .then(data => {
-                    const notificationCountSpan = document.getElementById('notification-count');
-                    if (data.count > 0) {
-                        notificationCountSpan.textContent = data.count > 9 ? '9+' : data.count;
-                        notificationCountSpan.classList.remove('hidden');
-                    } else {
-                        notificationCountSpan.classList.add('hidden');
-                    }
-                })
-                .catch(error => console.error("Error checking notification count:", error));
+        // Navigation background change on scroll
+        const nav = document.querySelector('nav');
+        if (nav) {
+            window.addEventListener('scroll', function() {
+                nav.style.background = (window.scrollY > 80) ? 'rgba(55, 0, 100, 0.98)' : 'rgba(75, 0, 130, 0.95)';
+                nav.style.boxShadow = (window.scrollY > 80) ? '0 4px 15px rgba(0,0,0,0.2)' : 'none';
+            });
         }
 
-        function loadNotifications() {
-            const notificationList = document.querySelector('#notification-dropdown .notification-list');
-            notificationList.innerHTML = '<div class="notification-item-empty">Loading...</div>';
-            fetch("{% url 'get_notifications' %}")
-                .then(response => response.json())
-                .then(data => {
-                    notificationList.innerHTML = '';
-                    if (!data.notifications || data.notifications.length === 0) {
-                        notificationList.innerHTML = '<div class="notification-item-empty">No new notifications</div>';
-                        return;
-                    }
-                    data.notifications.forEach(n => {
-                        const itemLink = document.createElement('a');
-                        itemLink.className = 'notification-item';
-                        itemLink.href = n.click_action_url;
-                        itemLink.dataset.id = n.id;
-                        const pic = n.sender_profile_pic_url || DEFAULT_AVATAR_URL;
-                        const postPreview = n.post_preview_url ? `<img src="${n.post_preview_url}" alt="Post preview" class="notification-post-preview">` : '';
-                        itemLink.innerHTML = `
-                            <img src="${pic}" alt="Avatar" class="notification-sender-avatar">
-                            <div class="notification-content">
-                                <div class="notification-message">${n.message_html}</div>
-                                <div class="notification-time">${n.created_at}</div>
-                            </div>
-                            ${postPreview}`;
-                        itemLink.addEventListener('click', () => markNotificationAsRead(n.id));
-                        notificationList.appendChild(itemLink);
-                    });
-                    document.getElementById('notification-count').classList.add('hidden');
-                    addMarkAllReadFooter();
-                })
-                .catch(error => {
-                    console.error("Error loading notifications:", error);
-                    notificationList.innerHTML = '<div class="notification-item-empty">Could not load.</div>';
-                });
+        // Intersection Observer for animations
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const elementsToAnimate = document.querySelectorAll('.feature-card, .stat-item, .profile-card, .section-title, .cta-section .btn, footer .footer-section');
+        const animationObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target); // Optional: stop observing after animation
+                }
+            });
+        }, observerOptions);
+        elementsToAnimate.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.7s ease-out, transform 0.7s ease-out';
+            animationObserver.observe(el);
+        });
+
+        // Bible quotes carousel
+        const quotes = document.querySelectorAll('.bible-quote');
+        if (quotes.length > 0) {
+            let currentQuoteIndex = 0;
+            quotes[0].classList.add('active');
+            setInterval(() => {
+                quotes[currentQuoteIndex].classList.remove('active');
+                currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+                quotes[currentQuoteIndex].classList.add('active');
+            }, 7000);
         }
-        
-        function addMarkAllReadFooter() {
-            const dropdown = document.getElementById('notification-dropdown');
-            let footer = dropdown.querySelector('.notification-footer');
-            if (!footer) {
-                footer = document.createElement('div');
-                footer.className = 'notification-footer';
-                dropdown.appendChild(footer);
-            }
-            footer.innerHTML = `<button class="notification-mark-all-read">Mark all as read</button>`;
-            footer.querySelector('.notification-mark-all-read').addEventListener('click', e => {
+
+        // --- In-App Notification Bell Logic ---
+        const notificationBell = document.getElementById('notification-bell');
+        const notificationDropdown = document.getElementById('notification-dropdown');
+        if (notificationBell && notificationDropdown) {
+            notificationBell.addEventListener('click', e => {
                 e.preventDefault();
                 e.stopPropagation();
-                markAllNotificationsAsRead();
+                const isShown = notificationDropdown.classList.toggle('show');
+                if (isShown) {
+                    loadNotifications();
+                }
             });
-        }
-
-        function markNotificationAsRead(notificationId) {
-            fetch(`/mark_notification_read/${notificationId}/`, { method: 'POST', headers: { 'X-CSRFToken': CSRF_TOKEN }})
-                .catch(error => console.error("Error marking notification read:", error));
-        }
-
-        function markAllNotificationsAsRead() {
-            fetch("{% url 'mark_all_notifications_read' %}", { method: 'POST', headers: { 'X-CSRFToken': CSRF_TOKEN }})
-                .then(response => response.json())
-                .then(data => { if (data.status === 'success') loadNotifications(); })
-                .catch(error => console.error("Error marking all notifications read:", error));
-        }
-        
-        // --- PWA & Push Notification Logic ---
-
-        // Helper function to convert VAPID key
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-            const rawData = window.atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-
-        // The main function to subscribe a user
-        async function subscribeUserToPush() {
-            try {
-                const registration = await navigator.serviceWorker.ready;
-                
-                // Check if already subscribed
-                const existingSubscription = await registration.pushManager.getSubscription();
-                if (existingSubscription) {
-                    console.log('User is already subscribed.');
-                    return;
+            document.addEventListener('click', e => {
+                if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                    notificationDropdown.classList.remove('show');
                 }
-                
-                // Get VAPID public key from our server
-                const response = await fetch("{% url 'get_vapid_key' %}");
-                const data = await response.json();
-                if (!data.public_key) {
-                    console.error('VAPID public key not found on server.');
-                    return;
-                }
-                const applicationServerKey = urlBase64ToUint8Array(data.public_key);
-                
-                // Subscribe the user
-                const subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: applicationServerKey
-                });
-                console.log('User subscribed successfully.');
-                
-                // Send subscription to the backend
-                await fetch("{% url 'subscribe_to_push' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': CSRF_TOKEN
-                    },
-                    body: JSON.stringify(subscription)
-                });
-                console.log('Subscription details sent to server.');
-
-            } catch (error) {
-                console.error('Failed to subscribe user to push notifications:', error);
-            }
+            });
+            // Only check for notifications if the user is logged in
+            {% if user.is_authenticated %}
+                setInterval(checkNotificationCount, 30000); // Check every 30 seconds
+                checkNotificationCount(); // Check immediately on page load
+            {% endif %}
         }
-        
-        // This function initiates the whole process
-        async function initializePushNotifications() {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                console.warn('Push messaging is not supported by this browser.');
-                return;
-            }
+    });
 
-            // If permission is already granted, just subscribe
-            if (Notification.permission === 'granted') {
-                console.log('Permission for notifications is already granted.');
-                subscribeUserToPush();
-                return;
-            }
-
-            // If permission is denied, do nothing
-            if (Notification.permission === 'denied') {
-                console.log('Permission for notifications has been denied.');
-                return;
-            }
-
-            // If permission hasn't been asked yet ('default'), prompt the user
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    console.log('Permission for notifications was granted.');
-                    await subscribeUserToPush();
+    function checkNotificationCount() {
+        fetch("{% url 'get_notifications' %}")
+            .then(response => response.json())
+            .then(data => {
+                const notificationCountSpan = document.getElementById('notification-count');
+                if (data.count > 0) {
+                    notificationCountSpan.textContent = data.count > 9 ? '9+' : data.count;
+                    notificationCountSpan.classList.remove('hidden');
                 } else {
-                    console.log('Permission for notifications was denied.');
+                    notificationCountSpan.classList.add('hidden');
                 }
-            } catch (error) {
-                console.error('Error requesting notification permission:', error);
-            }
-        }
+            })
+            .catch(error => console.error("Error checking notification count:", error));
+    }
 
-        // Register the service worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register("{% url 'service_worker' %}")
-                    .then(registration => {
-                        console.log('✅ Service Worker registered with scope:', registration.scope);
-                        
-                        // --- INITIATE PUSH SUBSCRIPTION FLOW ---
-                        // This block will only run for logged-in users with a profile.
-                        {% if user.is_authenticated and user_has_profile %}
-                            initializePushNotifications();
-                        {% endif %}
-                    })
-                    .catch(error => {
-                        console.error('❌ Service Worker registration failed:', error);
+    function loadNotifications() {
+        const notificationList = document.querySelector('#notification-dropdown .notification-list');
+        notificationList.innerHTML = '<div class="notification-item-empty">Loading...</div>';
+
+        fetch("{% url 'get_notifications' %}")
+            .then(response => response.json())
+            .then(data => {
+                notificationList.innerHTML = ''; // Clear previous content
+                const dropdown = document.getElementById('notification-dropdown');
+                let footer = dropdown.querySelector('.notification-footer');
+                if (footer) footer.remove(); // Remove old footer
+
+                if (!data.notifications || data.notifications.length === 0) {
+                    notificationList.innerHTML = '<div class="notification-item-empty">No new notifications</div>';
+                    return;
+                }
+
+                data.notifications.forEach(n => {
+                    const itemLink = document.createElement('a');
+                    itemLink.className = 'notification-item';
+                    itemLink.href = n.click_action_url;
+                    itemLink.dataset.id = n.id;
+                    const pic = n.sender_profile_pic_url || DEFAULT_AVATAR_URL;
+                    const postPreview = n.post_preview_url ? `<img src="${n.post_preview_url}" alt="Post preview" class="notification-post-preview">` : '';
+                    itemLink.innerHTML = `
+                        <img src="${pic}" alt="Avatar" class="notification-sender-avatar">
+                        <div class="notification-content">
+                            <div class="notification-message">${n.message_html}</div>
+                            <div class="notification-time">${n.created_at}</div>
+                        </div>
+                        ${postPreview}`;
+                    
+                    itemLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        markNotificationAsRead(n.id);
+                        window.location.href = n.click_action_url;
                     });
-            });
-        }
-        
-        // Logic for PWA install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // You can optionally show a custom install button here
-            // const installContainer = document.getElementById('install-container');
-            // if(installContainer) installContainer.style.display = 'block';
-        });
+                    notificationList.appendChild(itemLink);
+                });
 
-    </script>
+                document.getElementById('notification-count').classList.add('hidden');
+                addMarkAllReadFooter();
+            })
+            .catch(error => {
+                console.error("Error loading notifications:", error);
+                notificationList.innerHTML = '<div class="notification-item-empty">Could not load notifications.</div>';
+            });
+    }
+
+    function addMarkAllReadFooter() {
+        const dropdown = document.getElementById('notification-dropdown');
+        let footer = document.createElement('div');
+        footer.className = 'notification-footer';
+        footer.innerHTML = `<button class="notification-mark-all-read">Mark all as read</button>`;
+        dropdown.appendChild(footer);
+        
+        footer.querySelector('.notification-mark-all-read').addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            markAllNotificationsAsRead();
+        });
+    }
+
+    function markNotificationAsRead(notificationId) {
+        // This is a POST request, so it MUST include the CSRF token.
+        fetch(`/mark_notification_read/${notificationId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN }
+        }).catch(error => console.error("Error marking notification read:", error));
+    }
+
+    function markAllNotificationsAsRead() {
+        // This is also a POST request and needs the CSRF token.
+        fetch("{% url 'mark_all_notifications_read' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                loadNotifications(); // Reload the list to show it's empty
+            }
+        })
+        .catch(error => console.error("Error marking all notifications read:", error));
+    }
+
+    // --- PWA Service Worker Registration (No Push Logic) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register("{% url 'service_worker' %}")
+                .then(registration => {
+                    console.log('✅ Service Worker for PWA Caching registered with scope:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ Service Worker registration failed:', error);
+                });
+        });
+    }
+
+    // --- PWA Install Prompt Logic (Remains the same) ---
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // You can optionally show a custom install button here.
+        // e.g., const installButton = document.getElementById('install-btn');
+        // if(installButton) installButton.style.display = 'block';
+    });
+</script>
 </body>
 </html>

@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'webpush',
     'matri',
 ]
 
@@ -154,11 +153,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 
-WEBPUSH_SETTINGS = {
-    "VAPID_PUBLIC_KEY": "BFlOgyScRShsYMhMA49dZ7AK6_ArPpJF1m92HlbQaiRwE8v0Lmz8j3BJaibWxUb1ovBbT8HGHMuq7nvKmHjlKL0",
-    "VAPID_PRIVATE_KEY": "P-XMfIxx8aJMO8VTfhXr_5aWNI7uYRigQzNFp12i_Yw",
-    "VAPID_ADMIN_EMAIL": "athul.23pmc116@mariancollege.org" # Your admin email
-}
+# WEBPUSH_SETTINGS = {
+#     "VAPID_PUBLIC_KEY": "BFlOgyScRShsYMhMA49dZ7AK6_ArPpJF1m92HlbQaiRwE8v0Lmz8j3BJaibWxUb1ovBbT8HGHMuq7nvKmHjlKL0",
+#     "VAPID_PRIVATE_KEY": "P-XMfIxx8aJMO8VTfhXr_5aWNI7uYRigQzNFp12i_Yw",
+#     "VAPID_ADMIN_EMAIL": "athul.23pmc116@mariancollege.org" # Your admin email
+# }
 
 # Add this line to tell webpush where to find the user model
 AUTH_USER_MODEL = 'auth.User'
