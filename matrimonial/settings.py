@@ -34,7 +34,9 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
+# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = ['*']
 
 
 dotenv_path = BASE_DIR / '.env' # Add this
@@ -84,6 +86,15 @@ TEMPLATES = [
         },
     },
 ]
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://pentecostmatrimony.co.in',
+    'https://www.pentecostmatrimony.co.in',
+]
+
+
 
 
 
