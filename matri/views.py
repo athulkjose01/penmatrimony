@@ -51,6 +51,7 @@ from django.db import transaction # Import transaction
 import logging
 import time
 from webpush.models import SubscriptionInfo, PushInformation, Group
+from firebase_admin import auth
 
 
 
@@ -63,6 +64,7 @@ def generate_username():
         suffix = ''.join(random.choices(string.digits, k=4))
         username = base + suffix
     return username
+
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -155,6 +157,7 @@ def login_view(request):
         except Exception as e: 
             context['error'] = f"An authentication error occurred. Please try again."
     return render(request, 'matri/login.html', context)
+
 
 
 @login_required

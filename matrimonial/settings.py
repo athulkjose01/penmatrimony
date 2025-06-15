@@ -16,6 +16,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 from decouple import config
 
+
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -250,3 +254,7 @@ EMAIL_USE_TLS = True
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
+
+
+
+
