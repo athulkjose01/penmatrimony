@@ -164,6 +164,7 @@
             font-weight: 500;
             padding: 5px 10px;
             border-radius: 4px;
+            position: relative;
         }
 
         .nav-links a:hover, .nav-links a.active {
@@ -171,18 +172,23 @@
             background-color: rgba(255,255,255,0.1);
         }
         
-        /* NEW STYLE FOR MESSAGE COUNT BADGE */
+        /* UPDATED STYLE FOR MESSAGE COUNT BADGE */
         .nav-count-badge {
-            display: inline-block;
+            position: absolute;
+            top: -8px; /* Position above the link */
+            right: -5px; /* Position to the right edge of the link */
             background-color: #3498db; /* Blue for messages */
             color: white;
-            border-radius: 10px;
-            padding: 1px 7px;
+            border-radius: 50%; /* Makes it a circle */
+            width: 20px;
+            height: 20px;
             font-size: 11px;
             font-weight: bold;
-            margin-left: 6px;
-            vertical-align: middle;
-            line-height: 1.4; /* Helps with vertical centering */
+            display: flex; /* Used to center the number */
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #4B0082; /* Border matches nav background for a clean look */
+            line-height: 1; /* Reset line-height */
         }
 
         .nav-links .auth-link { /* Special style for login/logout if needed */
@@ -795,8 +801,8 @@
             <ul class="nav-links">
                 {% if user.is_authenticated %}
                     {% if user_has_profile %}
+                        <li><a href="{% url 'search_users' %}" class="{% if request.resolver_match.url_name == 'search_users' %}active{% endif %}"><i class="fas fa-search"></i></a></li>
                         <li><a href="{% url 'view_user_profile' %}" class="{% if request.resolver_match.url_name == 'view_user_profile' %}active{% endif %}"><i class="fas fa-user"></i> My Profile</a></li>
-                        <li><a href="{% url 'search_users' %}" class="{% if request.resolver_match.url_name == 'search_users' %}active{% endif %}"><i class="fas fa-search"></i> Search</a></li>
                         <li>
                             <a href="{% url 'chat_room_list' %}" class="{% if request.resolver_match.url_name == 'chat_room_list' %}active{% endif %}">
                                 <i class="fas fa-comments"></i> Messages
