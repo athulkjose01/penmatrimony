@@ -93,19 +93,19 @@
             padding: 40px 20px;
         }
 
-        .registration-card { /* Renamed from login-card */
+        .registration-card {
             background: white;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(75,0,130,0.08);
             border: 1px solid rgba(75, 0, 130, 0.1);
             padding: 30px 35px;
             width: 100%;
-            max-width: 500px; /* Can be wider for more fields */
+            max-width: 500px;
             position: relative;
             animation: fadeInUp 0.6s ease-out;
         }
 
-        .registration-card::before { /* Top accent border */
+        .registration-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -141,7 +141,7 @@
             font-size: 1rem;
         }
 
-        /* Messages (Django) - styled like index.html */
+        /* Messages (Django) */
         .django-messages {
             list-style: none;
             padding: 0;
@@ -161,10 +161,9 @@
         .django-messages li.info { background-color: #17a2b8; }
         .django-messages li.warning { background-color: #ffc107; color: #333; }
         
-
         /* Form Styles */
-        .form-row { /* Retaining for structure */
-            margin-bottom: 18px; /* Adjusted spacing */
+        .form-row {
+            margin-bottom: 18px;
         }
 
         .form-row label {
@@ -180,8 +179,7 @@
             color: #8A2BE2; /* BlueViolet for icons */
         }
 
-
-        .form-control { /* Retaining for input styling */
+        .form-control {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ccc;
@@ -189,7 +187,7 @@
             font-size: 0.95rem;
             font-family: 'Georgia', serif;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-sizing: border-box; /* Added from original */
+            box-sizing: border-box;
         }
 
         .form-control:focus {
@@ -208,7 +206,7 @@
             align-items: center;
             text-align: center;
             margin: 25px 0;
-            color: #6A0DAD; /* A slightly different purple */
+            color: #6A0DAD;
         }
         
         .section-divider::before,
@@ -227,12 +225,51 @@
 
         .password-requirements {
             font-size: 0.85rem;
-            color: #666; /* Darker gray for better readability */
+            color: #666;
             margin-top: 6px;
             font-style: italic;
         }
 
-        /* Button Styles from index.html */
+        /* --- NEW STYLES for Agreement Checkbox --- */
+        .form-agreement {
+            display: flex;
+            align-items: flex-start; /* Align to top for multi-line text */
+            gap: 10px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        .form-agreement input[type="checkbox"] {
+            margin-top: 4px; /* Align checkbox with the first line of text */
+            flex-shrink: 0; /* Prevent checkbox from shrinking */
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .agreement-label {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: normal; /* Override default bold label style */
+            display: inline !important; /* Override block display */
+            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        .agreement-label a {
+            color: #4B0082; /* Indigo */
+            text-decoration: underline;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .agreement-label a:hover {
+            color: #8A2BE2; /* BlueViolet */
+        }
+        /* --- END NEW STYLES --- */
+
+
+        /* Button Styles */
         .btn {
             padding: 12px 25px;
             text-decoration: none;
@@ -254,7 +291,7 @@
             color: white;
         }
         .btn-primary:hover {
-            background: linear-gradient(45deg, #8A2BE2, #9370DB); /* Lighter purple gradient */
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
@@ -274,22 +311,22 @@
         }
 
         .login-link-container a {
-            color: #4B0082; /* Indigo */
+            color: #4B0082;
             text-decoration: none;
             font-weight: 600;
         }
         .login-link-container a:hover {
-            color: #8A2BE2; /* BlueViolet */
+            color: #8A2BE2;
             text-decoration: underline;
         }
         .login-link-container i {
-            color: #DDA0DD; /* Plum for icon */
+            color: #DDA0DD;
         }
 
 
-        /* Footer from index.html */
+        /* Footer */
         footer {
-            background: #3a2d4c; /* Dark Purple/Brownish */
+            background: #3a2d4c;
             color: #e0e0e0;
             padding: 40px 0 20px;
             text-align: center;
@@ -308,7 +345,7 @@
         .footer-bottom .bible-verse {
             font-style: italic;
             opacity: 0.8;
-            color: #DDA0DD; /* Plum */
+            color: #DDA0DD;
         }
 
 
@@ -337,13 +374,14 @@
     </style>
     <script>
         function validateForm() {
-            const nameInput = document.forms["regForm"]["name"]; // Changed from "username" to "name"
+            const nameInput = document.forms["regForm"]["name"];
             const emailInput = document.forms["regForm"]["email"];
             const phoneInput = document.forms["regForm"]["phone"];
             const passwordInput = document.forms["regForm"]["password"];
             const confirmPasswordInput = document.forms["regForm"]["confirm_password"];
+            const termsCheckbox = document.forms["regForm"]["terms_agree"]; // Get the checkbox
 
-            // Name validation (ensure not empty)
+            // Name validation
             if (nameInput && nameInput.value.trim() === "") {
                 alert("Please enter your name.");
                 nameInput.focus();
@@ -362,13 +400,12 @@
                 return false;
             }
 
-            // Phone number validation (ensure not empty and basic format)
+            // Phone number validation
             if (phoneInput && phoneInput.value.trim() === "") {
                 alert("Please enter your phone number.");
                 phoneInput.focus();
                 return false;
             }
-            // Match backend logic for 10-15 digits (excluding non-digits for length check)
             const phoneDigits = phoneInput.value.replace(/\D/g, ''); 
             if (phoneDigits.length < 10 || phoneDigits.length > 15) {
                 alert("Phone number should contain 10 to 15 digits.");
@@ -376,32 +413,36 @@
                 return false;
             }
             
-            // Password validation (ensure not empty)
-            if (passwordInput && passwordInput.value === "") { // Check for empty string
+            // Password validation
+            if (passwordInput && passwordInput.value === "") {
                 alert("Please enter a password.");
                 passwordInput.focus();
                 return false;
             }
-            // Basic password strength (example: at least 8 chars)
             if (passwordInput && passwordInput.value.length < 8) {
                 alert("Password must be at least 8 characters long.");
                 passwordInput.focus();
                 return false;
             }
 
-            // Confirm Password validation (ensure not empty)
+            // Confirm Password validation
              if (confirmPasswordInput && confirmPasswordInput.value === "") {
                 alert("Please confirm your password.");
                 confirmPasswordInput.focus();
                 return false;
             }
-            // Password match
             if (passwordInput && confirmPasswordInput && passwordInput.value !== confirmPasswordInput.value) {
                 alert("Passwords do not match. Please re-enter.");
                 confirmPasswordInput.focus();
                 return false;
             }
 
+            // --- NEW: Terms and Conditions Checkbox Validation ---
+            if (termsCheckbox && !termsCheckbox.checked) {
+                alert("You must agree to the Terms & Conditions and Privacy Policy to register.");
+                termsCheckbox.focus();
+                return false;
+            }
 
             return true; // Form will submit
         }
@@ -455,8 +496,8 @@
                 </div>
                 
                 <div class="form-row">
-                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label> <!-- Removed (Optional) -->
-                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g., +91 1234567890" required> <!-- Added required attribute -->
+                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g., +91 1234567890" required>
                 </div>
                 
                 <div class="section-divider">
@@ -473,6 +514,17 @@
                     <label for="confirm_password"><i class="fas fa-check-circle"></i> Confirm Password</label>
                     <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter your password" required>
                 </div>
+
+                <!-- --- NEW: Terms and Conditions Section --- -->
+                <div class="form-agreement">
+                    <input type="checkbox" id="terms_agree" name="terms_agree" required>
+                    <label for="terms_agree" class="agreement-label">
+                        I have read and agree to the 
+                        <a href="{% url 'terms_and_conditions' %}" target="_blank">Terms & Conditions</a> and 
+                        <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a>.
+                    </label>
+                </div>
+                <!-- --- END: Terms and Conditions Section --- -->
                 
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-heart" style="margin-right: 8px;"></i> Create Account

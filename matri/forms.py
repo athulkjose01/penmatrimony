@@ -11,7 +11,7 @@ from django.contrib.auth.forms import SetPasswordForm
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile # Links to the UserProfile MODEL
-        exclude = ['user', 'religion', 'category', 'is_profile_in_index', 'is_premium_member']
+        exclude = ['user', 'religion', 'category', 'Monthly_income', 'is_profile_in_index', 'is_premium_member']
         widgets = {
             'date_of_birth': forms.DateInput(
                 attrs={
