@@ -51,7 +51,6 @@ from django.db import transaction # Import transaction
 import logging
 import time
 from webpush.models import SubscriptionInfo, PushInformation, Group
-from firebase_admin import auth
 
 
 
