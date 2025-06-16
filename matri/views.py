@@ -1004,11 +1004,11 @@ def notification_list_view(request):
     This is a full page, not an API.
     """
     # Get all notifications for the user, newest first.
-    notifications = Notification.objects.filter(recipient=request.user)
+    notifications = Notification.objects.filter(recipient=request.user, is_read=False)
 
     # Mark all unread notifications as read.
     # We do this after fetching so we can still show which ones were new.
-    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    #Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
 
     context = {
         'page_title': 'Your Notifications',
