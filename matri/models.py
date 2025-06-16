@@ -272,47 +272,42 @@ class Notification(models.Model):
     def __str__(self):
         return f"Notification for {self.recipient.username}: {self.text}"
 
-    # --- NEW LOGIC: MODEL PROPERTIES ---
+    # --- MODEL PROPERTIES (Unchanged) ---
 
     @property
     def time_since(self):
-        """Returns a human-readable time since creation (e.g., '5 minutes ago')."""
         return naturaltime(self.created_at)
 
     @property
     def sender_name(self):
-        """Safely returns the sender's full name or a default."""
         if self.sender_profile:
             return self.sender_profile.full_name
         return "A user"
 
     @property
     def sender_avatar_url(self):
-        """Safely returns the sender's avatar URL or a default."""
         if self.sender_profile and self.sender_profile.profile_picture:
             return self.sender_profile.profile_picture.url
-        return '/static/images/default_avatar.png' # Make sure you have this default image
+        return '/static/images/default_avatar.png' 
 
     @property
     def related_image_url(self):
-        """Returns the image URL for 'like' notifications, otherwise None."""
         if self.notification_type == 'like' and self.post and self.post.image:
             return self.post.image.url
         return None
 
+    # --- UPDATED LINK PROPERTY ---
     @property
     def link(self):
         """
-        Returns the correct URL for the notification. This is the most robust part.
-        It will not crash if a URL cannot be found.
+        Returns the correct URL for the notification.
+        "Like" notifications now also point to the sender's profile.
         """
         try:
-            if self.notification_type == 'like':
-                # Link to the post feed where the post is visible
-                return reverse('post_feed')
-            
-            elif self.notification_type in ['interest_sent', 'interest_accepted']:
-                # Link to the sender's profile
+            # --- THIS IS THE KEY CHANGE ---
+            # If the notification is a like, interest sent, or interest accepted,
+            # the link should go to the sender's profile.
+            if self.notification_type in ['like', 'interest_sent', 'interest_accepted']:
                 if self.sender_profile:
                     return reverse('view_other_user_profile', args=[self.sender_profile.id])
             
