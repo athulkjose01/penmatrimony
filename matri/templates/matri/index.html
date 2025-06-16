@@ -946,20 +946,29 @@
     }
     const CSRF_TOKEN = getCookie('csrftoken');
 
-    // --- Main Logic on Page Load ---
+   // --- Main Logic on Page Load ---
     document.addEventListener('DOMContentLoaded', function() {
-        // ALL NOTIFICATION DROPDOWN LISTENERS HAVE BEEN REMOVED.
-        // The notification bell is now a simple link and needs no JavaScript.
+        
+        // =========================================================================
+        // === NEW: "EXIT ON BACK" LOGIC FOR THE HOMEPAGE ==========================
+        // =========================================================================
+        // This code only runs if the current page is the index/homepage.
+        {% if request.resolver_match.url_name == 'index' %}
+            // 1. We add a "dummy" entry into the browser's history right after the homepage loads.
+            //    The user is on the homepage, but the history stack now looks like: [..., HomePage, DummyPage]
+            history.pushState({ page: "dummy" }, "dummy", window.location.href);
 
-        // --- Start checking for UNREAD MESSAGE updates if the user is logged in ---
-        {% if user.is_authenticated and user.has_profile %}
-            // Initial check for messages right away on page load
-            checkUnreadMessages();
-
-            // Then check periodically every 30 seconds for new messages
-            setInterval(checkUnreadMessages, 30000); 
+            // 2. We listen for the 'popstate' event, which fires when the user clicks the browser's back button.
+            window.addEventListener('popstate', function(event) {
+                // 3. When the user hits "back", they are moved from HomePage to our DummyPage.
+                //    This event fires, and we immediately tell the browser to go back one MORE time.
+                //    This second "back" action exits the site because the previous entry is external.
+                history.back();
+            });
         {% endif %}
-    });
+        // =========================================================================
+        // === END OF NEW LOGIC ====================================================
+        // =========================================================================
 
     // --- Function to check UNREAD MESSAGES (This is for the chat system and is kept) ---
     function checkUnreadMessages() {
