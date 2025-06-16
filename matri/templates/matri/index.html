@@ -15,6 +15,60 @@
     
     <!-- Your CSS styles are unchanged -->
     <style>
+        /* Toast notification styling */
+        #exit-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+            backdrop-filter: blur(5px);
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; bottom: 0; }
+            to { opacity: 1; bottom: 30px; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; bottom: 30px; }
+            to { opacity: 0; bottom: 0; }
+        }
+        
+        #exit-toast.show {
+            display: block;
+        }
+        
+        #exit-toast.hide {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+        
+        /* Countdown circle */
+        .countdown-circle {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e74c3c;
+            color: white;
+            text-align: center;
+            line-height: 24px;
+            margin-left: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -925,11 +979,19 @@
         </div>
     </footer>
 
+
+     <!-- Exit Toast Notification -->
+    <div id="exit-toast">
+        <i class="fas fa-sign-out-alt"></i> Press back again to exit
+        <span id="countdown" class="countdown-circle">3</span>
+    </div>
+
     <!-- ==================== SCRIPT SECTION (UPDATED) ==================== -->
     <!-- THE FIX IS HERE: ADDING THE OPENING <script> TAG -->
          <!-- ==================== SCRIPT SECTION (SERVER-SIDE NOTIFICATION METHOD) ==================== -->
+        <!-- ==================== SCRIPT SECTION (ROBUST EXIT-ON-BACK METHOD) ==================== -->
     <script>
-    // --- Helper Function to get CSRF Token (Remains for other site functions) ---
+    // --- Helper Function to get CSRF Token (Unchanged) ---
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -946,39 +1008,134 @@
     }
     const CSRF_TOKEN = getCookie('csrftoken');
 
-   // --- Main Logic on Page Load ---
+    // --- Main Logic on Page Load ---
     document.addEventListener('DOMContentLoaded', function() {
         
         // =========================================================================
-        // === NEW: "EXIT ON BACK" LOGIC FOR THE HOMEPAGE ==========================
+        // === NEW: ROBUST "EXIT ON BACK" LOGIC FOR THE HOMEPAGE ===================
         // =========================================================================
         // This code only runs if the current page is the index/homepage.
         {% if request.resolver_match.url_name == 'index' %}
-            // 1. We add a "dummy" entry into the browser's history right after the homepage loads.
-            //    The user is on the homepage, but the history stack now looks like: [..., HomePage, DummyPage]
-            history.pushState({ page: "dummy" }, "dummy", window.location.href);
-
-            // 2. We listen for the 'popstate' event, which fires when the user clicks the browser's back button.
+            let backPressed = false;
+            let exitTimer = null;
+            let countdownValue = 3;
+            const exitToast = document.getElementById('exit-toast');
+            const countdownElement = document.getElementById('countdown');
+            
+            // Initialize history state
+            history.replaceState({ isHome: true }, '');
+            history.pushState({ isHome: false }, '');
+            
+            // Handle back button press
             window.addEventListener('popstate', function(event) {
-                // 3. When the user hits "back", they are moved from HomePage to our DummyPage.
-                //    This event fires, and we immediately tell the browser to go back one MORE time.
-                //    This second "back" action exits the site because the previous entry is external.
-                history.back();
+                if (event.state && event.state.isHome) {
+                    // Prevent default back behavior
+                    event.preventDefault();
+                    
+                    if (backPressed) {
+                        // Second back press - exit the site
+                        tryToExitApp();
+                    } else {
+                        // First back press - show exit toast
+                        backPressed = true;
+                        showExitToast();
+                        
+                        // Reset after 3 seconds
+                        resetBackPress(3000);
+                    }
+                    
+                    // Push a new state to maintain our position
+                    history.pushState({ isHome: false }, '');
+                }
             });
+            
+            // Prevent navigating away with back button on other pages
+            window.addEventListener('beforeunload', function(e) {
+                if (backPressed) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+            
+            // Function to show the exit toast with countdown
+            function showExitToast() {
+                countdownValue = 3;
+                countdownElement.textContent = countdownValue;
+                exitToast.classList.remove('hide');
+                exitToast.classList.add('show');
+                
+                // Start countdown
+                const countdownInterval = setInterval(() => {
+                    countdownValue--;
+                    countdownElement.textContent = countdownValue;
+                    
+                    if (countdownValue <= 0) {
+                        clearInterval(countdownInterval);
+                        hideExitToast();
+                    }
+                }, 1000);
+            }
+            
+            // Function to hide the exit toast
+            function hideExitToast() {
+                exitToast.classList.remove('show');
+                exitToast.classList.add('hide');
+                
+                // Remove hide class after animation completes
+                setTimeout(() => {
+                    exitToast.classList.remove('hide');
+                }, 300);
+            }
+            
+            // Function to reset the back press state
+            function resetBackPress(timeout = 3000) {
+                if (exitTimer) clearTimeout(exitTimer);
+                exitTimer = setTimeout(() => {
+                    backPressed = false;
+                    hideExitToast();
+                }, timeout);
+            }
+            
+            // Function to attempt to exit the app
+            function tryToExitApp() {
+                // Try to close the window (works when opened by script)
+                try {
+                    window.close();
+                } catch (e) {
+                    console.log("Window.close() not supported");
+                }
+                
+                // For mobile browsers - navigate to a blank page
+                window.location.href = 'about:blank';
+                
+                // For PWAs - attempt to minimize (not standard, but may work on some devices)
+                if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+                    // This is a PWA - try to simulate going to home screen
+                    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#f8f9fa;"><h2 style="color:#6c757d;">Return to home screen</h2></div>';
+                    setTimeout(() => {
+                        window.location.href = 'about:blank';
+                    }, 500);
+                }
+            }
         {% endif %}
         // =========================================================================
         // === END OF NEW LOGIC ====================================================
         // =========================================================================
 
-    // --- Function to check UNREAD MESSAGES (This is for the chat system and is kept) ---
+
+        // --- Start checking for UNREAD MESSAGE updates if the user is logged in ---
+        {% if user.is_authenticated %}
+            checkUnreadMessages();
+            setInterval(checkUnreadMessages, 30000); 
+        {% endif %}
+    });
+
+    // --- Function to check UNREAD MESSAGES (Unchanged) ---
     function checkUnreadMessages() {
         fetch("{% url 'get_unread_message_count' %}")
             .then(response => {
                 if (!response.ok) {
-                    // Don't log an error if the user is simply navigating away
-                    if (response.status !== 0) {
-                        console.error('Network response was not ok for messages.');
-                    }
+                    if (response.status !== 0) console.error('Network response was not ok for messages.');
                     return;
                 }
                 return response.json();
@@ -987,12 +1144,9 @@
                 if (!data) return;
                 const messageLink = document.querySelector('a[href="{% url 'chat_room_list' %}"]');
                 if (!messageLink) return;
-
                 let badge = messageLink.querySelector('.nav-count-badge');
                 const count = data.unread_count;
-
                 if (count > 0) {
-                    // If the badge doesn't exist, create it
                     if (!badge) {
                         badge = document.createElement('span');
                         badge.className = 'nav-count-badge';
@@ -1001,39 +1155,22 @@
                     badge.textContent = count;
                     badge.style.display = 'flex';
                 } else {
-                    // If the count is 0, hide the badge if it exists
-                    if (badge) {
-                        badge.style.display = 'none';
-                    }
+                    if (badge) badge.style.display = 'none';
                 }
             })
             .catch(error => {
-                // Ignore AbortError which happens on page navigation
-                if (error.name !== 'AbortError') {
-                    console.error("Error checking for unread messages:", error);
-                }
+                if (error.name !== 'AbortError') console.error("Error checking for unread messages:", error);
             });
     }
 
-    // --- ALL JAVASCRIPT FUNCTIONS FOR NOTIFICATIONS ARE GONE ---
-    // checkUnreadNotifications() has been removed.
-    // loadNotifications() has been removed.
-    // markAllNotificationsAsRead() has been removed.
-
-
-    // --- PWA LOGIC (Unchanged, keep this if you use it) ---
+    // --- PWA LOGIC (Unchanged) ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register("{% url 'service_worker' %}")
-                .then(registration => {
-                    console.log('✅ Service Worker registered');
-                })
-                .catch(error => {
-                    console.error('❌ Service Worker registration failed:', error);
-                });
+                .then(reg => console.log('✅ Service Worker registered'))
+                .catch(err => console.error('❌ Service Worker registration failed:', err));
         });
     }
-
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
