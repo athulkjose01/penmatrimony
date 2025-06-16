@@ -6,31 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account - Pentecost Matrimony</title>
     <link rel="manifest" href="{% static 'manifest.json' %}">
-  <meta name="theme-color" content="#000000">
-  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* --- ALL ORIGINAL STYLES FROM YOUR FIRST FILE --- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Georgia', serif;
             line-height: 1.6;
             color: #333;
-            background: linear-gradient(135deg, #f8f9ff 0%, #e8e8ff 100%); /* Light lavender gradient */
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8e8ff 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
         }
-
-        /* Navigation from index.html */
         nav {
-            background: rgba(75, 0, 130, 0.95); /* Indigo base */
+            background: rgba(75, 0, 130, 0.95);
             backdrop-filter: blur(10px);
             z-index: 1000;
             padding: 15px 0;
@@ -39,7 +37,6 @@
             top: 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -48,312 +45,74 @@
             align-items: center;
             padding: 0 20px;
         }
-
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
-        }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: bold; color: white; text-decoration: none; }
         .logo i { margin-right: 8px; }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 25px;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.3s ease, background-color 0.3s ease;
-            font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: #DDA0DD; /* Plum for hover */
-            background-color: rgba(255,255,255,0.1);
-        }
-         .nav-links .auth-link {
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-        .nav-links .auth-link:hover {
-             border-color: #DDA0DD;
-        }
-
-        /* Main Container for Registration Card */
-        .main-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-        }
-
-        .registration-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(75,0,130,0.08);
-            border: 1px solid rgba(75, 0, 130, 0.1);
-            padding: 30px 35px;
-            width: 100%;
-            max-width: 500px;
-            position: relative;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .registration-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: #4B0082; /* Indigo */
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
-
-        .card-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .divine-symbol {
-            font-size: 2.5rem;
-            color: #4B0082; /* Indigo */
-            margin-bottom: 15px;
-        }
-
-        .card-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            color: #4B0082; /* Indigo */
-            margin-bottom: 8px;
-        }
-
-        .card-header p {
-            color: #555;
-            font-style: italic;
-            font-size: 1rem;
-        }
-
-        /* Messages (Django) */
-        .django-messages {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 20px;
-        }
-        .django-messages li {
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            font-weight: 500;
-        }
+        .nav-links { display: flex; list-style: none; gap: 25px; }
+        .nav-links a { color: white; text-decoration: none; transition: color 0.3s ease, background-color 0.3s ease; font-weight: 500; padding: 5px 10px; border-radius: 4px; }
+        .nav-links a:hover, .nav-links a.active { color: #DDA0DD; background-color: rgba(255,255,255,0.1); }
+        .nav-links .auth-link { border: 1px solid rgba(255,255,255,0.5); }
+        .nav-links .auth-link:hover { border-color: #DDA0DD; }
+        .main-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .registration-card { background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(75,0,130,0.08); border: 1px solid rgba(75, 0, 130, 0.1); padding: 30px 35px; width: 100%; max-width: 500px; position: relative; animation: fadeInUp 0.6s ease-out; }
+        .registration-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #4B0082; border-top-left-radius: 15px; border-top-right-radius: 15px; }
+        .card-header { text-align: center; margin-bottom: 25px; }
+        .divine-symbol { font-size: 2.5rem; color: #4B0082; margin-bottom: 15px; }
+        .card-header h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #4B0082; margin-bottom: 8px; }
+        .card-header p { color: #555; font-style: italic; font-size: 1rem; }
+        .django-messages { list-style: none; padding: 0; margin-bottom: 20px; }
+        .django-messages li { padding: 15px 20px; margin-bottom: 10px; border-radius: 8px; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; font-weight: 500; }
         .django-messages li.success { background-color: #28a745; }
         .django-messages li.error { background-color: #dc3545; }
-        .django-messages li.info { background-color: #17a2b8; }
-        .django-messages li.warning { background-color: #ffc107; color: #333; }
-        
-        /* Form Styles */
-        .form-row {
-            margin-bottom: 18px;
-        }
+        .form-row { margin-bottom: 18px; }
+        .form-row label { display: block; margin-bottom: 8px; font-weight: 600; color: #4B0082; font-size: 1rem; font-family: 'Georgia', serif; }
+        .form-row label i { margin-right: 6px; color: #8A2BE2; }
+        .form-control { width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem; font-family: 'Georgia', serif; transition: border-color 0.3s ease, box-shadow 0.3s ease; box-sizing: border-box; }
+        .form-control:focus { outline: none; border-color: #4B0082; box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.15); }
+        .section-divider { display: flex; align-items: center; text-align: center; margin: 25px 0; color: #6A0DAD; }
+        .section-divider::before, .section-divider::after { content: ''; flex: 1; border-bottom: 1px solid #DDA0DD; }
+        .section-divider span { padding: 0 15px; font-size: 0.9rem; font-weight: 500; font-style: italic; }
+        .password-requirements { font-size: 0.85rem; color: #666; margin-top: 6px; font-style: italic; }
+        .form-agreement { display: flex; align-items: flex-start; gap: 10px; margin-top: 5px; margin-bottom: 20px; }
+        .form-agreement input[type="checkbox"] { margin-top: 4px; flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+        .agreement-label { font-size: 0.9rem; color: #555; font-weight: normal; display: inline !important; line-height: 1.5; cursor: pointer; }
+        .agreement-label a { color: #4B0082; text-decoration: underline; font-weight: 600; transition: color 0.3s; }
+        .agreement-label a:hover { color: #8A2BE2; }
+        .btn { padding: 12px 25px; text-decoration: none; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; display: inline-block; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin-top: 10px; border: 2px solid transparent; cursor: pointer; font-family: 'Georgia', serif; }
+        .btn-primary { background: linear-gradient(45deg, #4B0082, #8A2BE2); color: white; }
+        .btn-primary:hover:not(:disabled) { background: linear-gradient(45deg, #8A2BE2, #9370DB); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .login-link-container { text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+        .login-link-container p { color: #555; font-size: 0.95rem; }
+        .login-link-container a { color: #4B0082; text-decoration: none; font-weight: 600; }
+        .login-link-container i { color: #DDA0DD; }
+        footer { background: #3a2d4c; color: #e0e0e0; padding: 40px 0 20px; text-align: center; margin-top: auto; }
+        .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .footer-bottom p { margin-bottom: 8px; font-size: 0.9rem; color: #c0c0c0; }
+        .footer-bottom .bible-verse { font-style: italic; opacity: 0.8; color: #DDA0DD; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        .form-row label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #4B0082; /* Indigo */
-            font-size: 1rem;
-            font-family: 'Georgia', serif;
-        }
-         .form-row label i {
-            margin-right: 6px;
-            color: #8A2BE2; /* BlueViolet for icons */
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-family: 'Georgia', serif;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #4B0082; /* Indigo */
-            box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.15);
-        }
-        .form-control::placeholder {
-            color: #888;
-            opacity: 1;
-        }
-
-        /* Section Divider */
-        .section-divider {
+        /* --- STYLES FOR PASSWORD TOGGLE (NEW) --- */
+        .password-wrapper {
+            position: relative;
             display: flex;
             align-items: center;
-            text-align: center;
-            margin: 25px 0;
-            color: #6A0DAD;
         }
-        
-        .section-divider::before,
-        .section-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #DDA0DD; /* Plum */
+        .password-wrapper .form-control {
+            padding-right: 45px; /* Make space for the icon */
         }
-        
-        .section-divider span {
-            padding: 0 15px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            font-style: italic;
-        }
-
-        .password-requirements {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 6px;
-            font-style: italic;
-        }
-
-        /* --- NEW STYLES for Agreement Checkbox --- */
-        .form-agreement {
-            display: flex;
-            align-items: flex-start; /* Align to top for multi-line text */
-            gap: 10px;
-            margin-top: 5px;
-            margin-bottom: 20px;
-        }
-
-        .form-agreement input[type="checkbox"] {
-            margin-top: 4px; /* Align checkbox with the first line of text */
-            flex-shrink: 0; /* Prevent checkbox from shrinking */
-            width: 16px;
-            height: 16px;
+        .password-toggle-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             cursor: pointer;
+            color: #888;
+            transition: color 0.3s ease;
         }
-
-        .agreement-label {
-            font-size: 0.9rem;
-            color: #555;
-            font-weight: normal; /* Override default bold label style */
-            display: inline !important; /* Override block display */
-            line-height: 1.5;
-            cursor: pointer;
-        }
-
-        .agreement-label a {
-            color: #4B0082; /* Indigo */
-            text-decoration: underline;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-
-        .agreement-label a:hover {
-            color: #8A2BE2; /* BlueViolet */
-        }
-        /* --- END NEW STYLES --- */
-
-
-        /* Button Styles */
-        .btn {
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-block;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            width: 100%;
-            margin-top: 10px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            font-family: 'Georgia', serif;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #4B0082, #8A2BE2); /* Indigo to BlueViolet */
-            color: white;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #8A2BE2, #9370DB);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-
-        /* Login Link */
-        .login-link-container {
-            text-align: center;
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .login-link-container p {
-            color: #555;
-            font-size: 0.95rem;
-        }
-
-        .login-link-container a {
+        .password-toggle-icon:hover {
             color: #4B0082;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .login-link-container a:hover {
-            color: #8A2BE2;
-            text-decoration: underline;
-        }
-        .login-link-container i {
-            color: #DDA0DD;
         }
 
-
-        /* Footer */
-        footer {
-            background: #3a2d4c;
-            color: #e0e0e0;
-            padding: 40px 0 20px;
-            text-align: center;
-            margin-top: auto;
-        }
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        .footer-bottom p {
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #c0c0c0;
-        }
-        .footer-bottom .bible-verse {
-            font-style: italic;
-            opacity: 0.8;
-            color: #DDA0DD;
-        }
-
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        /* --- THIS IS THE CRUCIAL RESPONSIVE PART THAT WAS MISSING --- */
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -371,93 +130,38 @@
                 font-size: 1.8rem;
             }
         }
+        
+        /* --- STYLES FOR NEW OTP & PHONE INPUT FEATURES (APPENDED HERE) --- */
+        .phone-input-container { position: relative; display: flex; align-items: center; }
+        .phone-prefix { position: absolute; left: 1px; top: 1px; bottom: 1px; display: flex; align-items: center; padding: 0 12px; background-color: #f1f1f1; border-right: 1px solid #ccc; border-top-left-radius: 8px; border-bottom-left-radius: 8px; font-weight: 600; color: #333; }
+        .phone-prefix img { width: 22px; height: 22px; border-radius: 50%; margin-right: 8px; object-fit: cover; }
+        .form-control.phone-input { padding-left: 95px; /* Space for prefix */ }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 2000; animation: fadeIn 0.3s ease; }
+        .modal-content { background: white; padding: 30px 35px; border-radius: 15px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: slideUp 0.4s ease-out; }
+        .modal-content h3 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #4B0082; margin-bottom: 10px; }
+        .modal-content .otp-info-msg { background-color: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; border: 1px solid #a5d6a7; }
+        .otp-input { width: 100%; padding: 12px; font-size: 1.5rem; text-align: center; letter-spacing: 15px; border: 2px solid #ccc; border-radius: 8px; margin-bottom: 20px; }
+        .otp-input:focus { outline: none; border-color: #4B0082; }
+        .modal-error-msg { color: #dc3545; font-weight: 500; margin-top: -15px; margin-bottom: 15px; min-height: 1.2em; font-size: 0.9rem; }
+        #resend-otp-btn { background: none; border: none; color: #4B0082; cursor: pointer; text-decoration: underline; font-weight: 600; margin-top: 15px; font-size: 0.9rem; }
+        #resend-otp-btn:disabled, .btn:disabled { cursor: not-allowed; }
+        #resend-otp-btn:disabled { color: #999; text-decoration: none; }
+        .btn:disabled { background: #ccc; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 8px; vertical-align: middle; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-    <script>
-        function validateForm() {
-            const nameInput = document.forms["regForm"]["name"];
-            const emailInput = document.forms["regForm"]["email"];
-            const phoneInput = document.forms["regForm"]["phone"];
-            const passwordInput = document.forms["regForm"]["password"];
-            const confirmPasswordInput = document.forms["regForm"]["confirm_password"];
-            const termsCheckbox = document.forms["regForm"]["terms_agree"]; // Get the checkbox
-
-            // Name validation
-            if (nameInput && nameInput.value.trim() === "") {
-                alert("Please enter your name.");
-                nameInput.focus();
-                return false;
-            }
-
-            // Email validation
-            if (emailInput && emailInput.value.trim() === "") {
-                alert("Please enter your email address.");
-                emailInput.focus();
-                return false;
-            }
-            if (emailInput && !emailInput.value.includes("@")) {
-                alert("Please enter a valid email address (must contain '@').");
-                emailInput.focus();
-                return false;
-            }
-
-            // Phone number validation
-            if (phoneInput && phoneInput.value.trim() === "") {
-                alert("Please enter your phone number.");
-                phoneInput.focus();
-                return false;
-            }
-            const phoneDigits = phoneInput.value.replace(/\D/g, ''); 
-            if (phoneDigits.length < 10 || phoneDigits.length > 15) {
-                alert("Phone number should contain 10 to 15 digits.");
-                phoneInput.focus();
-                return false;
-            }
-            
-            // Password validation
-            if (passwordInput && passwordInput.value === "") {
-                alert("Please enter a password.");
-                passwordInput.focus();
-                return false;
-            }
-            if (passwordInput && passwordInput.value.length < 8) {
-                alert("Password must be at least 8 characters long.");
-                passwordInput.focus();
-                return false;
-            }
-
-            // Confirm Password validation
-             if (confirmPasswordInput && confirmPasswordInput.value === "") {
-                alert("Please confirm your password.");
-                confirmPasswordInput.focus();
-                return false;
-            }
-            if (passwordInput && confirmPasswordInput && passwordInput.value !== confirmPasswordInput.value) {
-                alert("Passwords do not match. Please re-enter.");
-                confirmPasswordInput.focus();
-                return false;
-            }
-
-            // --- NEW: Terms and Conditions Checkbox Validation ---
-            if (termsCheckbox && !termsCheckbox.checked) {
-                alert("You must agree to the Terms & Conditions and Privacy Policy to register.");
-                termsCheckbox.focus();
-                return false;
-            }
-
-            return true; // Form will submit
-        }
-    </script>
 </head>
 <body>
     <nav>
         <div class="nav-container">
-            <a href="{% url 'index' %}" class="logo">
-                <i class="fas fa-church"></i> Pentecost Matrimony
-            </a>
+            <a href="{% url 'index' %}" class="logo"><i class="fas fa-church"></i> Pentecost Matrimony</a>
             <ul class="nav-links">
                 <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
                 {% if user.is_authenticated %}
-                     <li><a href="{% url 'logout' %}" class="auth-link"><i class="fas fa-sign-out-alt"></i> Logout ({{ user.username|truncatechars:10 }})</a></li>
+                     <li><a href="{% url 'logout' %}" class="auth-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 {% else %}
                     <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                     <li><a href="{% url 'register' %}" class="auth-link active"><i class="fas fa-user-plus"></i> Register</a></li>
@@ -476,46 +180,55 @@
 
             {% if messages %}
                 <ul class="django-messages">
-                    {% for message in messages %}
-                        <li class="{{ message.tags }}">{{ message }}</li>
-                    {% endfor %}
+                    {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
                 </ul>
             {% endif %}
             
-            <form method="post" name="regForm" action="{% url 'register' %}" onsubmit="return validateForm();">
+            <div id="registration-error" class="django-messages" style="display:none;"></div>
+            
+            <form id="registerForm">
                 {% csrf_token %}
-                
                 <div class="form-row">
                     <label for="full_name"><i class="fas fa-user"></i> Name</label>
-                    <input type="text" id="full_name" name="name" class="form-control" placeholder="Enter your name" required>
+                    <input type="text" id="full_name" name="name" class="form-control" placeholder="Enter your full name" required>
                 </div>
-                
                 <div class="form-row">
                     <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="yourname@gmail.com" required>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="yourname@example.com" required>
                 </div>
                 
                 <div class="form-row">
-                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
-                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g., +91 1234567890" required>
+                    <label for="phone"><i class="fab fa-whatsapp"></i> WhatsApp Number</label>
+                    <div class="phone-input-container">
+                        <span class="phone-prefix">
+                            <img src="https://flagcdn.com/in.svg" alt="India Flag">
+                            +91
+                        </span>
+                        <input type="tel" id="phone" name="phone" class="form-control phone-input" placeholder="Your 10-digit number" required pattern="\d{10}" title="Please enter a valid 10-digit phone number.">
+                    </div>
                 </div>
                 
-                <div class="section-divider">
-                    <span>Secure Your Account</span>
-                </div>
+                <div class="section-divider"><span>Secure Your Account</span></div>
                 
+                <!-- UPDATED PASSWORD FIELD -->
                 <div class="form-row">
                     <label for="password"><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Create a strong password" required>
-                    <p class="password-requirements">Min. 8 characters. Consider letters, numbers & symbols.</p>
-                </div>
-                
-                <div class="form-row">
-                    <label for="confirm_password"><i class="fas fa-check-circle"></i> Confirm Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter your password" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Create a strong password" required minlength="8">
+                        <i class="fas fa-eye-slash password-toggle-icon" title="Show/Hide Password"></i>
+                    </div>
+                    <p class="password-requirements">Minimum 8 characters.</p>
                 </div>
 
-                <!-- --- NEW: Terms and Conditions Section --- -->
+                <!-- UPDATED CONFIRM PASSWORD FIELD -->
+                <div class="form-row">
+                    <label for="confirm_password"><i class="fas fa-check-circle"></i> Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter your password" required>
+                        <i class="fas fa-eye-slash password-toggle-icon" title="Show/Hide Password"></i>
+                    </div>
+                </div>
+
                 <div class="form-agreement">
                     <input type="checkbox" id="terms_agree" name="terms_agree" required>
                     <label for="terms_agree" class="agreement-label">
@@ -524,10 +237,10 @@
                         <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a>.
                     </label>
                 </div>
-                <!-- --- END: Terms and Conditions Section --- -->
                 
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-heart" style="margin-right: 8px;"></i> Create Account
+                <button type="submit" class="btn btn-primary" id="register-btn">
+                    <span class="spinner"></span>
+                    <span class="btn-text"><i class="fas fa-paper-plane" style="margin-right: 8px;"></i> Send OTP</span>
                 </button>
             </form>
             
@@ -540,6 +253,24 @@
         </div>
     </div>
 
+    <!-- OTP MODAL (POPUP) -->
+    <div id="otp-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Verify Your Number</h3>
+            <p class="otp-info-msg">Please check your WhatsApp. The OTP is sent from the business account: <strong>'dccoder'</strong></p>
+            <form id="otpForm">
+                <p class="modal-error-msg" id="otp-error-msg"></p>
+                <input type="text" id="otp-input" class="otp-input" maxlength="5" pattern="\d{5}" required autocomplete="one-time-code" placeholder="-----">
+                <button type="submit" id="verify-otp-btn" class="btn btn-primary">
+                    <span class="spinner"></span>
+                    <span class="btn-text">Verify & Create Account</span>
+                </button>
+            </form>
+            <button id="resend-otp-btn" disabled>Resend OTP</button>
+            <span id="resend-timer" style="display: block; margin-top: 5px; color: #666; font-size: 0.9rem;"></span>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-content">
             <div class="footer-bottom">
@@ -548,5 +279,161 @@
             </div>
         </div>
     </footer>
+
+    <!-- UPDATED SCRIPT WITH PASSWORD TOGGLE FUNCTIONALITY -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const registerForm = document.getElementById('registerForm');
+        const otpForm = document.getElementById('otpForm');
+        const otpModal = document.getElementById('otp-modal');
+        const resendBtn = document.getElementById('resend-otp-btn');
+        let countdown;
+
+        // --- NEW: LOGIC FOR PASSWORD VISIBILITY TOGGLE ---
+        const passwordToggles = document.querySelectorAll('.password-toggle-icon');
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', function () {
+                const passwordInput = this.previousElementSibling;
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        });
+
+        const getCookie = name => document.cookie.match(`[; ]?${name}=([^;]*)`)?.[1];
+
+        const toggleButtonLoading = (btn, isLoading) => {
+            btn.disabled = isLoading;
+            const spinner = btn.querySelector('.spinner');
+            const btnText = btn.querySelector('.btn-text');
+            if (spinner) spinner.style.display = isLoading ? 'inline-block' : 'none';
+            if (btnText) btnText.style.opacity = isLoading ? '0.5' : '1';
+        };
+
+        const displayError = (containerId, message) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = message ? `<li class="error">${message}</li>` : '';
+            container.style.display = message ? 'block' : 'none';
+            if(message) container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        const handleRegisterSubmit = async (e) => {
+            e.preventDefault();
+            displayError('registration-error', null);
+            if (!registerForm.checkValidity()) {
+                registerForm.reportValidity();
+                return;
+            }
+            if (document.getElementById('password').value !== document.getElementById('confirm_password').value) {
+                displayError('registration-error', 'Passwords do not match.');
+                return;
+            }
+            const registerBtn = document.getElementById('register-btn');
+            toggleButtonLoading(registerBtn, true);
+
+            const formData = {
+                name: document.getElementById('full_name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+            };
+
+            try {
+                const response = await fetch("{% url 'register' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify(formData),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'An unknown server error occurred.');
+                
+                otpModal.style.display = 'flex';
+                document.getElementById('otp-input').focus();
+                startResendTimer(180); // 3 minutes
+            } catch (error) {
+                displayError('registration-error', error.message);
+            } finally {
+                toggleButtonLoading(registerBtn, false);
+            }
+        };
+
+        const handleOtpSubmit = async (e) => {
+            e.preventDefault();
+            const otpErrorMsg = document.getElementById('otp-error-msg');
+            otpErrorMsg.textContent = '';
+            
+            if (!otpForm.checkValidity()) {
+                otpErrorMsg.textContent = 'Please enter the 5-digit OTP.';
+                return;
+            }
+            
+            const verifyBtn = document.getElementById('verify-otp-btn');
+            toggleButtonLoading(verifyBtn, true);
+
+            try {
+                const response = await fetch("{% url 'verify_otp' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ otp: document.getElementById('otp-input').value }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Verification failed');
+                window.location.href = data.redirect_url;
+            } catch (error) {
+                otpErrorMsg.textContent = error.message;
+            } finally {
+                toggleButtonLoading(verifyBtn, false);
+            }
+        };
+
+        const handleResendOtp = async () => {
+            const otpErrorMsg = document.getElementById('otp-error-msg');
+            otpErrorMsg.textContent = '';
+            resendBtn.disabled = true;
+
+            try {
+                const response = await fetch("{% url 'resend_otp' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message);
+                
+                otpErrorMsg.style.color = '#28a745';
+                otpErrorMsg.textContent = data.message;
+                setTimeout(() => { otpErrorMsg.textContent = ''; otpErrorMsg.style.color = '#dc3545'; }, 5000);
+
+                startResendTimer(180);
+            } catch(error) {
+                otpErrorMsg.textContent = error.message;
+                resendBtn.disabled = false;
+            }
+        };
+
+        const startResendTimer = (seconds) => {
+            clearInterval(countdown);
+            const timerDisplay = document.getElementById('resend-timer');
+            resendBtn.disabled = true;
+            timerDisplay.style.display = 'block';
+            let timer = seconds;
+
+            countdown = setInterval(() => {
+                const minutes = Math.floor(timer / 60);
+                let secs = timer % 60;
+                timerDisplay.textContent = `You can resend OTP in ${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+                if (--timer < 0) {
+                    clearInterval(countdown);
+                    timerDisplay.style.display = 'none';
+                    resendBtn.disabled = false;
+                }
+            }, 1000);
+        };
+
+        registerForm.addEventListener('submit', handleRegisterSubmit);
+        otpForm.addEventListener('submit', handleOtpSubmit);
+        resendBtn.addEventListener('click', handleResendOtp);
+    });
+    </script>
 </body>
 </html>

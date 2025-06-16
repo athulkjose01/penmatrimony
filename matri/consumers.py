@@ -2,7 +2,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from .models import ChatRoom, ChatMessage, UserProfile, Notification, User
+from .models import ChatRoom, ChatMessage, UserProfile, User, Notification
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -14,13 +15,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Check if the user is a participant of the room
         is_participant = await self.is_user_participant()
         if not is_participant:
             await self.close()
             return
             
-        # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -28,25 +27,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
 
-    # Receive message from WebSocket
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data['message']
         sender_profile = await self.get_user_profile(self.user)
 
-        # Save message to database
         chat_message = await self.save_message(message, sender_profile)
         
-        # Create and send notification to the other user
-        await self.create_notification_for_receiver(sender_profile, message)
+        # --- Create notification for other participants ---
+        await self.create_chat_notification(sender_profile, chat_message.room)
 
-        # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -59,7 +54,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    # Receive message from room group
     async def chat_message(self, event):
         message = event['message']
         sender_id = event['sender_id']
@@ -67,7 +61,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender_avatar_url = event['sender_avatar_url']
         timestamp = event['timestamp']
 
-        # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message,
             'sender_id': sender_id,
@@ -98,15 +91,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             content=message_content
         )
 
+    # --- ADDED: Method to create notifications for new messages ---
     @database_sync_to_async
-    def create_notification_for_receiver(self, sender_profile, message_content):
-        room = ChatRoom.objects.get(id=self.room_id)
-        # Find the other participant
-        receiver_profile = room.participants.exclude(id=sender_profile.id).first()
-        if receiver_profile:
-            Notification.objects.create(
-                recipient=receiver_profile.user,
-                sender=self.user,
-                message=f"sent you a message: '{message_content[:30]}...'",
-                # No post associated with a chat message
-            )
+    def create_chat_notification(self, sender_profile, room):
+        other_participants = room.participants.exclude(user=self.user)
+        
+        for participant_profile in other_participants:
+            if participant_profile.user != self.user:
+                Notification.objects.create(
+                    recipient=participant_profile.user,
+                    sender_profile=sender_profile,
+                    notification_type='new_message',
+                    text=f"You have a new message from {sender_profile.full_name}.",
+                    chat_room=room
+                )

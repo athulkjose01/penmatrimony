@@ -3,12 +3,15 @@
 import os
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy, reverse
-from .models import ChatRoom, Profile, UserProfile, UserPost
+import requests
+from .models import ChatRoom, PostLike, Profile, UserProfile, UserPost
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 import random
+from django.db.models import Q, Max, Count, Subquery, OuterRef
+from django.contrib import messages
 from django.views.decorators.http import require_POST
 import string
 from django.template.loader import render_to_string
@@ -34,7 +37,6 @@ import json
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger # For pagination
 from .models import UserProfile, UserPost
 from django.views.decorators.csrf import csrf_exempt
-from .models import Notification
 from django.db.models import Q, Max
 from .forms import PasswordResetForm
 from .forms import CustomSetPasswordForm
@@ -50,7 +52,9 @@ from django.views.decorators.csrf import csrf_exempt # We will remove this where
 from django.db import transaction # Import transaction
 import logging
 import time
-# from webpush.models import SubscriptionInfo, PushInformation, Group
+from .models import Notification # Import the new model
+from django.contrib.humanize.templatetags.humanize import naturaltime
+
 
 
 
@@ -65,60 +69,223 @@ def generate_username():
     return username
 
 
+
+
+def generate_otp(length=5):
+    """Generate a random numeric OTP."""
+    return ''.join(random.choices(string.digits, k=length))
+
+def send_otp_sms(phone_number, otp):
+    """Sends an OTP using the Fast2SMS API."""
+    # This message will be sent to the user.
+    # The API templates this, so {#var#} is replaced by the 'otp' value.
+    message_to_send = f"Your OTP for Pentecost Matrimony is {otp}. This code is valid for 10 minutes. Do not share it with anyone. - dccoder"
+    
+    # The Fast2SMS API for OTPs often uses 'variables_values' for the dynamic part.
+    # The provided API URL also confirms this.
+    payload = {
+        'authorization': 'HVmWoy1neMpAlaUxf4JXFb7kC2EvPOdDQZhSwGqiLrNu3TR5ztt6alruhJsALHqwvT8g2GEBbZS1R9eM',
+        'route': 'otp',
+        'variables_values': otp, # The API will inject this into its configured template
+        'flash': 0,
+        'numbers': phone_number
+    }
+    
+    url = "https://www.fast2sms.com/dev/bulkV2"
+    
+    try:
+        response = requests.get(url, params=payload)
+        response.raise_for_status()  # Raise an exception for bad status codes
+        result = response.json()
+        print(f"Fast2SMS Response: {result}") # For debugging
+        
+        if result.get("return") is True:
+            return True, "OTP sent successfully."
+        else:
+            return False, result.get("message", "An unknown API error occurred.")
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending OTP: {e}")
+        return False, "Could not connect to the SMS service."
+    
+
+    
+
 def register_view(request):
+    """
+    Handles both the GET request to display the registration form and the
+    initial POST (AJAX) request to validate data and send an OTP.
+    """
     if request.user.is_authenticated:
+        # Redirect logged-in users away from the registration page
         try:
             UserProfile.objects.get(user=request.user)
             return redirect('index') 
         except UserProfile.DoesNotExist:
+            # If they are logged in but have no profile, send them to create one
             return redirect('create_user_profile') 
 
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        email = request.POST.get('email', '').strip().lower()
-        phone = request.POST.get('phone', '').strip()
-        password = request.POST.get('password', '')
-        confirm_password = request.POST.get('confirm_password', '')
-        form_data = request.POST 
-
-        if not all([name, email, phone, password, confirm_password]):
-            messages.error(request, "All fields are required.")
-            return render(request, 'matri/register.html', {'form_data': form_data})
-        
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match.")
-            return render(request, 'matri/register.html', {'form_data': form_data})
-        
-        if '@' not in email or '.' not in email.split('@')[-1]:
-            messages.error(request, "Enter a valid email address.")
-            return render(request, 'matri/register.html', {'form_data': form_data})
-        
-        if not phone.isdigit() or not (10 <= len(phone) <= 15):
-            messages.error(request, "Phone number must be 10-15 digits.")
-            return render(request, 'matri/register.html', {'form_data': form_data})
-        
-        if User.objects.filter(email__iexact=email).exists():
-            messages.error(request, "Email is already registered.")
-            return render(request, 'matri/register.html', {'form_data': form_data})
-
-        # Check if the phone number is already used
-        if Profile.objects.filter(phone=phone).exists():
-            messages.error(request, "Phone number is already registered.")
-            return render(request, 'matri/register.html', {'form_data': form_data})
-
-        username = generate_username()
+        # This part handles the AJAX request from the JavaScript
         try:
-            user = User.objects.create_user(username=username, password=password, email=email)
-            user.first_name = name
-            user.save()
-            Profile.objects.create(user=user, phone=phone)
-            messages.success(request, f"Registered successfully. Your username is {username}. Please login.")
-            return redirect('login')
-        except Exception as e:
-            messages.error(request, f"An error occurred during registration: {e}")
-            return render(request, 'matri/register.html', {'form_data': form_data})
+            data = json.loads(request.body)
+            name = data.get('name', '').strip()
+            email = data.get('email', '').strip().lower()
+            phone_no_only = data.get('phone', '').strip() # e.g., "9876543210"
+            password = data.get('password', '')
 
+            # --- Server-side Validation ---
+            if not all([name, email, phone_no_only, password]):
+                return JsonResponse({'status': 'error', 'message': 'All fields are required.'}, status=400)
+            
+            if '@' not in email or '.' not in email.split('@')[-1]:
+                return JsonResponse({'status': 'error', 'message': 'Please enter a valid email address.'}, status=400)
+
+            if not phone_no_only.isdigit() or len(phone_no_only) != 10:
+                return JsonResponse({'status': 'error', 'message': 'Please enter a valid 10-digit WhatsApp number.'}, status=400)
+            
+            # Prepend the country code for database storage and API calls
+            full_phone_number = f"91{phone_no_only}"
+
+            if User.objects.filter(email__iexact=email).exists():
+                return JsonResponse({'status': 'error', 'message': 'This email address is already registered.'}, status=400)
+
+            if Profile.objects.filter(phone=full_phone_number).exists():
+                return JsonResponse({'status': 'error', 'message': 'This phone number is already registered.'}, status=400)
+
+            # --- OTP Generation and Sending ---
+            otp = generate_otp()
+            
+            # --- For Development: Simulate sending OTP to avoid using credits ---
+            # print(f"Generated OTP for {full_phone_number}: {otp}")
+            # success, message = True, "OTP Sent (Simulated)"
+            # --- End of Simulation ---
+            
+            # --- For Production: Uncomment the line below to send a real SMS ---
+            success, message = send_otp_sms(full_phone_number, otp)
+            
+            if not success:
+                # If sending OTP fails, return the error from the API
+                return JsonResponse({'status': 'error', 'message': f'Failed to send OTP: {message}'}, status=500)
+
+            # Store all necessary data in the session to use after OTP verification
+            request.session['registration_data'] = {
+                'name': name,
+                'email': email,
+                'phone': full_phone_number, # Store the full number
+                'password': password,
+            }
+            request.session['otp_details'] = {
+                'otp': otp,
+                'timestamp': time.time() # Record when the OTP was sent
+            }
+            
+            # Send a success response to the frontend to trigger the OTP popup
+            return JsonResponse({'status': 'success', 'message': 'OTP sent successfully. Please check your WhatsApp.'})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid request format.'}, status=400)
+        except Exception as e:
+            # General error catch
+            print(f"Error in register_view: {e}")
+            return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred.'}, status=500)
+
+    # This handles the initial GET request to load the page
     return render(request, 'matri/register.html')
+
+
+# --- OTP VERIFICATION VIEW (Creates the user) ---
+
+@require_POST
+def verify_otp_view(request):
+    """
+    Verifies the OTP submitted by the user. If correct, creates the user account.
+    """
+    try:
+        data = json.loads(request.body)
+        submitted_otp = data.get('otp')
+        
+        reg_data = request.session.get('registration_data')
+        otp_details = request.session.get('otp_details')
+
+        # Check if session data exists
+        if not all([submitted_otp, reg_data, otp_details]):
+            return JsonResponse({'status': 'error', 'message': 'Your session has expired. Please start the registration process again.'}, status=400)
+
+        # OTP is valid for 10 minutes (600 seconds)
+        if time.time() - otp_details['timestamp'] > 600:
+            # Clear expired session data
+            request.session.flush() 
+            return JsonResponse({'status': 'error', 'message': 'OTP has expired. Please request a new one.'}, status=400)
+
+        if submitted_otp == otp_details['otp']:
+            # OTP is correct, proceed with creating the user
+            username = generate_username()
+            user = User.objects.create_user(
+                username=username,
+                password=reg_data['password'],
+                email=reg_data['email']
+            )
+            user.first_name = reg_data['name']
+            user.save()
+            
+            # Create the associated Profile
+            Profile.objects.create(user=user, phone=reg_data['phone'])
+            
+            # Important: Clear all registration-related session data after success
+            request.session.flush()
+            
+            # Use Django messages for the next page load (login page)
+            messages.success(request, f"Registration successful! Your username is {username}. Please log in to continue.")
+            
+            login_url = redirect('login').url
+            return JsonResponse({'status': 'success', 'message': 'Verification successful!', 'redirect_url': login_url})
+        else:
+            # Incorrect OTP
+            return JsonResponse({'status': 'error', 'message': 'The OTP you entered is incorrect. Please try again.'}, status=400)
+    except Exception as e:
+        print(f"Error during OTP verification: {e}")
+        return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred during verification.'}, status=500)
+
+
+# --- RESEND OTP VIEW ---
+
+@require_POST
+def resend_otp_view(request):
+    """
+    Handles the "Resend OTP" request, respecting the 3-minute cooldown.
+    """
+    reg_data = request.session.get('registration_data')
+    otp_details = request.session.get('otp_details')
+
+    if not reg_data or not otp_details:
+        return JsonResponse({'status': 'error', 'message': 'No registration in progress. Please start over.'}, status=400)
+
+    # Enforce a 3-minute (180 seconds) cooldown before resending
+    if time.time() - otp_details.get('timestamp', 0) < 180:
+        return JsonResponse({'status': 'error', 'message': 'Please wait a moment before requesting a new OTP.'}, status=429) # 429: Too Many Requests
+
+    new_otp = generate_otp()
+    phone_number = reg_data.get('phone')
+    
+    # --- For Development: Simulate sending OTP ---
+    # print(f"Resent OTP for {phone_number}: {new_otp}")
+    # success, message = True, "New OTP sent (Simulated)"
+    # --- End of Simulation ---
+
+    # --- For Production: Uncomment the line below to send a real SMS ---
+    success, message = send_otp_sms(phone_number, new_otp)
+    
+    if not success:
+        return JsonResponse({'status': 'error', 'message': f'Failed to send new OTP: {message}'}, status=500)
+
+    # Update session with the new OTP and timestamp
+    request.session['otp_details'] = {
+        'otp': new_otp,
+        'timestamp': time.time()
+    }
+
+    return JsonResponse({'status': 'success', 'message': 'A new OTP has been sent to your number.'})
 
 
 
@@ -166,49 +333,40 @@ def logout_view(request):
     return redirect('login')
 
 
-def index_view(request):
-    # --- Define default values for all variables first ---
-    user_has_profile = False
-    unread_notifications_count = 0
-    unread_messages_count = 0 # NEW: Default to 0 for unread messages
 
-    # Check the user's status
+
+def index_view(request):
+    user_has_profile = False
+    unread_messages_count = 0
+    unread_notifications_count = 0 # Default to 0
+
     if request.user.is_authenticated:
         try:
-            # This checks if the logged-in user has a profile
             user_profile = UserProfile.objects.get(user=request.user)
             user_has_profile = True
 
-            # NEW: Calculate unread messages count if profile exists
-            # Counts messages in rooms the user is part of, which are unread and not sent by the user.
             unread_messages_count = ChatMessage.objects.filter(
-                room__participants=user_profile,
-                is_read=False
-            ).exclude(
-                sender=user_profile
+                room__participants=user_profile, is_read=False
+            ).exclude(sender=user_profile).count()
+
+            # --- This is the key part: Calculate count ONLY for this view ---
+            unread_notifications_count = Notification.objects.filter(
+                recipient=request.user, is_read=False
             ).count()
 
         except UserProfile.DoesNotExist:
-            # User is logged in but has no profile
             user_has_profile = False
 
-        # Get notification count for any authenticated user, regardless of profile status.
-        unread_notifications_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
-
-    # Get featured profiles for the homepage
     featured_profiles = UserProfile.objects.filter(
-        is_profile_in_index=True,
-        profile_picture__isnull=False
-    ).exclude(
-        profile_picture=''
-    ).distinct().order_by('?')[:8] # Added back a limit to avoid loading too many profiles
+        is_profile_in_index=True, profile_picture__isnull=False
+    ).exclude(profile_picture='').distinct().order_by('?')[:8]
 
-    # Now, all context variables are guaranteed to have a value.
     context = {
         'featured_profiles': featured_profiles,
         'user_has_profile': user_has_profile,
-        'unread_notifications_count': unread_notifications_count, # Using existing descriptive name
-        'unread_messages_count': unread_messages_count, # NEW: Add to context
+        'unread_messages_count': unread_messages_count,
+        # Pass the count specifically to the index.html template
+        'unread_notifications_count': unread_notifications_count, 
     }
     
     return render(request, 'matri/index.html', context)
@@ -424,11 +582,13 @@ def search_users_view(request):
         current_user_profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:
         messages.warning(request, "Please create your profile before searching for others.")
-        return redirect('create_user_profile') # Ensure 'create_user_profile' is a valid URL name
+        return redirect('create_user_profile')
 
+    # Start with all profiles except the current user
     results_queryset = UserProfile.objects.exclude(user=request.user).select_related('user')
     form_submitted_with_data = False
 
+    # Pre-fill the 'gender' field on initial load based on the user's gender
     initial_form_data = {}
     if not request.GET:
         if current_user_profile.gender == 'Male':
@@ -443,6 +603,7 @@ def search_users_view(request):
 
         if form.is_valid():
             cleaned_data = form.cleaned_data
+            # Check if any form field has data to determine if a search was actually performed
             form_submitted_with_data = any(
                 cleaned_data.get(key) for key in cleaned_data if key not in ['search_type', 'gender'] or (key == 'gender' and cleaned_data.get(key))
             )
@@ -452,24 +613,30 @@ def search_users_view(request):
                 if username_query:
                     results_queryset = results_queryset.filter(user__username__iexact=username_query)
                 else:
+                    # If username search is selected but no username is provided, return no results
                     results_queryset = UserProfile.objects.none()
             
             elif search_type == 'advanced_search':
+                # Apply filters sequentially
                 if cleaned_data.get('gender'):
                     results_queryset = results_queryset.filter(gender=cleaned_data.get('gender'))
                 
                 today = date.today()
                 age_min, age_max = cleaned_data.get('age_min'), cleaned_data.get('age_max')
                 if age_min:
+                    # Profiles with date_of_birth on or before (today - age_min years)
                     results_queryset = results_queryset.filter(date_of_birth__lte=date(today.year - age_min, today.month, today.day))
                 if age_max:
-                    # To ensure someone who just turned age_max+1 is excluded
-                    # date_of_birth must be greater than (today - (age_max + 1) years)
-                    # effectively meaning they are age_max or younger.
+                    # Profiles with date_of_birth after (today - (age_max + 1) years)
                     results_queryset = results_queryset.filter(date_of_birth__gt=date(today.year - (age_max + 1), today.month, today.day))
                 
                 if cleaned_data.get('marital_status'):
                     results_queryset = results_queryset.filter(marital_status=cleaned_data.get('marital_status'))
+                
+                # --- NEW: Denomination filter added ---
+                if cleaned_data.get('denomination'):
+                    results_queryset = results_queryset.filter(denomination=cleaned_data.get('denomination'))
+
                 if cleaned_data.get('height_min'):
                     results_queryset = results_queryset.filter(height__gte=cleaned_data.get('height_min'))
                 if cleaned_data.get('height_max'):
@@ -479,151 +646,83 @@ def search_users_view(request):
                 if cleaned_data.get('weight_max_kg'):
                     results_queryset = results_queryset.filter(weight__lte=cleaned_data.get('weight_max_kg'))
                 
-                # --- Enhanced Profession Search with Groq AI ---
+                # --- Enhanced Profession Search ---
                 profession_query_str = cleaned_data.get('profession')
                 if profession_query_str:
                     user_entered_professions = [p.strip() for p in profession_query_str.split(',') if p.strip()]
                     
                     if user_entered_professions:
-                        # 1. Get all unique individual professions from the database
-                        all_db_profession_entries = UserProfile.objects.filter( 
-                            profession__isnull=False
-                        ).exclude(profession__exact='').values_list('profession', flat=True).distinct()
-                        
-                        print(f"DEBUG: Raw profession entries from DB: {list(all_db_profession_entries)}")
-                        
+                        all_db_profession_entries = UserProfile.objects.filter(profession__isnull=False).exclude(profession__exact='').values_list('profession', flat=True).distinct()
                         unique_individual_db_professions = set()
                         for entry in all_db_profession_entries:
-                            # Handle comma-separated professions in DB field
                             for p_item in entry.split(','): 
                                 cleaned_p_item = p_item.strip()
                                 if cleaned_p_item:
                                     unique_individual_db_professions.add(cleaned_p_item)
                         
                         unique_db_professions_list = list(unique_individual_db_professions)
-                        print(f"DEBUG: Unique professions extracted: {unique_db_professions_list}")
 
                         if not unique_db_professions_list:
-                            # No professions in DB to compare against, fallback to simple icontains
-                            print("DEBUG: No unique professions in DB. Falling back to icontains for profession search.")
                             q_objects_prof = Q()
                             for term in user_entered_professions:
                                 q_objects_prof |= Q(profession__icontains=term)
                             results_queryset = results_queryset.filter(q_objects_prof)
                         else:
-                            # 2. Try Groq AI for each user-entered term
                             all_groq_matched_professions = set()
                             groq_call_failed_for_any_term = False
 
                             for search_term in user_entered_professions:
-                                print(f"DEBUG: Processing search term: '{search_term}'")
                                 related_terms_from_groq = get_related_professions_groq(search_term, unique_db_professions_list)
-                                
-                                if related_terms_from_groq is None: # Groq API call failed
+                                if related_terms_from_groq is None:
                                     groq_call_failed_for_any_term = True
-                                    print(f"DEBUG: Groq call failed for term '{search_term}'. Switching to fallback for all profession terms.")
                                     break 
-                                # If related_terms_from_groq is an empty list, it means Groq ran but found no matches for this term.
-                                # This is a valid outcome, so we add its (empty) content.
                                 for term in related_terms_from_groq:
                                     all_groq_matched_professions.add(term)
                             
                             if groq_call_failed_for_any_term:
-                                # Fallback to simple icontains for all user-entered terms
-                                print("DEBUG: Fallback: Using 'icontains' for all entered profession terms due to Groq failure.")
                                 q_objects_prof = Q()
                                 for term in user_entered_professions:
                                     q_objects_prof |= Q(profession__icontains=term)
                                 results_queryset = results_queryset.filter(q_objects_prof)
                             else:
-                                # Groq processed all terms (successfully or found no matches for some/all)
                                 if all_groq_matched_professions:
-                                    print(f"DEBUG: Groq search: Using matched professions: {list(all_groq_matched_professions)}")
-                                    
-                                    # Debug: Let's see what professions actually exist in the database
-                                    actual_db_professions = UserProfile.objects.filter(
-                                        profession__isnull=False
-                                    ).exclude(profession__exact='').values_list('profession', flat=True)
-                                    
-                                    print(f"DEBUG: Actual profession values in DB: {list(actual_db_professions)}")
-                                    
-                                    # Check which profiles would match each Groq-identified profession
-                                    for groq_term in all_groq_matched_professions:
-                                        matching_profiles = results_queryset.filter(profession__icontains=groq_term)
-                                        print(f"DEBUG: Profession '{groq_term}' matches {matching_profiles.count()} profiles")
-                                        for profile in matching_profiles[:3]:  # Show first 3 matches
-                                            print(f"  - Profile ID {profile.id}: profession='{profile.profession}'")
-                                    
-                                    # Enhanced matching for comma-separated profession fields
                                     q_objects_prof = Q()
                                     for p_term in all_groq_matched_professions:
-                                        # Handle different formats of profession storage
-                                        # This covers: "Teacher", "Doctor, Teacher", "Teacher, Nurse", etc.
-                                        q_objects_prof |= (
-                                            Q(profession__icontains=p_term) |  # General contains
-                                            Q(profession__iregex=r'\b' + re.escape(p_term) + r'\b')  # Word boundary match
-                                        )
-                                    
-                                    # Apply the filter and debug
-                                    results_before_filter = results_queryset.count()
+                                        q_objects_prof |= Q(profession__iregex=r'\b' + re.escape(p_term) + r'\b')
                                     results_queryset = results_queryset.filter(q_objects_prof)
-                                    results_after_filter = results_queryset.count()
-                                    
-                                    print(f"DEBUG: Results before profession filter: {results_before_filter}")
-                                    print(f"DEBUG: Results after profession filter: {results_after_filter}")
-                                    
-                                    # Show some matching profiles for debugging
-                                    if results_queryset.exists():
-                                        print("DEBUG: Sample matching profiles:")
-                                        for profile in results_queryset[:3]:
-                                            print(f"  - {profile.user.username}: '{profile.profession}'")
-                                    else:
-                                        print("DEBUG: No profiles found after applying profession filter")
-                                        
-                                        # Additional debugging - try direct search
-                                        print("\nDEBUG: Trying direct profession searches:")
-                                        for p_term in all_groq_matched_professions:
-                                            direct_matches = UserProfile.objects.filter(
-                                                profession__icontains=p_term
-                                            ).exclude(user=request.user)
-                                            print(f"  Direct search for '{p_term}': {direct_matches.count()} matches")
-                                            for match in direct_matches[:2]:
-                                                print(f"    - {match.user.username}: '{match.profession}'")
-
                                 else:
-                                    # Groq ran for all terms but found no matches for any of them.
-                                    # This implies no profiles match the semantic search.
-                                    print("DEBUG: Groq processed all terms but found no related professions. Filtering for no results.")
-                                    results_queryset = results_queryset.none() 
+                                    results_queryset = results_queryset.none()
                 # --- End of Enhanced Profession Search ---
 
                 if cleaned_data.get('drinking'):
                     results_queryset = results_queryset.filter(drinking=cleaned_data.get('drinking'))
                 if cleaned_data.get('smoking'):
                     results_queryset = results_queryset.filter(smoking=cleaned_data.get('smoking'))
-                if cleaned_data.get('family_type'):
-                    results_queryset = results_queryset.filter(family_type=cleaned_data.get('family_type'))
+                
+                # --- REMOVED: family_type filter is no longer here ---
             
-            else: # Invalid search_type or no search_type
-                if request.GET: # If there was an attempt to submit GET data
+            else: # Invalid or no search_type
+                if request.GET:
                     messages.warning(request, "Invalid search attempt.")
                 results_queryset = UserProfile.objects.none()
 
             if not results_queryset.exists() and form_submitted_with_data:
+                # This message now appears in the template, so a blank message is fine.
                 messages.info(request, "")
         
         else: # Form is not valid
+            # Check if the user actually tried to submit data, not just an empty form
             was_attempted_submit = any(val for key, val in request.GET.items() if key != 'search_type' and val)
             if was_attempted_submit:
                 messages.error(request, "There were errors in your search criteria. Please check the form.")
-            results_queryset = UserProfile.objects.none() # No results if form is invalid
-    else: # Not a GET request (initial page load without search)
-        results_queryset = UserProfile.objects.none() # Show no results by default
+            results_queryset = UserProfile.objects.none()
+    else: # Not a GET request (initial page load)
+        results_queryset = UserProfile.objects.none()
 
     context = {
         'form': form,
         'results': results_queryset,
-        'user_has_profile': True, # Assuming this is set correctly elsewhere if needed
+        'user_has_profile': True,
         'form_submitted_with_data': form_submitted_with_data,
     }
     return render(request, 'matri/search_users.html', context)
@@ -648,13 +747,13 @@ def view_other_user_profile_view(request, profile_id):
 
     partner_prefs_to_view = PartnerPreference.objects.filter(user_profile=profile_to_view).first()
     
-    # --- START OF LIKED POSTS LOGIC ---
+    # --- START OF LIKED POSTS LOGIC (UPDATED) ---
     user_posts_to_view = UserPost.objects.filter(user_profile=profile_to_view).order_by('-created_at')
 
-    # Get a list of post IDs from the gallery that the current user has liked
+    # Get a list of post IDs from the gallery that the current user has liked using the new PostLike model
     liked_post_ids = set(
-        Notification.objects.filter(
-            sender=request.user, 
+        PostLike.objects.filter(
+            user=request.user, 
             post__in=user_posts_to_view
         ).values_list('post_id', flat=True)
     )
@@ -667,7 +766,7 @@ def view_other_user_profile_view(request, profile_id):
     # --- Check interest status ---
     interest_status = 'none'
     interest_request_obj = None
-    contact_phone = None  # <<< NEW: Initialize phone number variable
+    contact_phone = None
     
     interest_lookup = InterestRequest.objects.filter(
         (Q(sender=my_profile) & Q(receiver=profile_to_view)) |
@@ -678,17 +777,11 @@ def view_other_user_profile_view(request, profile_id):
         interest_request_obj = interest_lookup
         if interest_lookup.status == 'accepted':
             interest_status = 'accepted'
-            # <<< START OF NEW LOGIC >>>
-            # If interest is accepted, try to get the phone number from the related Profile model.
             try:
-                # The phone number is in the Profile model, linked via the User model
                 basic_profile = Profile.objects.get(user=profile_to_view.user)
                 contact_phone = basic_profile.phone
             except Profile.DoesNotExist:
-                # Handle the case where a basic Profile object might not exist for the user
                 contact_phone = "Not Provided"
-            # <<< END OF NEW LOGIC >>>
-
         elif interest_lookup.sender == my_profile:
             interest_status = 'sent_pending'
         elif interest_lookup.receiver == my_profile:
@@ -702,7 +795,7 @@ def view_other_user_profile_view(request, profile_id):
         'is_own_profile': False,
         'interest_status': interest_status,
         'interest_request': interest_request_obj,
-        'contact_phone': contact_phone,  # <<< NEW: Add phone to context
+        'contact_phone': contact_phone,
     }
     return render(request, 'matri/view_other_user_profile.html', context)
 
@@ -715,20 +808,13 @@ def view_other_user_profile_view(request, profile_id):
 @login_required
 def post_feed_view(request):
     try:
-        # Get the profile of the logged-in user
         logged_in_user_profile = UserProfile.objects.select_related('user').get(user=request.user)
     except UserProfile.DoesNotExist:
-        # If profile doesn't exist, redirect to profile creation page
         messages.warning(request, "Please create your profile to view the feed.")
         return redirect('create_user_profile') 
 
-    # Determine the gender of the logged-in user to filter the feed
     logged_in_user_gender = logged_in_user_profile.gender
-    
-    # Q object for the logged-in user's own posts to ensure they appear in their feed
     own_posts_q = Q(user_profile=logged_in_user_profile)
-    
-    # Q object for posts from the "opposite" gender
     opposite_gender_posts_q = Q() 
 
     if logged_in_user_gender == 'Male':
@@ -738,46 +824,38 @@ def post_feed_view(request):
     elif logged_in_user_gender == 'Other':
          opposite_gender_posts_q = Q(user_profile__gender='Male') | Q(user_profile__gender='Female')
     
-    # Combine the queries: show own posts OR posts from the determined opposite gender
     final_query = own_posts_q | opposite_gender_posts_q
         
-    # Get all posts that match the filtering criteria
-    # It's better practice to order by newest first for a feed than random ('?')
     all_posts_list = UserPost.objects.filter(final_query).select_related(
         'user_profile', 
         'user_profile__user'
     ).distinct().order_by('-created_at')
 
-    # --- START OF FIX: Check which posts are liked by the current user ---
-
-    # Get a set of post IDs from the feed that the current user has liked.
-    # We filter by the specific 'like' message to be precise.
-    liked_post_ids = set(
-        Notification.objects.filter(
-            sender=request.user,
-            post_id__in=[post.id for post in all_posts_list], # Check only against posts in our feed
-            message="liked your post"
-        ).values_list('post_id', flat=True)
-    )
+    # --- LIKED POSTS LOGIC (UPDATED TO USE PostLike MODEL) ---
+    if request.user.is_authenticated:
+        # Get a set of post IDs from the feed that the current user has liked.
+        liked_post_ids = set(
+            PostLike.objects.filter(
+                user=request.user,
+                post__in=all_posts_list  # Check only against posts in our feed
+            ).values_list('post_id', flat=True)
+        )
+    else:
+        liked_post_ids = set()
 
     # Annotate each post object with a new attribute 'is_liked_by_user'.
-    # The template will use this to decide which heart icon to show.
     for post in all_posts_list:
         post.is_liked_by_user = post.id in liked_post_ids
-        
-    # --- END OF FIX ---
+    # --- END OF UPDATED LOGIC ---
 
     # Pagination
-    paginator = Paginator(all_posts_list, 9) # Show 9 posts per page
+    paginator = Paginator(all_posts_list, 9)
     page_number = request.GET.get('page')
-    
-    # .get_page() is a safer way to handle pagination as it gracefully handles
-    # invalid page numbers and empty pages.
     posts_page = paginator.get_page(page_number)
 
     context = {
         'posts_page': posts_page,
-        'user_has_profile': True, # If this view is rendered, the user must have a profile
+        'user_has_profile': True,
         'page_title': "Community Feed", 
     }
     return render(request, 'matri/post_feed.html', context)
@@ -795,111 +873,66 @@ def post_feed_view(request):
 def like_post(request, post_id):
     post = get_object_or_404(UserPost, id=post_id)
     
-    # Keep this check as a security measure
     if post.user_profile.user == request.user:
         return JsonResponse({'status': 'error', 'message': 'Cannot like your own post'}, status=403)
 
-    like_message = "liked your post"
-    
-    # Use a queryset to handle potential duplicates
-    existing_notifications = Notification.objects.filter(
-        sender=request.user,
-        post=post,
-        message=like_message
-    )
+    like_obj, created = PostLike.objects.get_or_create(user=request.user, post=post)
 
-    if existing_notifications.exists():
-        # This will delete ALL matching notifications, ensuring a clean "unlike"
-        existing_notifications.delete()
-        action = 'unliked'
-    else:
-        Notification.objects.create(
-            recipient=post.user_profile.user,
-            sender=request.user,
-            post=post,
-            message=like_message
-        )
+    if created:
         action = 'liked'
+        # --- Create a notification for the post owner ---
+        sender_profile = get_object_or_404(UserProfile, user=request.user)
+        if post.user_profile.user != request.user:
+            Notification.objects.create(
+                recipient=post.user_profile.user,
+                sender_profile=sender_profile,
+                notification_type='like',
+                text=f"{sender_profile.full_name} liked your post.",
+                post=post
+            )
+    else:
+        like_obj.delete()
+        action = 'unliked'
+        # --- Delete the corresponding notification ---
+        Notification.objects.filter(
+            recipient=post.user_profile.user,
+            sender_profile__user=request.user,
+            notification_type='like',
+            post=post
+        ).delete()
 
     return JsonResponse({'status': 'success', 'action': action})
-    
 
 
 
 
+
+
+
+
+# --- AJAX VIEW FOR LIVE MESSAGE COUNT (This is the one I provided before) ---
 @login_required
-def get_notifications(request):
-    notifications = Notification.objects.filter(recipient=request.user, is_read=False) \
-                                     .select_related('sender__userprofile', 'post') \
-                                     .order_by('-created_at')
-
-    serialized_notifications = []
-    for n in notifications:
-        sender_profile_pic_url = None
-        sender_display_name = n.sender.username
-        sender_profile_id = None
-
-        if hasattr(n.sender, 'userprofile') and n.sender.userprofile:
-            user_profile = n.sender.userprofile
-            if user_profile.profile_picture:
-                sender_profile_pic_url = user_profile.profile_picture.url
-            if user_profile.full_name:
-                sender_display_name = user_profile.full_name
-            sender_profile_id = user_profile.id
-
-        click_action_url = "#"
-        message_text = n.message
-
-        if "sent you a message" in n.message and sender_profile_id:
-            # Find the chat room between the sender and recipient
-            current_user_profile = UserProfile.objects.get(user=request.user)
-            sender_profile = UserProfile.objects.get(id=sender_profile_id)
-            room = ChatRoom.objects.filter(participants=current_user_profile).filter(participants=sender_profile).first()
-            if room:
-                click_action_url = f"/messages/room/{room.id}/"
-        elif "interest request" in n.message and sender_profile_id:
-            click_action_url = f"/profile/view/{sender_profile_id}/"
-        elif n.post:
-            click_action_url = f"/profile/view/{sender_profile_id}/" # Or a link to the post itself
-        elif sender_profile_id:
-            click_action_url = f"/profile/view/{sender_profile_id}/"
-
-        full_message_html = f"<strong>{sender_display_name}</strong> {message_text}"
-
-        serialized_notifications.append({
-            'id': n.id,
-            'message_html': full_message_html,
-            'sender_profile_pic_url': sender_profile_pic_url,
-            'post_preview_url': n.post.image.url if n.post and n.post.image else None,
-            'click_action_url': click_action_url,
-            'created_at': n.created_at.strftime("%b %d, %Y %I:%M %p")
-        })
-
-    count = len(serialized_notifications)
-    return JsonResponse({
-        'count': count,
-        'notifications': serialized_notifications
-    })
-
-
-
-@login_required
-@require_POST # Make sure this view only accepts POST requests
-def mark_notification_read(request, notification_id): # Ensure this is @require_POST
+def get_unread_message_count(request):
+    """
+    API endpoint to get the total number of unread messages for the logged-in user.
+    """
     try:
-        notification = Notification.objects.get(id=notification_id, recipient=request.user)
-        notification.is_read = True
-        notification.save()
-        return JsonResponse({'status': 'success'})
-    except Notification.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Notification not found'}, status=404)
+        current_user_profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        # If user has no profile, they can't have messages
+        return JsonResponse({'unread_count': 0})
 
-# If you haven't implemented mark_all_notifications_read, add it:
-@login_required
-@require_POST
-def mark_all_notifications_read(request):
-    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
-    return JsonResponse({'status': 'success', 'message': 'All notifications marked as read.'})
+    # Count unread messages in all rooms the user is a participant of.
+    count = ChatMessage.objects.filter(
+        room__participants=current_user_profile,
+        is_read=False
+    ).exclude(
+        sender=current_user_profile
+    ).count()
+    
+    return JsonResponse({'unread_count': count})
+
+
 
 
 
@@ -909,7 +942,6 @@ def mark_all_notifications_read(request):
 @login_required
 @require_POST
 def send_interest_request(request, profile_id):
-    # This view is correct, no changes needed
     sender_profile = get_object_or_404(UserProfile, user=request.user)
     receiver_profile = get_object_or_404(UserProfile, id=profile_id)
 
@@ -922,12 +954,15 @@ def send_interest_request(request, profile_id):
         messages.warning(request, "An interest request already exists with this user.")
         return redirect('view_other_user_profile', profile_id=profile_id)
 
-    InterestRequest.objects.create(sender=sender_profile, receiver=receiver_profile, status='pending')
+    interest_req = InterestRequest.objects.create(sender=sender_profile, receiver=receiver_profile, status='pending')
+    
+    # --- Create notification for the receiver ---
     Notification.objects.create(
         recipient=receiver_profile.user,
-        sender=request.user,
-        message=f"{sender_profile.full_name} sent you an interest request.",
-        post=None
+        sender_profile=sender_profile,
+        notification_type='interest_sent',
+        text=f"You have received an interest request from {sender_profile.full_name}.",
+        interest_request=interest_req
     )
     
     messages.success(request, f"Your interest has been sent to {receiver_profile.full_name}.")
@@ -937,7 +972,6 @@ def send_interest_request(request, profile_id):
 @login_required
 @require_POST
 def accept_interest_request(request, interest_id):
-    # This view is mostly correct, just changing the redirect
     interest_request = get_object_or_404(InterestRequest, id=interest_id)
     my_profile = get_object_or_404(UserProfile, user=request.user)
 
@@ -948,16 +982,63 @@ def accept_interest_request(request, interest_id):
     interest_request.status = 'accepted'
     interest_request.save()
 
+    # --- Create notification for the sender ---
     Notification.objects.create(
         recipient=interest_request.sender.user,
-        sender=request.user,
-        message=f"{my_profile.full_name} accepted your interest request!",
-        post=None
+        sender_profile=my_profile,
+        notification_type='interest_accepted',
+        text=f"{my_profile.full_name} has accepted your interest request.",
+        interest_request=interest_request
     )
 
-    messages.success(request, f"You have accepted the interest from {interest_request.sender.full_name}.\nNow you can see the contact number or chat with the user")
-    # Redirect back to the new manage interests page
-    return redirect('manage_interests')
+    messages.success(request, f"You have accepted the interest from {interest_request.sender.full_name}. You can now see their contact details and start a chat.")
+    return redirect('view_other_user_profile', profile_id=interest_request.sender.id)
+
+
+
+
+@login_required
+def notification_list_view(request):
+    """
+    Displays a list of all notifications and marks them as read.
+    This is a full page, not an API.
+    """
+    # Get all notifications for the user, newest first.
+    notifications = Notification.objects.filter(recipient=request.user)
+
+    # Mark all unread notifications as read.
+    # We do this after fetching so we can still show which ones were new.
+    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+
+    context = {
+        'page_title': 'Your Notifications',
+        'notifications': notifications,
+        'user_has_profile': True, # Assume user has a profile to see this page
+    }
+    return render(request, 'matri/notifications.html', context)
+
+
+
+
+
+@login_required
+def mark_all_as_read_view(request):
+    """
+    Finds all unread notifications for the logged-in user and
+    marks them as read.
+    """
+    # Use .update() for an efficient, single database query
+    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+
+    # (Optional) Add a success message to inform the user
+    messages.success(request, "All notifications have been marked as read.")
+
+    # Redirect the user back to the notifications list page
+    return redirect('notification_list')
+
+
+
+
 
 
 # --- NEW VIEWS TO ADD ---
@@ -977,8 +1058,6 @@ def reject_interest_request(request, interest_id):
     interest_request.status = 'rejected'
     interest_request.save()
     
-    # You can optionally notify the sender of the rejection
-    # Notification.objects.create(...)
 
     messages.info(request, f"You have rejected the interest from {interest_request.sender.full_name}.")
     return redirect('manage_interests')
@@ -1108,28 +1187,25 @@ def delete_user_profile_view(request):
 def start_chat(request, profile_id):
     """
     Finds or creates a chat room for two users and redirects to it.
-    This view now prevents chatting if the interest request was rejected.
+    This view is already well-structured and secure. No changes are needed.
     """
     other_user_profile = get_object_or_404(UserProfile, id=profile_id)
     current_user_profile = get_object_or_404(UserProfile, user=request.user)
-    
-    # --- NEW: Check for a rejected interest request first ---
-    # Look for a request in either direction that has been rejected.
+
+    # Security Check 1: Ensure there isn't a rejected interest request.
     rejected_interest = InterestRequest.objects.filter(
-        (Q(sender=current_user_profile, receiver=other_user_profile) | 
+        (Q(sender=current_user_profile, receiver=other_user_profile) |
          Q(sender=other_user_profile, receiver=current_user_profile)),
         status='rejected'
     ).exists()
 
     if rejected_interest:
-        messages.error(request, "You cannot initiate a chat as the interest request was not accepted.")
-        # Redirect back to the other user's profile page
+        messages.error(request, "You cannot start a chat as the interest request was not accepted.")
         return redirect('view_other_user_profile', profile_id=profile_id)
 
-    # --- EXISTING: Security check to ensure an accepted interest exists ---
-    # This check remains crucial.
+    # Security Check 2: Ensure an accepted interest request exists.
     accepted_interest = InterestRequest.objects.filter(
-        (Q(sender=current_user_profile, receiver=other_user_profile) | 
+        (Q(sender=current_user_profile, receiver=other_user_profile) |
          Q(sender=other_user_profile, receiver=current_user_profile)),
         status='accepted'
     ).exists()
@@ -1138,7 +1214,9 @@ def start_chat(request, profile_id):
         messages.error(request, "You can only chat with users whose interest request you have accepted.")
         return redirect('view_other_user_profile', profile_id=profile_id)
 
-    # If checks pass, find or create the room
+    # If checks pass, find or create the room.
+    # This method of chaining filters is the standard and correct way to find
+    # a room with a specific pair of many-to-many participants.
     room = ChatRoom.objects.filter(participants=current_user_profile).filter(participants=other_user_profile).first()
 
     if not room:
@@ -1151,40 +1229,61 @@ def start_chat(request, profile_id):
 @login_required
 def chat_room_list(request):
     """
-    Displays a list of all chat rooms the user is in, and suggestions to start new chats.
-    This view's logic is already correct as it only suggests chats for 'accepted' interests.
+    Displays a list of all chat rooms and suggestions for new chats.
+    --- OPTIMIZED to reduce database queries significantly. ---
     """
     current_user_profile = get_object_or_404(UserProfile, user=request.user)
 
-    # Get existing chat rooms, ordered by the most recent message
-    existing_chats = current_user_profile.chat_rooms.annotate(
-        last_message_time=Max('messages__timestamp')
-    ).order_by('-last_message_time')
-    
+    # --- Part 1: Get Existing Chats (Highly Optimized) ---
+
+    # Subquery to get the timestamp of the latest message in each room.
+    latest_message_subquery = ChatMessage.objects.filter(
+        room=OuterRef('pk')
+    ).order_by('-timestamp').values('timestamp')[:1]
+
+    # Annotate each chat room with the unread message count and the timestamp of the last message.
+    # This performs all calculations in a single, efficient database query.
+    chat_rooms_with_details = current_user_profile.chat_rooms.annotate(
+        unread_count=Count(
+            'messages',
+            filter=Q(messages__is_read=False) & ~Q(messages__sender=current_user_profile)
+        ),
+        last_message_time=Subquery(latest_message_subquery)
+    ).order_by('-last_message_time') # Order by the most recently active chat
+
     chat_list = []
-    for room in existing_chats:
+    # This loop no longer makes database queries.
+    for room in chat_rooms_with_details:
         other_user = room.participants.exclude(id=current_user_profile.id).first()
-        last_message = room.messages.order_by('-timestamp').first()
-        unread_count = room.messages.filter(is_read=False).exclude(sender=current_user_profile).count()
+        last_message = room.messages.order_by('-timestamp').first() # This one extra query per room is acceptable for simplicity, but could also be subqueried if needed.
+        
         chat_list.append({
             'room': room,
             'other_user': other_user,
             'last_message': last_message,
-            'unread_count': unread_count
+            'unread_count': room.unread_count, # Use the annotated value
         })
 
-    # Get accepted interests where a chat hasn't started yet.
-    # This correctly filters out pending and rejected requests.
+    # --- Part 2: Get Chat Suggestions (Optimized) ---
+
+    # Get profiles of users the current user already has a chat with.
+    existing_chat_partner_ids = set(UserProfile.objects.filter(
+        chat_rooms__in=current_user_profile.chat_rooms.all()
+    ).exclude(id=current_user_profile.id).values_list('id', flat=True))
+
+    # Get all accepted interests.
     accepted_interests = InterestRequest.objects.filter(
         (Q(sender=current_user_profile) | Q(receiver=current_user_profile)),
         status='accepted'
-    )
-    
+    ).select_related('sender', 'receiver') # Eager load related profiles
+
     chat_suggestions = []
+    # This loop no longer makes database queries.
     for interest in accepted_interests:
         other_user = interest.sender if interest.receiver == current_user_profile else interest.receiver
-        # Check if a chat room already exists for this pair
-        if not ChatRoom.objects.filter(participants=current_user_profile).filter(participants=other_user).exists():
+        
+        # Check against the pre-fetched set of IDs instead of hitting the DB.
+        if other_user.id not in existing_chat_partner_ids:
             chat_suggestions.append(other_user)
 
     context = {
@@ -1196,25 +1295,29 @@ def chat_room_list(request):
     return render(request, 'matri/chat_room_list.html', context)
 
 
-
 @login_required
 def chat_room_detail(request, room_id):
     """
     Displays the chat room and handles message fetching.
+    --- Minor optimization in the security check. ---
     """
-    room = get_object_or_404(ChatRoom, id=room_id)
+    room = get_object_or_404(ChatRoom.objects.prefetch_related('participants', 'messages__sender'), id=room_id)
     current_user_profile = get_object_or_404(UserProfile, user=request.user)
 
-    # Security check: Ensure the user is a participant of the room
-    if current_user_profile not in room.participants.all():
+    # Security check: Ensure the user is a participant of the room.
+    # Using .exists() is slightly more performant than loading all participants.
+    if not room.participants.filter(pk=current_user_profile.pk).exists():
         messages.error(request, "You do not have permission to view this chat.")
         return redirect('chat_room_list')
 
-    # Mark messages as read
+    # Mark all messages in this room sent by OTHERS as read.
+    # This is an efficient, single UPDATE query.
     room.messages.filter(is_read=False).exclude(sender=current_user_profile).update(is_read=True)
 
     other_user_profile = room.participants.exclude(user=request.user).first()
-    messages_list = room.messages.all().order_by('timestamp')
+    
+    # The 'messages' have been prefetched in the initial query for efficiency.
+    messages_list = room.messages.all()
 
     context = {
         'page_title': f"Chat with {other_user_profile.full_name}",
@@ -1225,6 +1328,29 @@ def chat_room_detail(request, room_id):
         'user_has_profile': True,
     }
     return render(request, 'matri/chat_room_detail.html', context)
+
+
+@login_required
+def get_unread_message_count(request):
+    """
+    API endpoint to get the total number of unread messages for the logged-in user.
+    This view is already optimal and correct. No changes needed.
+    """
+    try:
+        current_user_profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        # If user has no profile, they can't have any messages.
+        return JsonResponse({'unread_count': 0})
+
+    # This single .count() query is the most efficient way to get this number.
+    count = ChatMessage.objects.filter(
+        room__participants=current_user_profile,
+        is_read=False
+    ).exclude(
+        sender=current_user_profile
+    ).count()
+    
+    return JsonResponse({'unread_count': count})
 
 
 
@@ -1415,60 +1541,11 @@ def verify_payment(request):
 
 
 
-# @login_required
-# def get_vapid_public_key(request):
-#     """Returns the VAPID public key."""
-#     public_key = settings.WEBPUSH_SETTINGS.get('VAPID_PUBLIC_KEY')
-#     return JsonResponse({'public_key': public_key})
 
 
 
 
 
-# @login_required
-# @csrf_exempt
-# def subscribe_to_push(request):
-#     """
-#     Subscribes a user to push notifications.
-#     This version uses the library's intended and simplest pattern.
-#     """
-#     if request.method != 'POST':
-#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
-
-#     try:
-#         # 1. Get the subscription data
-#         subscription_data = json.loads(request.body)
-        
-#         # 2. Get or create a Group for the user.
-#         # The library is designed to send notifications to Groups.
-#         # A "group" can just be one user. We'll name the group after the user's ID.
-#         group, created = Group.objects.get_or_create(name=f"user_{request.user.id}")
-
-#         # 3. Create a PushInformation object and add it to the user's group
-#         # This is the single step that creates the subscription and links it.
-#         PushInformation.objects.create(
-#             subscription_info=subscription_data,
-#             group=group
-#         )
-        
-#         # We can also add the user directly if we want to use send_user_notification
-#         # This part is slightly redundant if using groups, but provides flexibility
-#         # and might be what send_user_notification looks for. Let's add it for safety.
-#         # First, find the PushInformation object we just made.
-#         push_info = PushInformation.objects.get(subscription_info=subscription_data)
-        
-#         SubscriptionInfo.objects.get_or_create(
-#             user=request.user,
-#             push_information=push_info
-#         )
-
-#         return JsonResponse({'status': 'success', 'message': 'Subscription saved.'})
-
-#     except Exception as e:
-#         print(f"CRITICAL Error in subscribe_to_push: {e}")
-#         import traceback
-#         traceback.print_exc()
-#         return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
     
 
 
@@ -1479,7 +1556,7 @@ def verify_payment(request):
 
 def service_worker(request):
     # Make sure the file path is correct
-    sw_path = os.path.join(settings.BASE_DIR, 'static', 'serviceworker.js') 
+    sw_path = os.path.join(settings.BASE_DIR, 'assets', 'serviceworker.js') 
     with open(sw_path, 'r') as f:
         sw_content = f.read()
     

@@ -1,6 +1,6 @@
 # admin.py
 from django.contrib import admin
-from .models import Profile, UserProfile, PartnerPreference, UserPost, InterestRequest # Add UserPost
+from .models import Profile, UserProfile, PartnerPreference, UserPost, InterestRequest, Notification # Add UserPost
 from django.utils.html import mark_safe
 
 
@@ -36,5 +36,6 @@ class UserPostAdmin(admin.ModelAdmin):
 admin.site.register(Profile)
 # admin.site.register(UserProfile) # Already registered with custom admin
 admin.site.register(PartnerPreference)
+admin.site.register(Notification)
 admin.site.register(InterestRequest)
 # admin.site.register(UserPost) # Already registered with custom admin

@@ -1,7 +1,9 @@
 # models.py
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.contrib.humanize.templatetags.humanize import naturaltime
 
 
 
@@ -28,12 +30,22 @@ class UserProfile(models.Model):
     ]
     FAMILY_TYPE_CHOICES = [('Joint', 'Joint'), ('Nuclear', 'Nuclear')]
 
+    DENOMINATION_CHOICES = [
+        ('IPC', 'IPC'),
+        ('AG', 'AG'),
+        ('Full Gospel', 'Full Gospel'),
+        ('TPM', 'TPM'),
+        ('Sharon Fellowship', 'Sharon Fellowship'),
+        ('Other Independent Church', 'Other Independent Church'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_of_birth = models.DateField(null=True, blank=True)
     religion = models.CharField(max_length=50, default="Christian", editable=False)
     category = models.CharField(max_length=50, default="Pentecost", editable=False)
+    denomination = models.CharField(max_length=50, choices=DENOMINATION_CHOICES, blank=True, verbose_name="Denomination (Church)")
     mother_tongue = models.CharField(max_length=50, default="Malayalam")
     marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES)
     height = models.IntegerField(help_text="Height in Cm (e.g. 172)", null=True, blank=True)
@@ -123,16 +135,36 @@ class UserPost(models.Model):
 
 
 
-class Notification(models.Model):
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', null=True)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    post = models.ForeignKey('UserPost', on_delete=models.CASCADE, null=True)
-    message = models.CharField(max_length=255)
-    is_read = models.BooleanField(default=False)
+# class Notification(models.Model):
+#     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', null=True)
+#     sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+#     post = models.ForeignKey('UserPost', on_delete=models.CASCADE, null=True)
+#     message = models.CharField(max_length=255)
+#     is_read = models.BooleanField(default=False)
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"Notification for {self.recipient.username} - {self.message}"
+
+
+
+class PostLike(models.Model):
+    """
+    Represents a "like" on a UserPost by a User.
+    This replaces the notification-based like system.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_likes')
+    post = models.ForeignKey(UserPost, on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # A user can only like a post once
+        unique_together = ('user', 'post')
+        ordering = ['-created_at']
+
     def __str__(self):
-        return f"Notification for {self.recipient.username} - {self.message}"
+        return f"{self.user.username} likes Post {self.post.id}"
+
     
     
 
@@ -207,6 +239,96 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.id} by {self.user.username}"
+
+
+
+
+
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ('like', 'Post Like'),
+        ('interest_sent', 'Interest Sent'),
+        ('interest_accepted', 'Interest Accepted'),
+        ('new_message', 'New Message'),
+    ]
+
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    sender_profile = models.ForeignKey('UserProfile', on_delete=models.SET_NULL, related_name='sent_notifications', null=True)
+    
+    notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+
+    # Related objects
+    post = models.ForeignKey('UserPost', on_delete=models.CASCADE, null=True, blank=True)
+    interest_request = models.ForeignKey('InterestRequest', on_delete=models.CASCADE, null=True, blank=True)
+    chat_room = models.ForeignKey('ChatRoom', on_delete=models.CASCADE, null=True, blank=True)
+
+    text = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Notification for {self.recipient.username}: {self.text}"
+
+    # --- NEW LOGIC: MODEL PROPERTIES ---
+
+    @property
+    def time_since(self):
+        """Returns a human-readable time since creation (e.g., '5 minutes ago')."""
+        return naturaltime(self.created_at)
+
+    @property
+    def sender_name(self):
+        """Safely returns the sender's full name or a default."""
+        if self.sender_profile:
+            return self.sender_profile.full_name
+        return "A user"
+
+    @property
+    def sender_avatar_url(self):
+        """Safely returns the sender's avatar URL or a default."""
+        if self.sender_profile and self.sender_profile.profile_picture:
+            return self.sender_profile.profile_picture.url
+        return '/static/images/default_avatar.png' # Make sure you have this default image
+
+    @property
+    def related_image_url(self):
+        """Returns the image URL for 'like' notifications, otherwise None."""
+        if self.notification_type == 'like' and self.post and self.post.image:
+            return self.post.image.url
+        return None
+
+    @property
+    def link(self):
+        """
+        Returns the correct URL for the notification. This is the most robust part.
+        It will not crash if a URL cannot be found.
+        """
+        try:
+            if self.notification_type == 'like':
+                # Link to the post feed where the post is visible
+                return reverse('post_feed')
+            
+            elif self.notification_type in ['interest_sent', 'interest_accepted']:
+                # Link to the sender's profile
+                if self.sender_profile:
+                    return reverse('view_other_user_profile', args=[self.sender_profile.id])
+            
+            elif self.notification_type == 'new_message':
+                # Link to the chat room
+                if self.chat_room:
+                    return reverse('chat_room_detail', args=[self.chat_room.id])
+        
+        except Exception:
+            # If any URL fails to reverse, return a safe fallback link.
+            return "#"
+        
+        return "#" # Default fallback
+    
+
+    
     
 
 

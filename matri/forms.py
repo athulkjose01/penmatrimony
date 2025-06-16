@@ -1,4 +1,5 @@
 # matri/forms.py
+import re
 from django import forms
 from .models import UserProfile, PartnerPreference
 from datetime import date # Make sure UserProfile and PartnerPreference models are imported
@@ -157,7 +158,7 @@ class UserSearchForm(forms.Form):
         widget=forms.TextInput(attrs={'placeholder': 'e.g., user7654', 'class': 'form-control'})
     )
     gender = forms.ChoiceField(
-        choices=[('', 'Any Gender')] + UserProfile.GENDER_CHOICES[:2], # Limit to Male/Female for search
+        choices=[('', 'Any Gender')] + UserProfile.GENDER_CHOICES[:2],
         required=False, label="Looking for Gender",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -172,6 +173,12 @@ class UserSearchForm(forms.Form):
     marital_status = forms.ChoiceField(
         choices=[('', 'Any Marital Status')] + UserProfile.MARITAL_STATUS_CHOICES,
         required=False, label="Marital Status",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    # --- NEW: Denomination field added ---
+    denomination = forms.ChoiceField(
+        choices=[('', 'Any Denomination')] + UserProfile.DENOMINATION_CHOICES,
+        required=False, label="Denomination",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     height_min = forms.DecimalField(
@@ -204,69 +211,41 @@ class UserSearchForm(forms.Form):
         required=False, label="Smoking Habit",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
-    family_type = forms.ChoiceField(
-        choices=[('', 'Any Family Type')] + UserProfile.FAMILY_TYPE_CHOICES,
-        required=False, label="Family Type",
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
+    # --- REMOVED: family_type field ---
+
     search_type = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
-        user_gender = kwargs.pop('user_gender', None) # Current logged-in user's gender
+        user_gender = kwargs.pop('user_gender', None)
         super().__init__(*args, **kwargs)
 
-        # Auto-select opposite gender in "Looking for Gender" if user's gender is known
-        # and the form is not bound (i.e., not a submission) and not pre-filled by GET params.
         if user_gender and not self.is_bound and not self.initial.get('gender') and not (args and args[0]):
             if user_gender == 'Male':
                 self.initial['gender'] = 'Female'
             elif user_gender == 'Female':
                 self.initial['gender'] = 'Male'
         
-        # If form is bound (submitted), conditionally set 'required' for fields
-        # based on the submitted 'search_type'.
         if self.is_bound:
             submitted_search_type = self.data.get('search_type')
             if submitted_search_type == 'username_search':
-                # Only username_search is relevant for this search type.
-                # All other advanced fields are effectively optional for this submission.
                 for field_name in self.fields:
                     if field_name not in ['username_search', 'search_type']:
-                        self.fields[field_name].required = False # Mark as not required for validation
+                        self.fields[field_name].required = False
             elif submitted_search_type == 'advanced_search':
-                 # username_search is optional for advanced search.
                  self.fields['username_search'].required = False
 
     def clean_username_search(self):
-        """
-        Custom validation for the username_search field.
-        If search_type is 'username_search', this field becomes mandatory.
-        """
         data = self.cleaned_data.get('username_search')
-        # Access self.data (raw request data) because cleaned_data for search_type might not be available yet
-        # if search_type itself fails validation or is processed later.
         search_type_from_submission = self.data.get('search_type') 
-
         if search_type_from_submission == 'username_search' and not data:
              raise forms.ValidationError("Please enter a Username for Username Search.")
-        # Optional: Add further format validation for username if needed (e.g., starts with 'user')
-        # if data and not data.lower().startswith('user'):
-        #     raise forms.ValidationError("Username should typically start with 'user'.")
         return data
 
     def clean(self):
         cleaned_data = super().clean()
-        # The search_type from self.data is more reliable here than from cleaned_data
-        # as cleaned_data might not have it if it's invalid or processed later.
-        search_type_from_submission = self.data.get('search_type')
-
-        # Only perform range validations if it's an advanced search
-        # or if the fields have values (as they are all optional by default)
-        # The 'required' status for specific search types is handled in __init__ and clean_FIELDNAME.
-
         age_min = cleaned_data.get('age_min')
         age_max = cleaned_data.get('age_max')
-        if age_min is not None and age_max is not None and age_min > age_max: # Check for None
+        if age_min is not None and age_max is not None and age_min > age_max:
             self.add_error('age_min', "Min age cannot be greater than max age.")
             self.add_error('age_max', None)
         

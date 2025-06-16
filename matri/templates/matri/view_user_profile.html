@@ -873,6 +873,7 @@
                         <div class="profile-detail-section section-personal-details">
                             <h3 class="profile-section-title"><i class="fas fa-user-circle"></i>Personal Details</h3>
                             <p class="profile-detail-item"><strong>Full Name:</strong> <span class="detail-value">{{ profile.full_name|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Denomination:</strong> <span class="detail-value">{{ profile.denomination|default:"-" }}</span></p>
                             <p class="profile-detail-item"><strong>Gender:</strong> <span class="detail-value">{{ profile.get_gender_display|default:"-" }}</span></p>
                             <p class="profile-detail-item"><strong>Age:</strong> <span class="detail-value">{% if profile.age %}{{ profile.age }} years{% else %}<span class="not-specified">Not specified</span>{% endif %}</span></p>
                             <p class="profile-detail-item"><strong>Date of Birth:</strong> <span class="detail-value">{{ profile.date_of_birth|date:"F d, Y"|default:"-" }}</span></p>
