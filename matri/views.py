@@ -1588,6 +1588,29 @@ def terms_and_conditions_view(request):
 
 
 
+def contact_us_view(request):
+    """
+    Renders the Contact Us page.
+    """
+    # Replace 'your_app_name/contact_us.html' with the actual path to your template
+    return render(request, 'matri/contact_us.html')
+
+def about_us_view(request):
+    """
+    Renders the About Us page.
+    """
+    # Replace 'your_app_name/about_us.html' with the actual path to your template
+    return render(request, 'matri/about_us.html')
+
+def refund_policy_view(request):
+    """
+    Renders the Refund Policy page.
+    """
+    # Replace 'your_app_name/refund_policy.html' with the actual path to your template
+    return render(request, 'matri/refund_policy.html')
+
+
+
 
 
 

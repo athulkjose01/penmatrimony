@@ -15,59 +15,6 @@
     
     <!-- Your CSS styles are unchanged -->
     <style>
-        /* Toast notification styling */
-        #exit-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            display: none;
-            animation: fadeIn 0.3s ease-out;
-            backdrop-filter: blur(5px);
-            max-width: 90%;
-            text-align: center;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; bottom: 0; }
-            to { opacity: 1; bottom: 30px; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; bottom: 30px; }
-            to { opacity: 0; bottom: 0; }
-        }
-        
-        #exit-toast.show {
-            display: block;
-        }
-        
-        #exit-toast.hide {
-            animation: fadeOut 0.3s ease-out forwards;
-        }
-        
-        /* Countdown circle */
-        .countdown-circle {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #e74c3c;
-            color: white;
-            text-align: center;
-            line-height: 24px;
-            margin-left: 8px;
-            font-size: 14px;
-            font-weight: bold;
-        }
         
         * {
             margin: 0;
@@ -959,12 +906,11 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="{% url 'index' %}#home">Home</a></li>
+                        <li><a href="{% url 'about_us' %}">About Us</a></li>
+                        <li><a href="{% url 'contact_us' %}">Contact Us</a></li>
+                        <li><a href="{% url 'refund_policy' %}">Refund Policy</a></li>
                         <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
                         <li><a href="{% url 'terms_and_conditions' %}">Terms and Conditions</a></li>
-                        {% if user.is_authenticated and user_has_profile %}
-                        <li><a href="{% url 'search_users' %}">Search Members</a></li>
-                        {% endif %}
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -980,16 +926,7 @@
     </footer>
 
 
-     <!-- Exit Toast Notification -->
-    <div id="exit-toast">
-        <i class="fas fa-sign-out-alt"></i> Press back again to exit
-        <span id="countdown" class="countdown-circle">3</span>
-    </div>
 
-    <!-- ==================== SCRIPT SECTION (UPDATED) ==================== -->
-    <!-- THE FIX IS HERE: ADDING THE OPENING <script> TAG -->
-         <!-- ==================== SCRIPT SECTION (SERVER-SIDE NOTIFICATION METHOD) ==================== -->
-        <!-- ==================== SCRIPT SECTION (ROBUST EXIT-ON-BACK METHOD) ==================== -->
     <script>
     // --- Helper Function to get CSRF Token (Unchanged) ---
     function getCookie(name) {
@@ -1011,117 +948,7 @@
     // --- Main Logic on Page Load ---
     document.addEventListener('DOMContentLoaded', function() {
         
-        // =========================================================================
-        // === NEW: ROBUST "EXIT ON BACK" LOGIC FOR THE HOMEPAGE ===================
-        // =========================================================================
-        // This code only runs if the current page is the index/homepage.
-        {% if request.resolver_match.url_name == 'index' %}
-            let backPressed = false;
-            let exitTimer = null;
-            let countdownValue = 3;
-            const exitToast = document.getElementById('exit-toast');
-            const countdownElement = document.getElementById('countdown');
             
-            // Initialize history state
-            history.replaceState({ isHome: true }, '');
-            history.pushState({ isHome: false }, '');
-            
-            // Handle back button press
-            window.addEventListener('popstate', function(event) {
-                if (event.state && event.state.isHome) {
-                    // Prevent default back behavior
-                    event.preventDefault();
-                    
-                    if (backPressed) {
-                        // Second back press - exit the site
-                        tryToExitApp();
-                    } else {
-                        // First back press - show exit toast
-                        backPressed = true;
-                        showExitToast();
-                        
-                        // Reset after 3 seconds
-                        resetBackPress(3000);
-                    }
-                    
-                    // Push a new state to maintain our position
-                    history.pushState({ isHome: false }, '');
-                }
-            });
-            
-            // Prevent navigating away with back button on other pages
-            window.addEventListener('beforeunload', function(e) {
-                if (backPressed) {
-                    e.preventDefault();
-                    e.returnValue = '';
-                }
-            });
-            
-            // Function to show the exit toast with countdown
-            function showExitToast() {
-                countdownValue = 3;
-                countdownElement.textContent = countdownValue;
-                exitToast.classList.remove('hide');
-                exitToast.classList.add('show');
-                
-                // Start countdown
-                const countdownInterval = setInterval(() => {
-                    countdownValue--;
-                    countdownElement.textContent = countdownValue;
-                    
-                    if (countdownValue <= 0) {
-                        clearInterval(countdownInterval);
-                        hideExitToast();
-                    }
-                }, 1000);
-            }
-            
-            // Function to hide the exit toast
-            function hideExitToast() {
-                exitToast.classList.remove('show');
-                exitToast.classList.add('hide');
-                
-                // Remove hide class after animation completes
-                setTimeout(() => {
-                    exitToast.classList.remove('hide');
-                }, 300);
-            }
-            
-            // Function to reset the back press state
-            function resetBackPress(timeout = 3000) {
-                if (exitTimer) clearTimeout(exitTimer);
-                exitTimer = setTimeout(() => {
-                    backPressed = false;
-                    hideExitToast();
-                }, timeout);
-            }
-            
-            // Function to attempt to exit the app
-            function tryToExitApp() {
-                // Try to close the window (works when opened by script)
-                try {
-                    window.close();
-                } catch (e) {
-                    console.log("Window.close() not supported");
-                }
-                
-                // For mobile browsers - navigate to a blank page
-                window.location.href = 'about:blank';
-                
-                // For PWAs - attempt to minimize (not standard, but may work on some devices)
-                if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
-                    // This is a PWA - try to simulate going to home screen
-                    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#f8f9fa;"><h2 style="color:#6c757d;">Return to home screen</h2></div>';
-                    setTimeout(() => {
-                        window.location.href = 'about:blank';
-                    }, 500);
-                }
-            }
-        {% endif %}
-        // =========================================================================
-        // === END OF NEW LOGIC ====================================================
-        // =========================================================================
-
 
         // --- Start checking for UNREAD MESSAGE updates if the user is logged in ---
         {% if user.is_authenticated %}

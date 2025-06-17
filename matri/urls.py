@@ -44,4 +44,7 @@ urlpatterns = [
     path('terms-and-conditions/', views.terms_and_conditions_view, name='terms_and_conditions'),
     path('notifications/', views.notification_list_view, name='notification_list'),
     path('notifications/mark-all-as-read/', views.mark_all_as_read_view, name='mark_notifications_as_read'),
+    path('contact-us/', views.contact_us_view, name='contact_us'),
+    path('about-us/', views.about_us_view, name='about_us'),
+    path('refund-policy/', views.refund_policy_view, name='refund_policy'),
 ]
