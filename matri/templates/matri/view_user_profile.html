@@ -99,7 +99,7 @@
 
         .nav-pending-badge {
             display: inline-block;
-            background-color: #f39c12;
+            background-color: #f39c12; /* A warm orange for "pending" status */
             color: white;
             border-radius: 10px;
             padding: 1px 7px;
@@ -107,7 +107,7 @@
             font-weight: bold;
             margin-left: 6px;
             vertical-align: middle;
-            line-height: 1.4;
+            line-height: 1.4; /* Helps with vertical alignment */
         }
 
         .main-view-container {
@@ -424,6 +424,7 @@
             line-height: 1;
         }
 
+        /* FULL PAGE POST VIEW STYLES */
         .full-page-post-view {
             position: fixed;
             top: 0;
@@ -531,6 +532,7 @@
             display: none;
         }
 
+        /* Footer */
         footer {
             background: rgba(58, 45, 76, 0.95);
             backdrop-filter: blur(10px);
@@ -642,6 +644,7 @@
             font-size: 1rem;
         }
 
+        /* Animations */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -661,6 +664,7 @@
         .section-family-background { animation-delay: 0.5s !important; }
         
 
+        /* --- Responsive Styles --- */
         @media (max-width: 992px) {
             .nav-links { gap: 15px; }
             .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
@@ -694,33 +698,25 @@
             .full-page-post-view { padding-top: 50px; }
         }
 
-        /* === UPDATED/MODIFIED FOR VERY SMALL SCREENS === */
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
         @media (max-width: 420px) {
             .logo {
-                font-size: 1.4rem; /* Further reduced logo size */
-            }
-            /* The key fix: Reduce link spacing and font size */
-            .nav-links {
-                gap: 5px; /* Significantly reduce gap */
-            }
-            .nav-links a {
-                font-size: 0.8rem; /* Make link text smaller */
-                padding: 4px 5px; /* Reduce horizontal padding */
-                gap: 5px; /* Reduce space between icon and text */
+                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
             }
             .profile-picture-large, .profile-no-picture {
-                width: 120px;
+                width: 120px; /* Make profile picture smaller */
                 height: 120px;
             }
             .profile-display-header .page-main-title {
-                font-size: 1.9rem;
+                font-size: 1.9rem; /* Make header smaller */
             }
             .profile-subtitle {
-                font-size: 1rem;
+                font-size: 1rem; /* Adjust subtitle */
             }
             .profile-section-title {
-                font-size: 1.4rem;
+                font-size: 1.4rem; /* Make section titles more compact */
             }
+            /* The key change: Stack label and value vertically */
             .profile-detail-item {
                 flex-direction: column;
                 align-items: flex-start;
@@ -728,14 +724,14 @@
                 margin-bottom: 12px;
             }
             .profile-detail-item strong {
-                min-width: auto;
+                min-width: auto; /* Remove the fixed min-width */
                 margin-right: 0;
             }
             .btn-profile-action {
                 padding: 10px 20px;
                 font-size: 0.85rem;
             }
-            .posts-grid.row {
+            .posts-grid.row { /* Make photo grid gutters smaller */
                 --bs-gutter-x: 0.5rem;
                 --bs-gutter-y: 0.5rem;
             }
@@ -744,6 +740,7 @@
 </head>
 <body>
     <nav>
+        <!-- NAV HTML REMAINS UNCHANGED -->
         <div class="nav-container">
             <a href="{% url 'index' %}" class="logo">
                 <i class="fas fa-church"></i> Pentecost Matrimony
@@ -760,6 +757,7 @@
                                 {% endif %}
                             </a>
                         </li>
+
                         <li><a href="{% url 'search_users' %}" {% if request.resolver_match.url_name == 'search_users' %}class="active"{% endif %}><i class="fas fa-search"></i> Search</a></li>
                     {% else %}
                         <li><a href="{% url 'create_user_profile' %}"><i class="fas fa-plus-circle"></i> Create Profile</a></li>
@@ -782,6 +780,7 @@
         {% endif %}
 
         <div class="profile-display-header">
+            <!-- PROFILE HEADER HTML REMAINS UNCHANGED -->
             <div class="profile-picture-wrapper">
                 {% if profile.profile_picture %}
                     <img src="{{ profile.profile_picture.url }}" alt="{{ profile.full_name }}" class="profile-picture-large">
@@ -798,10 +797,14 @@
             </div>
         </div>
 
-        <div class="profile-view-grid row g-lg-4 g-md-3 g-3">
-            <div class="col-12 order-1">
+        <!-- MODIFIED: profile-view-grid using Bootstrap row and cols -->
+        <div class="profile-view-grid row g-lg-4 g-md-3 g-3"> <!-- Responsive gutters, g-3 for slightly more space on small screens -->
+
+            <!-- Section 1: Photo Gallery (Full width on all, first visually) -->
+            <div class="col-12 order-1"> <!-- order-1 ensures it's first in flow on all screens -->
                 <div class="profile-detail-section section-user-posts">
                     <h3 class="profile-section-title"><i class="fas fa-images"></i>My Photo Gallery</h3>
+                    <!-- Enlarged posts-grid: fewer cols per row -->
                     <div class="posts-grid row g-2 g-sm-3 row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4">
                         {% for post in user_posts %}
                         <div class="col">
@@ -831,7 +834,8 @@
                 </div>
             </div>
 
-            <div class="col-12 col-lg-7 order-2">
+            <!-- Section 2: Left Column Content -->
+            <div class="col-12 col-lg-7 order-2"> <!-- order-2 ensures it's second on mobile -->
                 <div class="row g-lg-4 g-md-3 g-3">
                     <div class="col-12 order-lg-1">
                         <div class="profile-detail-section section-personal-details">
@@ -914,7 +918,8 @@
                 </div>
             </div>
 
-            <div class="col-12 col-lg-5 order-3">
+            <!-- Section 3: Right Column Content -->
+            <div class="col-12 col-lg-5 order-3"> <!-- order-3 ensures it's third on mobile -->
                 <div class="row g-lg-4 g-md-3 g-3">
                     <div class="col-12 order-lg-1">
                         <div class="profile-detail-section section-physical-diet">
@@ -961,17 +966,21 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </div> <!-- End .profile-view-grid .row -->
+    </div> <!-- End .main-view-container -->
 
+    <!-- FULL PAGE POST VIEW HTML (Replaces Lightbox) -->
     <div id="fullPagePostView" class="full-page-post-view">
         <button id="fullPagePostCloseBtn" class="full-page-post-close-btn">
             <i class="fas fa-arrow-left"></i> Back to Profile
         </button>
-        <div id="fullPagePostScroller" class="full-page-post-scroller"></div>
+        <div id="fullPagePostScroller" class="full-page-post-scroller">
+            <!-- Posts will be dynamically inserted here by JavaScript -->
+        </div>
     </div>
 
     <footer>
+        <!-- FOOTER HTML REMAINS UNCHANGED -->
         <div class="footer-container">
             <div class="footer-content">
                 <div class="footer-section">
@@ -987,7 +996,7 @@
                 {% if user.is_authenticated %}
                 <div class="logout-section">
                     <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
+                        {% csrf_token %} {# Important for Django POST forms #}
                         <button type="submit" class="btn-logout-page">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </button>
@@ -1010,6 +1019,7 @@
     </footer>
 
     <script>
+    // --- ALL JAVASCRIPT REMAINS UNCHANGED ---
     document.addEventListener('DOMContentLoaded', function() {
         const currentPath = window.location.pathname;
         const navLinks = document.querySelectorAll('.nav-links a');
