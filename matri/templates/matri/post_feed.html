@@ -45,7 +45,15 @@
         a.username:hover, a.username-in-caption:hover { color: #DDA0DD; }
         .post-date { font-size: 0.85rem; color: #b0b0b0; }
         .post-image-container { width: 100%; background-color: #1a1a1a; cursor: pointer; }
-        .post-image { display: block; width: 100%; max-height: 600px; height: auto; object-fit: cover; }
+        
+        /* === MODIFIED STYLE FOR POST IMAGE === */
+        .post-image {
+            display: block;
+            width: 100%;
+            aspect-ratio: 4 / 5; /* This creates a taller, consistent post size */
+            object-fit: cover;   /* This ensures the image fills the space without distortion */
+        }
+        
         .post-content { padding: 1rem 1.5rem; }
         .post-actions { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
         .action-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #cccccc; transition: all 0.3s ease; padding: 0.3rem; }
@@ -74,18 +82,12 @@
         .footer-socials a { margin-right: 12px; font-size: 1.2rem; color: #DDA0DD; }
         .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
         .footer-bottom p { margin-bottom: 5px; }
-
-        @media (max-width: 992px) {
-            .nav-links { gap: 15px; }
-            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
-        }
-
         @media (max-width: 768px) {
             .nav-container { flex-direction: column; gap: 10px; }
             .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; }
             .feed-container { margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 0 0.5rem; }
             .post { margin-bottom: 1.5rem; border-radius: 15px; }
-            .post-image { height: 300px; }
+            /* REMOVED: .post-image { height: 300px; } to allow aspect-ratio to work */
             .post-header { padding: 0.75rem 1rem; }
             .avatar-wrapper { width: 40px; height: 40px; }
             .username { font-size: 0.95rem; }
@@ -96,11 +98,13 @@
             .footer-content { grid-template-columns: 1fr; text-align: center;}
             .footer-socials { text-align: center; margin-top: 10px;}
         }
-        
-        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+         @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        }
         @media (max-width: 420px) {
             .logo {
-                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
+                font-size: 1.5rem;
             }
             .post {
                 border-radius: 12px;
