@@ -20,13 +20,10 @@
 
     <!-- INTERNAL STYLES -->
     <style>
-        /* --- GLOBAL RESET & BODY STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Georgia', serif; line-height: 1.6; color: #E0E0E0; background: black; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
         body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%); pointer-events: none; z-index: -1; }
 
-        /* --- NAVIGATION STYLES (Copied from index.html for consistency) --- */
- /* Navigation - Keep original style */
         nav {
             position: sticky;
             top: 0;
@@ -77,7 +74,6 @@
              border-color: #DDA0DD;
         }
 
-        /* --- MAIN CONTENT & CONTAINER --- */
         .main-view-container { 
             flex-grow: 1; 
             padding-bottom: 20px; 
@@ -85,7 +81,6 @@
         .interests-container { max-width: 800px; margin: 40px auto; padding: 30px; background: rgba(20, 20, 20, 0.9); border-radius: 15px; box-shadow: 0 8px 25px rgba(120, 119, 198, 0.15); border: 1px solid rgba(120, 119, 198, 0.3); }
         .interests-container h1 { text-align: center; color: #DDA0DD; font-family: 'Playfair Display', serif; margin-bottom: 40px; font-size: 2.2rem; }
         
-        /* --- INTEREST SECTION STYLING --- */
         .interest-section { margin-bottom: 50px; }
         .interest-section:last-of-type { margin-bottom: 10px; }
         .interest-section h2 { color: #E0E0E0; border-bottom: 1px solid rgba(221, 160, 221, 0.2); padding-bottom: 10px; margin-bottom: 20px; font-size: 1.5rem; font-family: 'Playfair Display', serif; }
@@ -106,7 +101,6 @@
         .no-requests { text-align: center; padding: 40px 20px; color: #aaa; font-style: italic; }
         .no-requests i { font-size: 2.5rem; margin-bottom: 15px; color: rgba(221, 160, 221, 0.5); }
 
-        /* --- FOOTER STYLES --- */
         footer { background: rgba(58, 45, 76, 0.95); backdrop-filter: blur(10px); color: #e0e0e0; padding: 40px 0 20px; margin-top: auto; }
         .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 30px; }
@@ -119,7 +113,6 @@
         .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
         .footer-bottom p { margin-bottom: 5px; }
 
-        /* --- RESPONSIVE STYLES (Updated to match index.html nav behavior) --- */
         @media (max-width: 992px) {
             .nav-links { gap: 15px; }
             .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
@@ -139,11 +132,40 @@
             footer { text-align: center; }
             .footer-content { grid-template-columns: 1fr; }
         }
+
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
+            }
+            .interests-container h1 {
+                font-size: 1.9rem; /* Make main title smaller */
+            }
+            .interest-section h2 {
+                font-size: 1.3rem; /* Make section titles smaller */
+            }
+            .interest-item {
+                padding: 15px; /* Reduce padding inside each item */
+            }
+            .interest-actor-avatar img,
+            .interest-actor-avatar .avatar-placeholder {
+                width: 50px; /* Make avatars smaller */
+                height: 50px;
+            }
+            .interest-text {
+                font-size: 1rem; /* Adjust text size */
+            }
+            .interest-actions .btn {
+                padding: 0.3rem 0.6rem; /* Make buttons a bit more compact */
+                font-size: 0.85rem;
+            }
+            .no-requests i {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <!-- ======================= NAVBAR ======================= -->
     <nav>
         <div class="nav-container">
             <a href="{% url 'index' %}" class="logo">
@@ -162,12 +184,10 @@
         </div>
     </nav>
 
-    <!-- ======================= MAIN CONTENT ======================= -->
     <div class="main-view-container container">
         <div class="interests-container">
             <h1>{{ page_title }}</h1>
             
-            <!-- SECTION 1: INTEREST REQUESTS RECEIVED (PENDING) -->
             <div class="interest-section">
                 <h2><center><i class="fas fa-inbox me-2"></i>Interest Requests Received</center></h2>
                 {% for req in incoming_requests %}
@@ -205,7 +225,6 @@
                 {% endfor %}
             </div>
 
-            <!-- SECTION 2: INTEREST REQUESTS SENT (PENDING) -->
             <div class="interest-section">
                 <h2><center><i class="fas fa-paper-plane me-2"></i>Interest Requests Sent</center></h2>
                 {% for req in outgoing_requests %}
@@ -233,11 +252,9 @@
                 {% endfor %}
             </div>
 
-            <!-- SECTION 3: ACCEPTED CONNECTIONS ("UN-INTEREST" OPTION) -->
             <div class="interest-section">
                 <h2><center><i class="fas fa-handshake me-2"></i>Your Connections</center></h2>
                 {% for req in accepted_connections %}
-                    {% comment %} Determine who the "other" person is in this connection {% endcomment %}
                     {% if req.sender.user == user %}
                         {% with other_profile=req.receiver %}
                         <div class="interest-item">
@@ -291,7 +308,6 @@
         </div>
     </div>
 
-    <!-- ======================= FOOTER ======================= -->
     <footer>
         <div class="footer-container">
             <div class="footer-content">
@@ -320,6 +336,5 @@
             </div>
         </div>
     </footer>
-
 </body>
 </html>

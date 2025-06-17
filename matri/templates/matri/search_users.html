@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -43,8 +43,6 @@
             z-index: -1;
         }
 
-
-        /* Navigation - Keep original style */
         nav {
             position: sticky;
             top: 0;
@@ -95,7 +93,6 @@
              border-color: #DDA0DD;
         }
 
-        /* Main container with modern spacing */
         .search-page-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -103,7 +100,6 @@
             flex-grow: 1;
         }
 
-        /* Django Messages */
         .django-messages {
             position: fixed;
             top: 80px;
@@ -112,7 +108,6 @@
             z-index: 1000;
             list-style: none;
         }
-
         .django-messages li {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -123,7 +118,6 @@
             border-left: 4px solid #667eea;
         }
 
-        /* Search Cards Container */
         .search-cards-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -141,7 +135,6 @@
             transition: all 0.3s ease;
             text-align: center;
         }
-
         .search-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
@@ -158,12 +151,10 @@
             margin: 0 auto 20px;
             transition: all 0.3s ease;
         }
-
         .card-icon i {
             color: white;
             font-size: 2rem;
         }
-
         .search-card:hover .card-icon {
             transform: scale(1.1);
         }
@@ -174,7 +165,6 @@
             margin-bottom: 15px;
             font-weight: 700;
         }
-
         .card-description {
             color: #718096;
             font-size: 1.1rem;
@@ -182,394 +172,87 @@
             line-height: 1.6;
         }
 
-        /* Modern Form Styles */
-        .modern-form {
-            text-align: left;
-        }
-
-        .quick-search-form {
-            display: block;
-        }
-
-        .advanced-search-form {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* MODIFIED: Changed to 4 columns */
-            gap: 15px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #4a5568;
-            font-size: 0.9em;
-        }
-
+        .modern-form { text-align: left; }
+        .quick-search-form { display: block; }
+        .advanced-search-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #4a5568; font-size: 0.9em; }
         .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 0.95em;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
+        .form-group select { width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95em; transition: all 0.3s ease; background: white; }
         .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+        .form-group select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .btn-container { grid-column: 1 / -1; text-align: center; margin-top: 20px; }
+        .btn-modern { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 15px 35px; border-radius: 25px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); }
 
-        .btn-container {
-            grid-column: 1 / -1;
-            text-align: center;
-            margin-top: 20px;
-        }
+        .results-section { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 35px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); }
+        .results-header { color: #4a5568; font-size: 2rem; margin-bottom: 30px; text-align: center; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        
+        .search-results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .search-results-grid.single-result-layout { justify-content: center; }
+        .search-results-grid.single-result-layout .profile-card { width: 100%; max-width: 400px; margin: 0 auto; }
+        .profile-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; text-align: center; position: relative; overflow: hidden; }
+        .profile-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, #667eea, #764ba2); }
+        .profile-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); }
+        .profile-card-img-wrapper { width: 120px; height: 120px; margin: 0 auto 20px; position: relative; }
+        .profile-card-img-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid #667eea; transition: all 0.3s ease; }
+        .profile-card:hover .profile-card-img-wrapper img { border-color: #764ba2; transform: scale(1.05); }
+        .no-photo { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border: 4px solid #667eea; }
+        .no-photo i { font-size: 2.5rem; margin-bottom: 5px; }
+        .no-photo span { font-size: 0.8rem; font-weight: 600; }
+        .profile-card-info h4 { color: #4a5568; font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; }
+        .profile-card-info p { color: #718096; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; }
+        .profile-card-info i { color: #667eea; width: 16px; }
+        .btn-view-profile { background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; padding: 12px 25px; border-radius: 25px; font-weight: 600; display: inline-block; margin-top: 15px; transition: all 0.3s ease; }
+        .btn-view-profile:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
 
-        .btn-modern {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 35px;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .no-results-message { text-align: center; padding: 60px 20px; color: #718096; }
+        .no-results-message i { font-size: 4rem; color: #667eea; margin-bottom: 20px; }
+        .no-results-message h3 { color: #4a5568; font-size: 1.8rem; margin-bottom: 15px; }
+        .no-results-message p { font-size: 1.1rem; line-height: 1.6; max-width: 500px; margin: 0 auto; }
 
-        .btn-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
+        .errorlist { color: #e53e3e; font-size: 0.85rem; margin-top: 5px; list-style: none; }
+        .errorlist li { background: rgba(229, 62, 62, 0.1); padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; }
 
-        /* Results Section */
-        .results-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        .results-header {
-            color: #4a5568;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            text-align: center;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Profile Cards Grid */
-        .search-results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .search-results-grid.single-result-layout {
-            justify-content: center; /* Centers the grid track if it's narrower than the grid container.
-                                       With default grid-template-columns, the single track is 1fr (full width),
-                                       so this primarily helps if grid-template-columns were overridden for single-result. */
-        }
-
-        .search-results-grid.single-result-layout .profile-card {
-            width: 100%; /* MODIFIED: Make the card try to fill its grid cell's width */
-            max-width: 400px; /* Then cap it at 400px (or responsive values below) */
-            margin: 0 auto; /* And center the (potentially max-width constrained) card within its cell */
-        }
-
-        .profile-card {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .profile-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        .profile-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .profile-card-img-wrapper {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-            position: relative;
-        }
-
-        .profile-card-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #667eea;
-            transition: all 0.3s ease;
-        }
-
-        .profile-card:hover .profile-card-img-wrapper img {
-            border-color: #764ba2;
-            transform: scale(1.05);
-        }
-
-        .no-photo {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            border: 4px solid #667eea;
-        }
-
-        .no-photo i {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-        }
-
-        .no-photo span {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .profile-card-info h4 {
-            color: #4a5568;
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .profile-card-info p {
-            color: #718096;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.95rem;
-        }
-
-        .profile-card-info i {
-            color: #667eea;
-            width: 16px;
-        }
-
-        .btn-view-profile {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-view-profile:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        /* No Results Message */
-        .no-results-message {
-            text-align: center;
-            padding: 60px 20px;
-            color: #718096;
-        }
-
-        .no-results-message i {
-            font-size: 4rem;
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-
-        .no-results-message h3 {
-            color: #4a5568;
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-
-        .no-results-message p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        /* Error Lists */
-        .errorlist {
-            color: #e53e3e;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            list-style: none;
-        }
-
-        .errorlist li {
-            background: rgba(229, 62, 62, 0.1);
-            padding: 5px 10px;
-            border-radius: 5px;
-            margin-bottom: 5px;
-        }
-
-        /* Footer - Keep original style */
-        footer {
-            background: #3a2d4c;
-            color: #e0e0e0;
-            padding: 60px 0 30px;
-            margin-top: 80px;
-        }
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        .footer-section h4 {
-            font-family: 'Playfair Display', serif;
-            margin-bottom: 20px;
-            color: #DDA0DD;
-            font-size: 1.3rem;
-        }
-        .footer-section p, .footer-section ul li {
-            font-size: 0.95rem;
-            line-height: 1.7;
-            color: #c0c0c0;
-        }
+        footer { background: #3a2d4c; color: #e0e0e0; padding: 60px 0 30px; margin-top: 80px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .footer-section h4 { font-family: 'Playfair Display', serif; margin-bottom: 20px; color: #DDA0DD; font-size: 1.3rem; }
+        .footer-section p, .footer-section ul li { font-size: 0.95rem; line-height: 1.7; color: #c0c0c0; }
         .footer-section ul { list-style: none; }
         .footer-section ul li { margin-bottom: 10px; }
-        .footer-section ul li a {
-            color: #c0c0c0;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
+        .footer-section ul li a { color: #c0c0c0; text-decoration: none; transition: color 0.3s ease; }
         .footer-section ul li a:hover { color: #DDA0DD; }
-        .footer-socials a {
-            margin-right: 15px;
-            font-size: 1.3rem;
-            color: #DDA0DD;
-        }
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid #5b4c6c;
-            color: #aaa;
-            font-size: 0.9rem;
-        }
+        .footer-socials a { margin-right: 15px; font-size: 1.3rem; color: #DDA0DD; }
+        .footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.9rem; }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #764ba2, #667eea);
-        }
-
-        /* Responsive Design */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2, #667eea); }
+        
         @media (max-width: 1200px) {
-            .search-cards-container {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-             .advanced-search-form { /* Adjust for 4 columns on slightly smaller screens before full collapse */
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            }
+            .search-cards-container { grid-template-columns: 1fr; gap: 30px; }
+            .advanced-search-form { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
         }
 
         @media (max-width: 992px) {
             .nav-links { gap: 15px; }
             .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
-
-            .search-results-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 25px;
-            }
-            .search-results-grid.single-result-layout .profile-card {
-                /* width: 100%; is inherited from the base .single-result-layout .profile-card rule */
-                max-width: 320px; /* Overrides base max-width */
-                /* margin: 0 auto; is inherited */
-            }
-            .advanced-search-form {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* This will adapt, likely to 2 columns */
-            }
+            .search-results-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+            .search-results-grid.single-result-layout .profile-card { max-width: 320px; }
+            .advanced-search-form { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
         }
 
         @media (max-width: 768px) {
             .nav-container { flex-direction: column; gap: 10px; }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                width: 100%;
-                background: rgba(75, 0, 130, 0.98);
-                padding-bottom: 10px;
-            }
+            .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; }
             .search-page-container { padding: 20px 15px 40px 15px; }
             .search-card { padding: 30px 25px; }
-            .advanced-search-form, .quick-search-form { grid-template-columns: 1fr; } /* Fallback to 1 column on smaller screens */
-
-            .search-results-grid:not(.single-result-layout) {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .search-results-grid.single-result-layout .profile-card {
-                /* width: 100%; is inherited */
-                max-width: 90%; /* Overrides base max-width. 90% of its grid cell. */
-                /* margin: 0 auto; is inherited, centers the 90% width block in its cell */
-            }
-
-            .django-messages {
-                position: static;
-                max-width: 100%;
-                margin: 20px auto 30px auto;
-                right: auto; top: auto;
-            }
+            .advanced-search-form, .quick-search-form { grid-template-columns: 1fr; }
+            .search-results-grid:not(.single-result-layout) { grid-template-columns: 1fr; gap: 20px; }
+            .search-results-grid.single-result-layout .profile-card { max-width: 90%; }
+            .django-messages { position: static; max-width: 100%; margin: 20px auto 30px auto; right: auto; top: auto; }
             .footer-content { grid-template-columns: 1fr; text-align: center;}
             .footer-socials { text-align: center; margin-top: 10px;}
         }
@@ -580,17 +263,38 @@
             .card-icon i { font-size: 1.5rem; }
             .card-title { font-size: 1.4rem; }
             .btn-modern { padding: 15px 30px; font-size: 1rem; }
-
             .results-header { font-size: 1.8rem; }
-
-            .search-results-grid.single-result-layout .profile-card {
-                 /* width: 100%; is inherited */
-                 max-width: 90%; /* Inherited from 768px media query if not specified, or set again. */
-                 /* margin: 0 auto; is inherited */
-            }
+            .search-results-grid.single-result-layout .profile-card { max-width: 90%; }
             .profile-card-info h4 {font-size: 1.1rem;}
             .profile-card-info p {font-size: 0.85rem;}
             .btn-view-profile {font-size: 0.8rem; padding: 9px 16px;}
+        }
+
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size */
+            }
+            .card-title {
+                font-size: 1.3rem; /* Further reduce card title */
+            }
+            .card-description {
+                font-size: 1rem;
+            }
+            .btn-modern {
+                padding: 12px 25px; /* Make button more compact */
+                font-size: 0.9rem;
+            }
+            .results-header {
+                font-size: 1.6rem;
+            }
+            .profile-card-img-wrapper {
+                width: 100px; /* Make result avatar smaller */
+                height: 100px;
+            }
+            .no-photo i {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -627,6 +331,38 @@
         {% endif %}
 
         <div class="search-cards-container">
+
+        <div class="search-card">
+                <h4 class="card-title"><div class="card-icon"><i class="fas fa-sliders-h"></i></div> Advanced Filters</h4>
+                <form method="get" action="{% url 'search_users' %}#results-section" class="modern-form advanced-search-form">
+                    <input type="hidden" name="search_type" value="advanced_search">
+                    
+                    <div class="form-group">{{ form.gender.label_tag }} {{ form.gender }} {{ form.gender.errors }}</div>
+                    <div class="form-group">{{ form.denomination.label_tag }} {{ form.denomination }} {{ form.denomination.errors }}</div>
+                    <div class="form-group">{{ form.marital_status.label_tag }} {{ form.marital_status }} {{ form.marital_status.errors }}</div>
+                    <div class="form-group">{{ form.profession.label_tag }} {{ form.profession }} {{ form.profession.errors }}</div>
+                    <div class="form-group">{{ form.age_min.label_tag }} {{ form.age_min }} {{ form.age_min.errors }}</div>
+                    <div class="form-group">{{ form.age_max.label_tag }} {{ form.age_max }} {{ form.age_max.errors }}</div>
+                    <div class="form-group">{{ form.height_min.label_tag }} {{ form.height_min }} {{ form.height_min.errors }}</div>
+                    <div class="form-group">{{ form.height_max.label_tag }} {{ form.height_max }} {{ form.height_max.errors }}</div>
+                    <div class="form-group">{{ form.weight_min_kg.label_tag }} {{ form.weight_min_kg }} {{ form.weight_min_kg.errors }}</div>
+                    <div class="form-group">{{ form.weight_max_kg.label_tag }} {{ form.weight_max_kg }} {{ form.weight_max_kg.errors }}</div>
+                    <div class="form-group">{{ form.drinking.label_tag }} {{ form.drinking }} {{ form.drinking.errors }}</div>
+                    <div class="form-group">{{ form.smoking.label_tag }} {{ form.smoking }} {{ form.smoking.errors }}</div>
+
+                    {% if form.non_field_errors %}
+                    <div class="form-group" style="grid-column: 1 / -1; background-color: rgba(220,53,69,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(220,53,69,0.1);">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="btn-container">
+                        <button type="submit" class="btn-modern"><i class="fas fa-search-plus"></i> Advanced Search</button>
+                    </div>
+                </form>
+            </div>
+        
+
             <div class="search-card">
                 <h3 class="card-title"><div class="card-icon"><i class="fas fa-user-tag"></i></div>Quick Search</h3>
                 <p class="card-description">Find a specific member quickly by their username.</p>
@@ -647,38 +383,8 @@
                 <br><br>
             </div>
 
-            <div class="search-card">
-                <h4 class="card-title"><div class="card-icon"><i class="fas fa-sliders-h"></i></div> Advanced Filters</h4>
-                <form method="get" action="{% url 'search_users' %}#results-section" class="modern-form advanced-search-form">
-                    <input type="hidden" name="search_type" value="advanced_search">
-                    
-                    <!-- --- MODIFIED: Form fields with Denomination --- -->
-                    <div class="form-group">{{ form.gender.label_tag }} {{ form.gender }} {{ form.gender.errors }}</div>
-                    <div class="form-group">{{ form.denomination.label_tag }} {{ form.denomination }} {{ form.denomination.errors }}</div>
-                    <div class="form-group">{{ form.marital_status.label_tag }} {{ form.marital_status }} {{ form.marital_status.errors }}</div>
-                    <div class="form-group">{{ form.profession.label_tag }} {{ form.profession }} {{ form.profession.errors }}</div>
-                    <div class="form-group">{{ form.age_min.label_tag }} {{ form.age_min }} {{ form.age_min.errors }}</div>
-                    <div class="form-group">{{ form.age_max.label_tag }} {{ form.age_max }} {{ form.age_max.errors }}</div>
-                    <div class="form-group">{{ form.height_min.label_tag }} {{ form.height_min }} {{ form.height_min.errors }}</div>
-                    <div class="form-group">{{ form.height_max.label_tag }} {{ form.height_max }} {{ form.height_max.errors }}</div>
-                    <div class="form-group">{{ form.weight_min_kg.label_tag }} {{ form.weight_min_kg }} {{ form.weight_min_kg.errors }}</div>
-                    <div class="form-group">{{ form.weight_max_kg.label_tag }} {{ form.weight_max_kg }} {{ form.weight_max_kg.errors }}</div>
-                    <div class="form-group">{{ form.drinking.label_tag }} {{ form.drinking }} {{ form.drinking.errors }}</div>
-                    <div class="form-group">{{ form.smoking.label_tag }} {{ form.smoking }} {{ form.smoking.errors }}</div>
-                    <!-- --- REMOVED: family_type field --- -->
-
-                    {% if form.non_field_errors %}
-                    <div class="form-group" style="grid-column: 1 / -1; background-color: rgba(220,53,69,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(220,53,69,0.1);">
-                        {{ form.non_field_errors }}
-                    </div>
-                    {% endif %}
-
-                    <div class="btn-container">
-                        <button type="submit" class="btn-modern"><i class="fas fa-search-plus"></i> Advanced Search</button>
-                    </div>
-                </form>
             </div>
-        </div>
+
 
         <div class="results-section" id="results-section">
             <h3 class="results-header">
@@ -704,8 +410,6 @@
                                 <p><i class="fas fa-birthday-cake"></i>Age: {{ profile_result.age|default:"N/A" }}</p>
                                 <p><i class="fas fa-map-marker-alt"></i>{{ profile_result.city|default_if_none:"" }}{% if profile_result.city and profile_result.country %}, {% endif %}{{ profile_result.country|default_if_none:"" }}</p>
                                 <p><i class="fas fa-briefcase"></i> {{ profile_result.profession|default_if_none:"N/A" }}</p>
-                                
-                                <!-- --- MODIFIED: Added Denomination to profile card --- -->
                                 <p><i class="fas fa-church"></i> {{ profile_result.get_denomination_display|default_if_none:"N/A" }}</p>
                                 
                                 {% if request.user.userprofile.is_premium_member %}

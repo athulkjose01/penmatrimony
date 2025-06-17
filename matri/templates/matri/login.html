@@ -21,21 +21,20 @@
             font-family: 'Georgia', serif;
             line-height: 1.6;
             color: #333;
-            background: linear-gradient(135deg, #f8f9ff 0%, #e8e8ff 100%); /* Light lavender gradient like index.html features */
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8e8ff 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
         }
 
-        /* Navigation from index.html */
         nav {
-            background: rgba(75, 0, 130, 0.95); /* Indigo base */
+            background: rgba(75, 0, 130, 0.95);
             backdrop-filter: blur(10px);
             z-index: 1000;
             padding: 15px 0;
             width: 100%;
-            position: sticky; /* Or fixed if preferred */
+            position: sticky;
             top: 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
@@ -74,7 +73,7 @@
         }
 
         .nav-links a:hover, .nav-links a.active {
-            color: #DDA0DD; /* Plum for hover */
+            color: #DDA0DD;
             background-color: rgba(255,255,255,0.1);
         }
          .nav-links .auth-link {
@@ -84,36 +83,34 @@
              border-color: #DDA0DD;
         }
 
-
-        /* Main Container for Login Card */
         .main-container {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 40px 20px; /* Added more padding */
+            padding: 40px 20px;
         }
 
         .login-card {
             background: white;
-            border-radius: 15px; /* Softer radius like index.html feature cards */
-            box-shadow: 0 10px 30px rgba(75,0,130,0.08); /* Softer shadow */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(75,0,130,0.08);
             border: 1px solid rgba(75, 0, 130, 0.1);
-            padding: 30px 35px; /* Adjusted padding */
+            padding: 30px 35px;
             width: 100%;
-            max-width: 450px; /* Slightly wider */
+            max-width: 450px;
             position: relative;
             animation: fadeInUp 0.6s ease-out;
         }
 
-        .login-card::before { /* Top accent border */
+        .login-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 6px;
-            background: #4B0082; /* Indigo */
+            background: #4B0082;
             border-top-left-radius: 15px;
             border-top-right-radius: 15px;
         }
@@ -124,26 +121,25 @@
         }
 
         .divine-symbol {
-            font-size: 2.5rem; /* Matched feature-icon size */
-            color: #4B0082; /* Indigo */
+            font-size: 2.5rem;
+            color: #4B0082;
             margin-bottom: 15px;
         }
 
         .card-header h2 {
             font-family: 'Playfair Display', serif;
-            font-size: 2.2rem; /* Consistent with section titles */
-            color: #4B0082; /* Indigo */
+            font-size: 2.2rem;
+            color: #4B0082;
             margin-bottom: 8px;
         }
 
         .card-header p {
-            color: #555; /* Darker gray */
+            color: #555;
             font-style: italic;
             font-size: 1rem;
         }
 
-        /* Messages (Django) - styled like index.html */
-        .messages, .django-messages { /* Combined for consistency */
+        .messages, .django-messages {
             list-style: none;
             padding: 0;
             margin-bottom: 20px;
@@ -162,7 +158,7 @@
         .messages li.info, .django-messages li.info { background-color: #17a2b8; }
         .messages li.warning, .django-messages li.warning { background-color: #ffc107; color: #333; }
         
-        .error-message-custom { /* For the non-Django error */
+        .error-message-custom {
             color: #721c24;
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
@@ -173,50 +169,43 @@
             font-weight: 500;
         }
 
-
-        /* Form Styles */
         .form-group {
             margin-bottom: 20px;
         }
-
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #4B0082; /* Indigo */
-            font-size: 1rem; /* Slightly smaller */
+            color: #4B0082;
+            font-size: 1rem;
             font-family: 'Georgia', serif;
         }
         .form-group label i {
             margin-right: 6px;
-            color: #8A2BE2; /* BlueViolet for icons */
+            color: #8A2BE2;
         }
-
-        /* --- THE ONLY CSS CHANGE IS HERE --- */
+        
         .form-group input[type="email"],
         .form-group input[type="password"],
-        .form-group input[type="text"] { /* ADDED type="text" TO FIX THE STYLE JUMP */
+        .form-group input[type="text"] {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ccc;
-            border-radius: 8px; /* Softer radius */
+            border-radius: 8px;
             font-size: 0.95rem;
             font-family: 'Georgia', serif;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-
         .form-group input:focus {
             outline: none;
-            border-color: #4B0082; /* Indigo */
+            border-color: #4B0082;
             box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.15);
         }
-
         .form-group input::placeholder {
             color: #888;
             opacity: 1;
         }
 
-        /* --- STYLES FOR PASSWORD TOGGLE --- */
         .password-wrapper {
             position: relative;
             display: flex;
@@ -224,7 +213,7 @@
         }
         .password-wrapper .form-group input,
         .password-wrapper input {
-            padding-right: 45px; /* Make space for the icon */
+            padding-right: 45px;
         }
         .password-toggle-icon {
             position: absolute;
@@ -239,10 +228,8 @@
             color: #4B0082;
         }
 
-
-        /* Button Styles from index.html */
         .btn {
-            padding: 12px 25px; /* Adjusted for login form */
+            padding: 12px 25px;
             text-decoration: none;
             border-radius: 50px;
             font-weight: 600;
@@ -256,53 +243,47 @@
             cursor: pointer;
             font-family: 'Georgia', serif;
         }
-
         .btn-primary {
-            background: linear-gradient(45deg, #4B0082, #8A2BE2); /* Indigo to BlueViolet */
+            background: linear-gradient(45deg, #4B0082, #8A2BE2);
             color: white;
         }
         .btn-primary:hover {
-            background: linear-gradient(45deg, #8A2BE2, #9370DB); /* Lighter purple gradient */
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
-        /* Register Link */
-        .register-link-container { /* Changed class name */
+        .register-link-container {
             text-align: center;
             margin-top: 25px;
             padding-top: 20px;
             border-top: 1px solid #e0e0e0;
         }
-
         .register-link-container p {
             color: #555;
             font-size: 0.95rem;
         }
-
         .register-link-container a {
-            color: #4B0082; /* Indigo */
+            color: #4B0082;
             text-decoration: none;
             font-weight: 600;
         }
         .register-link-container a:hover {
-            color: #8A2BE2; /* BlueViolet */
+            color: #8A2BE2;
             text-decoration: underline;
         }
         .register-link-container i {
-            color: #DDA0DD; /* Plum for icon */
+            color: #DDA0DD;
         }
 
-
-        /* Footer from index.html */
         footer {
-            background: #3a2d4c; /* Dark Purple/Brownish */
-            color: #e0e0e0; /* Lighter gray for text */
-            padding: 40px 0 20px; /* Adjusted padding */
+            background: #3a2d4c;
+            color: #e0e0e0;
+            padding: 40px 0 20px;
             text-align: center;
-            margin-top: auto; /* Pushes footer to bottom */
+            margin-top: auto;
         }
-        .footer-content { /* Simplified for login page */
+        .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
@@ -315,17 +296,14 @@
         .footer-bottom .bible-verse {
             font-style: italic;
             opacity: 0.8;
-            color: #DDA0DD; /* Plum */
+            color: #DDA0DD;
         }
 
-
-        /* Animation for card entrance */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -343,7 +321,8 @@
                 font-size: 1.8rem;
             }
              .form-group input[type="email"],
-             .form-group input[type="password"] {
+             .form-group input[type="password"],
+             .form-group input[type="text"] {
                 padding: 10px 12px;
             }
             .btn {
@@ -351,6 +330,25 @@
             }
         }
 
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
+            }
+            .login-card {
+                padding: 25px 15px; /* Reduce horizontal padding */
+            }
+            .card-header h2 {
+                font-size: 1.9rem; /* Make header smaller */
+            }
+            .card-header p {
+                font-size: 0.95rem; /* Adjust subtitle */
+            }
+            .btn {
+                padding: 12px 20px; /* Make button more compact */
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -364,7 +362,6 @@
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'logout' %}" class="auth-link"><i class="fas fa-sign-out-alt"></i> Logout ({{ user.username|truncatechars:10 }})</a></li>
                 {% else %}
-                    <li><a href="{% url 'login' %}" class="auth-link active"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                     <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
                 {% endif %}
             </ul>
@@ -374,13 +371,13 @@
     <div class="main-container">
         <div class="login-card">
             <div class="card-header">
-                <div class="divine-symbol"><i class="fas fa-key"></i></div> <!-- Changed symbol -->
+                <div class="divine-symbol"><i class="fas fa-key"></i></div>
                 <h2>Welcome Back</h2>
                 <p>Enter your sacred journey</p>
             </div>
 
             {% if messages %}
-                <ul class="messages django-messages"> <!-- Added django-messages class -->
+                <ul class="messages django-messages">
                     {% for message in messages %}
                         <li class="{{ message.tags }}">{{ message }}</li>
                     {% endfor %}
@@ -388,7 +385,7 @@
             {% endif %}
 
             {% if error %}
-                <div class="error-message-custom">{{ error }}</div> <!-- Use custom class for non-Django error -->
+                <div class="error-message-custom">{{ error }}</div>
             {% endif %}
 
             <form method="post" action="{% url 'login' %}">
@@ -400,7 +397,6 @@
                     </label>
                     <input type="email" id="email" name="email" required placeholder="yourname@gmail.com">
                 </div>
-                <!-- UPDATED PASSWORD FIELD -->
                 <div class="form-group">
                     <label for="password">
                         <i class="fas fa-lock"></i>
@@ -439,18 +435,15 @@
         </div>
     </footer>
 
-    <!-- SCRIPT FOR PASSWORD TOGGLE -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const togglePassword = document.querySelector('.password-toggle-icon');
         if (togglePassword) {
             togglePassword.addEventListener('click', function () {
                 const passwordInput = document.getElementById('password');
-                // Toggle the type attribute
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
                 
-                // Toggle the eye icon
                 this.classList.toggle('fa-eye');
                 this.classList.toggle('fa-eye-slash');
             });

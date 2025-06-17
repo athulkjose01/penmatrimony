@@ -14,7 +14,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     {% csrf_token %}
     <style>
-        /* All your CSS styles are perfect and remain unchanged. */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Georgia', serif; line-height: 1.6; color: #E0E0E0; background: black; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
         body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%); pointer-events: none; z-index: -1; }
@@ -75,6 +74,12 @@
         .footer-socials a { margin-right: 12px; font-size: 1.2rem; color: #DDA0DD; }
         .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
         .footer-bottom p { margin-bottom: 5px; }
+
+        @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        }
+
         @media (max-width: 768px) {
             .nav-container { flex-direction: column; gap: 10px; }
             .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; }
@@ -91,9 +96,42 @@
             .footer-content { grid-template-columns: 1fr; text-align: center;}
             .footer-socials { text-align: center; margin-top: 10px;}
         }
-         @media (max-width: 992px) {
-            .nav-links { gap: 15px; }
-            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
+            }
+            .post {
+                border-radius: 12px;
+            }
+            .post-header {
+                padding: 0.6rem 0.8rem;
+                gap: 0.6rem;
+            }
+            .avatar-wrapper {
+                width: 36px;
+                height: 36px;
+            }
+            .username {
+                font-size: 0.9rem;
+            }
+            .post-date {
+                font-size: 0.7rem;
+            }
+            .post-content {
+                padding: 0.6rem 0.8rem;
+            }
+            .action-btn {
+                font-size: 1.2rem;
+            }
+            .caption {
+                font-size: 0.85rem;
+            }
+            .pagination .page-link {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>

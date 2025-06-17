@@ -52,7 +52,6 @@
             z-index: -1;
         }
         
-        /* --- Navigation (Unchanged) --- */
         nav {
             position: sticky;
             top: 0;
@@ -100,7 +99,6 @@
             background-color: rgba(255,255,255,0.1);
         }
         
-        /* Main Content Styles */
         .main-view-container { 
             padding: 60px 20px;
             max-width: 1200px;
@@ -109,7 +107,7 @@
         
         .page-header { 
             text-align: center; 
-            margin-bottom: 40px; /* Reduced margin */
+            margin-bottom: 40px;
             position: relative;
         }
 
@@ -133,7 +131,6 @@
             margin: 0 auto;
         }
         
-        /* NEW: Unified Chat List Container */
         .chat-list-container {
             max-width: 850px;
             margin: 0 auto;
@@ -144,7 +141,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        /* NEW: Unified Chat Item Style */
         .chat-item {
             display: flex;
             align-items: center;
@@ -186,7 +182,7 @@
         
         .message-content { 
             flex-grow: 1; 
-            overflow: hidden; /* Prevents long text from breaking layout */
+            overflow: hidden;
         }
 
         .user-name { 
@@ -247,7 +243,7 @@
             font-weight: 500;
             transition: all 0.3s ease;
             font-size: 0.9rem;
-            margin-left: auto; /* Pushes button to the far right */
+            margin-left: auto;
             flex-shrink: 0;
             text-decoration: none;
             display: inline-flex;
@@ -265,27 +261,23 @@
             padding: 60px 40px;
             color: var(--text-muted);
         }
-
         .empty-state i {
             font-size: 3.5rem;
             color: var(--accent-purple);
             margin-bottom: 20px;
             opacity: 0.6;
         }
-
         .empty-state h3 {
             font-size: 1.4rem;
             color: var(--text-light);
             margin-bottom: 10px;
             font-family: 'Playfair Display', serif;
         }
-
         .empty-state p {
             font-size: 1rem;
             line-height: 1.6;
         }
         
-        /* --- Responsive Design --- */
         @media (max-width: 992px) {
             .nav-links { gap: 15px; }
             .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
@@ -320,6 +312,36 @@
             .timestamp { font-size: 0.75rem; }
             .start-chat-btn { font-size: 0.8rem; padding: 6px 14px; }
         }
+
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
+            }
+            .page-header h1 {
+                font-size: 2rem; /* Make header smaller */
+            }
+            .chat-item {
+                padding: 10px 12px; /* Reduce item padding */
+            }
+            .avatar-container {
+                margin-right: 12px;
+            }
+            .avatar-container img, .avatar-container .avatar-placeholder {
+                width: 48px; /* Make avatars smaller */
+                height: 48px;
+            }
+            .user-name {
+                font-size: 1rem; /* Adjust text size */
+            }
+            .last-message {
+                font-size: 0.85rem;
+            }
+            .start-chat-btn {
+                padding: 5px 12px;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -330,7 +352,6 @@
                 <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
                 {% if user.is_authenticated and user_has_profile %}
                     <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
-                    <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -344,7 +365,6 @@
 
         <div class="chat-list-container">
             {% if chat_list or chat_suggestions %}
-                <!-- Active Conversations -->
                 {% for chat in chat_list %}
                 <a href="{% url 'chat_room_detail' room_id=chat.room.id %}" class="chat-item">
                     <div class="avatar-container">
@@ -378,7 +398,6 @@
                 </a>
                 {% endfor %}
 
-                <!-- New Connections to Chat With -->
                 {% for profile in chat_suggestions %}
                 <div class="chat-item">
                     <div class="avatar-container">

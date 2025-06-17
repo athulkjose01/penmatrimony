@@ -11,7 +11,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* --- ALL ORIGINAL STYLES FROM YOUR FIRST FILE --- */
         * {
             margin: 0;
             padding: 0;
@@ -90,52 +89,15 @@
         .footer-bottom .bible-verse { font-style: italic; opacity: 0.8; color: #DDA0DD; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- STYLES FOR PASSWORD TOGGLE (NEW) --- */
-        .password-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .password-wrapper .form-control {
-            padding-right: 45px; /* Make space for the icon */
-        }
-        .password-toggle-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #888;
-            transition: color 0.3s ease;
-        }
-        .password-toggle-icon:hover {
-            color: #4B0082;
-        }
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper .form-control { padding-right: 45px; }
+        .password-toggle-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #888; transition: color 0.3s ease; }
+        .password-toggle-icon:hover { color: #4B0082; }
 
-        /* --- THIS IS THE CRUCIAL RESPONSIVE PART THAT WAS MISSING --- */
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .registration-card {
-                margin: 20px;
-                padding: 25px 20px;
-            }
-            .card-header h2 {
-                font-size: 1.8rem;
-            }
-        }
-        
-        /* --- STYLES FOR NEW OTP & PHONE INPUT FEATURES (APPENDED HERE) --- */
         .phone-input-container { position: relative; display: flex; align-items: center; }
         .phone-prefix { position: absolute; left: 1px; top: 1px; bottom: 1px; display: flex; align-items: center; padding: 0 12px; background-color: #f1f1f1; border-right: 1px solid #ccc; border-top-left-radius: 8px; border-bottom-left-radius: 8px; font-weight: 600; color: #333; }
         .phone-prefix img { width: 22px; height: 22px; border-radius: 50%; margin-right: 8px; object-fit: cover; }
-        .form-control.phone-input { padding-left: 95px; /* Space for prefix */ }
+        .form-control.phone-input { padding-left: 95px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 2000; animation: fadeIn 0.3s ease; }
         .modal-content { background: white; padding: 30px 35px; border-radius: 15px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: slideUp 0.4s ease-out; }
@@ -152,6 +114,39 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 10px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .registration-card { margin: 20px; padding: 25px 20px; }
+            .card-header h2 { font-size: 1.8rem; }
+        }
+        
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem;
+            }
+            .registration-card {
+                padding: 25px 15px;
+            }
+            .card-header h2 {
+                font-size: 1.7rem; /* Further reduce title size */
+            }
+            .card-header p {
+                font-size: 0.9rem;
+            }
+            .modal-content {
+                padding: 25px 20px;
+            }
+            .modal-content h3 {
+                font-size: 1.6rem;
+            }
+            .otp-input {
+                font-size: 1.4rem;
+                letter-spacing: 12px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -164,7 +159,6 @@
                      <li><a href="{% url 'logout' %}" class="auth-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 {% else %}
                     <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-                    <li><a href="{% url 'register' %}" class="auth-link active"><i class="fas fa-user-plus"></i> Register</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -210,7 +204,6 @@
                 
                 <div class="section-divider"><span>Secure Your Account</span></div>
                 
-                <!-- UPDATED PASSWORD FIELD -->
                 <div class="form-row">
                     <label for="password"><i class="fas fa-lock"></i> Password</label>
                     <div class="password-wrapper">
@@ -220,7 +213,6 @@
                     <p class="password-requirements">Minimum 8 characters.</p>
                 </div>
 
-                <!-- UPDATED CONFIRM PASSWORD FIELD -->
                 <div class="form-row">
                     <label for="confirm_password"><i class="fas fa-check-circle"></i> Confirm Password</label>
                     <div class="password-wrapper">
@@ -280,7 +272,6 @@
         </div>
     </footer>
 
-    <!-- UPDATED SCRIPT WITH PASSWORD TOGGLE FUNCTIONALITY -->
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const registerForm = document.getElementById('registerForm');
@@ -289,7 +280,6 @@
         const resendBtn = document.getElementById('resend-otp-btn');
         let countdown;
 
-        // --- NEW: LOGIC FOR PASSWORD VISIBILITY TOGGLE ---
         const passwordToggles = document.querySelectorAll('.password-toggle-icon');
         passwordToggles.forEach(toggle => {
             toggle.addEventListener('click', function () {
@@ -350,7 +340,7 @@
                 
                 otpModal.style.display = 'flex';
                 document.getElementById('otp-input').focus();
-                startResendTimer(180); // 3 minutes
+                startResendTimer(180);
             } catch (error) {
                 displayError('registration-error', error.message);
             } finally {

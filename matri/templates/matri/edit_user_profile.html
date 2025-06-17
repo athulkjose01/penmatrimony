@@ -43,7 +43,6 @@
             z-index: -1;
         }
 
-        /* Navigation */
         nav {
             position: sticky;
             top: 0;
@@ -99,7 +98,6 @@
              border-color: #DDA0DD;
         }
 
-        /* Main Container */
         .main-form-container {
             flex-grow: 1;
             max-width: 1000px;
@@ -107,7 +105,6 @@
             padding: 0 20px;
         }
 
-        /* Header Section */
         .form-header {
             text-align: center;
             margin-bottom: 50px;
@@ -132,7 +129,6 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* Django Messages */
         .django-messages {
             list-style: none;
             padding: 0;
@@ -152,7 +148,6 @@
         .django-messages li.error { background: linear-gradient(45deg, #dc3545, #e83e8c); }
         .django-messages li.info { background: linear-gradient(45deg, #17a2b8, #6610f2); }
 
-        /* Form Sections */
         .form-section {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -175,7 +170,6 @@
             height: 4px;
             background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD);
         }
-
         .form-section:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
@@ -190,7 +184,6 @@
             align-items: center;
             gap: 15px;
         }
-
         .form-section-title::before {
             content: '';
             width: 50px;
@@ -198,7 +191,6 @@
             background: linear-gradient(45deg, #4B0082, #DDA0DD);
             border-radius: 2px;
         }
-
         .form-section-title i {
             font-size: 1.5rem;
             color: #8A2BE2;
@@ -209,23 +201,16 @@
             font-size: 1rem;
             margin-bottom: 30px;
             font-style: italic;
-            padding-left: 65px; /* If title has icon and ::before, otherwise adjust */
+            padding-left: 65px;
         }
 
-        /* Form Grid */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
         }
-
-        .form-group {
-            position: relative;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
+        .form-group { position: relative; }
+        .form-group.full-width { grid-column: 1 / -1; }
 
         .form-group label {
             display: block;
@@ -281,7 +266,6 @@
             text-align: center;
             position: relative;
         }
-
         .form-group input[type="file"]:hover {
             background: linear-gradient(135deg, #e8e8ff, #d8d8ff);
             border-color: #4B0082;
@@ -296,10 +280,7 @@
             align-items: center;
             gap: 5px;
         }
-
-        .form-group .help i {
-            color: #8A2BE2;
-        }
+        .form-group .help i { color: #8A2BE2; }
 
         .form-group .error,
         .form-group ul.errorlist li {
@@ -314,208 +295,55 @@
             align-items: center;
             gap: 8px;
         }
-
         .form-group .error::before,
         .form-group ul.errorlist li::before {
-            content: '\f071'; /* Font Awesome exclamation triangle */
+            content: '\f071';
             font-family: 'Font Awesome 6 Free';
             font-weight: 900;
         }
+        .form-group ul.errorlist { list-style: none; padding: 0; }
+        .form-group ul.errorlist li { margin-bottom: 5px; }
 
-        .form-group ul.errorlist { 
-            list-style: none; 
-            padding: 0; 
-        }
-        .form-group ul.errorlist li { 
-            margin-bottom: 5px; 
-        }
+        .measurement-field { display: flex; align-items: center; gap: 15px; }
+        .measurement-field input { flex: 1; }
+        .measurement-unit { background: linear-gradient(45deg, #8A2BE2, #DDA0DD); color: white; padding: 0 15px; height: 50px; line-height: 50px; border-radius: 0 12px 12px 0; font-size: 0.9rem; font-weight: 600; white-space: nowrap; margin-left: -13px; border: 2px solid #8A2BE2; border-left: none; }
+        .measurement-field input { border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .measurement-unit i { margin-right: 5px; }
 
-        /* Special styling for height/weight fields */
-        .measurement-field {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .profile-picture-preview-container { grid-column: 1 / -1; margin-bottom: 20px; text-align: center; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px dashed #DDA0DD; }
+        .current-picture-heading { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #4B0082; margin-bottom: 15px; }
+        .profile-picture-preview { display: block; width: 180px; height: 180px; border-radius: 50%; margin: 0 auto 15px auto; border: 4px solid #DDA0DD; box-shadow: 0 8px 25px rgba(75, 0, 130, 0.25); object-fit: cover; object-position: center; background-color: #f0f0f0; }
+        .profile-picture-note { font-size: 0.9rem; color: #555; font-style: italic; }
 
-        .measurement-field input { /* The input field itself */
-            flex: 1;
-        }
-
-        .measurement-unit {
-            background: linear-gradient(45deg, #8A2BE2, #DDA0DD);
-            color: white;
-            padding: 0 15px; 
-            height: 50px; 
-            line-height: 50px; 
-            border-radius: 0 12px 12px 0; 
-            font-size: 0.9rem;
-            font-weight: 600;
-            white-space: nowrap;
-            margin-left: -13px; 
-            border: 2px solid #8A2BE2;
-            border-left: none;
-        }
-        .measurement-field input {
-            border-right: none;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-        .measurement-unit i {
-            margin-right: 5px;
-        }
-
-
-        /* Profile Picture Preview */
-        .profile-picture-preview-container {
-            grid-column: 1 / -1; 
-            margin-bottom: 20px;
-            text-align: center;
-            background: rgba(255,255,255,0.05); 
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px dashed #DDA0DD;
-        }
-        .current-picture-heading {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: #4B0082;
-            margin-bottom: 15px;
-        }
-        .profile-picture-preview {
-            display: block;
-            width: 180px;
-            height: 180px;
-            border-radius: 50%; /* Circular frame */
-            margin: 0 auto 15px auto;
-            border: 4px solid #DDA0DD;
-            box-shadow: 0 8px 25px rgba(75, 0, 130, 0.25);
-            object-fit: cover; /* Ensures image covers the area without distortion */
-            object-position: center; /* Centers the image within the circle */
-            background-color: #f0f0f0; /* Fallback for transparent images or loading issues */
-        }
-        .profile-picture-note {
-            font-size: 0.9rem;
-            color: #555;
-            font-style: italic;
-        }
-
-
-        /* Buttons */
-        .form-actions {
-            display: flex;
-            justify-content: center;
-            gap: 25px; 
-            margin-top: 40px;
-            align-items: center;
-        }
-
-        .btn-submit, .btn-cancel { 
-            padding: 18px 35px;
-            border: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1.05rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: white;
-            cursor: pointer;
-            font-family: 'Georgia', serif;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            text-decoration: none; 
-            display: inline-flex; 
-            align-items: center;
-            justify-content: center;
-        }
-        .btn-submit i, .btn-cancel i {
-            margin-right: 10px;
-        }
-
-        .btn-submit {
-            background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD);
-            box-shadow: 0 10px 30px rgba(75, 0, 130, 0.3);
-            margin: 0;
-        }
-        .btn-submit::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-        .btn-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(75, 0, 130, 0.4);
-            background: linear-gradient(45deg, #8A2BE2, #9370DB, #DDA0DD);
-        }
+        .form-actions { display: flex; justify-content: center; gap: 25px; margin-top: 40px; align-items: center; }
+        .btn-submit, .btn-cancel { padding: 18px 35px; border: none; border-radius: 50px; font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 1px; color: white; cursor: pointer; font-family: 'Georgia', serif; transition: all 0.3s ease; position: relative; overflow: hidden; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-submit i, .btn-cancel i { margin-right: 10px; }
+        .btn-submit { background: linear-gradient(45deg, #4B0082, #8A2BE2, #DDA0DD); box-shadow: 0 10px 30px rgba(75, 0, 130, 0.3); margin: 0; }
+        .btn-submit::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: left 0.5s; }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(75, 0, 130, 0.4); background: linear-gradient(45deg, #8A2BE2, #9370DB, #DDA0DD); }
         .btn-submit:hover::before { left: 100%; }
         .btn-submit:active { transform: translateY(-1px); }
+        .btn-cancel { background: #7f8c8d; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .btn-cancel:hover { background: #6c7a7b; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
 
-        .btn-cancel {
-            background: #7f8c8d; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        .btn-cancel:hover {
-            background: #6c7a7b;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-        }
-
-
-        /* Footer */
-        footer {
-            background: rgba(58, 45, 76, 0.95);
-            backdrop-filter: blur(10px);
-            color: #e0e0e0;
-            padding: 40px 0 20px;
-            margin-top: auto; 
-        }
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        .footer-section h4 {
-            font-family: 'Playfair Display', serif;
-            margin-bottom: 15px;
-            color: #DDA0DD;
-            font-size: 1.2rem;
-        }
-        .footer-section p, .footer-section ul li {
-            font-size: 0.9rem;
-            line-height: 1.7;
-            color: #c0c0c0;
-        }
+        footer { background: rgba(58, 45, 76, 0.95); backdrop-filter: blur(10px); color: #e0e0e0; padding: 40px 0 20px; margin-top: auto; }
+        .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .footer-section h4 { font-family: 'Playfair Display', serif; margin-bottom: 15px; color: #DDA0DD; font-size: 1.2rem; }
+        .footer-section p, .footer-section ul li { font-size: 0.9rem; line-height: 1.7; color: #c0c0c0; }
         .footer-section ul { list-style: none; }
         .footer-section ul li { margin-bottom: 8px; }
-        .footer-section ul li a {
-            color: #c0c0c0;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
+        .footer-section ul li a { color: #c0c0c0; text-decoration: none; transition: color 0.3s ease; }
         .footer-section ul li a:hover { color: #DDA0DD; }
         .footer-socials a { margin-right: 12px; font-size: 1.2rem; }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #5b4c6c;
-            color: #aaa;
-            font-size: 0.85rem;
-        }
+        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
         .footer-bottom p { margin-bottom: 5px; }
 
-        /* Responsive */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .form-section { animation: fadeInUp 0.6s ease-out; }
+        .form-section:nth-child(2) { animation-delay: 0.1s; }
+        .form-section:nth-child(3) { animation-delay: 0.2s; }
+
         @media (max-width: 992px) {
             .nav-links { gap: 15px; }
             .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
@@ -524,17 +352,8 @@
 
         @media (max-width: 768px) {
             .nav-container { flex-direction: column; gap: 10px; }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                width: 100%;
-                background: rgba(75, 0, 130, 0.98);
-                padding-bottom: 10px;
-            }
-            .main-form-container {
-                margin: 20px auto; 
-                padding: 0 10px;
-            }
+            .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; }
+            .main-form-container { margin: 20px auto; padding: 0 10px; }
             .form-header h2 { font-size: 2.2rem; }
             .form-section { padding: 25px 20px; }
             .form-section-title { font-size: 1.5rem; }
@@ -542,34 +361,41 @@
             .btn-submit, .btn-cancel { padding: 15px 25px; font-size: 1rem;}
             .form-actions { flex-direction: column; gap: 15px; }
             .btn-submit, .btn-cancel { width: 100%; max-width: 300px; } 
-
             .footer-content { grid-template-columns: 1fr; text-align: center;}
             .footer-socials { text-align: center; margin-top: 10px;}
-
-            .profile-picture-preview { /* Adjust circle size for smaller screens if needed */
-                width: 150px;
-                height: 150px;
-            }
+            .profile-picture-preview { width: 150px; height: 150px; }
         }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size */
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .form-header h2 {
+                font-size: 2rem; /* Make header smaller */
+            }
+            .form-section {
+                padding: 25px 15px; /* Reduce horizontal padding */
+            }
+            .form-section-title {
+                font-size: 1.6rem; /* Make section titles smaller */
+            }
+            .profile-picture-preview {
+                width: 120px; /* Make profile picture preview smaller */
+                height: 120px;
+            }
+            .form-group input, .form-group select, .form-group textarea {
+                padding: 12px 15px; /* Make form fields a bit more compact */
+            }
+            .measurement-unit { /* Adjust height of unit to match input */
+                height: calc(12px + 12px + 1rem + 4px); /* (padding-top + padding-bottom + font-size + borders) */
+                line-height: calc(12px + 12px + 1rem + 4px);
+            }
+            .btn-submit, .btn-cancel {
+                padding: 12px 25px; /* Make buttons smaller */
+                font-size: 0.9rem;
             }
         }
-
-        .form-section {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        .form-section:nth-child(2) { animation-delay: 0.1s; }
-        .form-section:nth-child(3) { animation-delay: 0.2s; }
-
     </style>
 </head>
 <body>
@@ -596,10 +422,6 @@
     </nav>
 
     <div class="main-form-container">
-        <div class="form-header">
-            <h2>Edit Your Divine Profile</h2>
-            <p class="subtitle">Update your details and partner preferences below.</p>
-        </div>
 
         {% if messages %}
             <ul class="django-messages">
@@ -818,10 +640,9 @@
             }
         });
         
-        if (currentPath.includes("{% url 'edit_user_profile' %}")) { // Ensure Django URL tag is correctly resolved by server
+        if (currentPath.includes("{% url 'edit_user_profile' %}")) {
             document.querySelector('.nav-links a[href="{% url 'edit_user_profile' %}"]')?.classList.add('active');
         }
-
 
         document.querySelectorAll('.measurement-field input').forEach(input => {
             const unit = input.nextElementSibling; 

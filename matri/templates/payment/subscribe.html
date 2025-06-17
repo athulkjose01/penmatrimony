@@ -278,27 +278,6 @@
     </style>
 </head>
 <body>
-    <nav>
-        <div class="nav-container">
-            <a href="{% url 'index' %}" class="logo">
-                <i class="fas fa-church"></i> Pentecost Matrimony
-            </a>
-            <ul class="nav-links">
-                <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
-                {% if user.is_authenticated %}
-                    {% if user.userprofile %}
-                        <li><a href="{% url 'view_user_profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
-                        <li><a href="{% url 'search_users' %}"><i class="fas fa-search"></i> Search</a></li>
-                    {% else %}
-                        <li><a href="{% url 'create_user_profile' %}"><i class="fas fa-plus-circle"></i> Create Profile</a></li>
-                    {% endif %}
-                {% else %}
-                    <li><a href="{% url 'login' %}" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-                    <li><a href="{% url 'register' %}" class="auth-link"><i class="fas fa-user-plus"></i> Register</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
 
     <div class="main-view-container container">
         <div class="row justify-content-center">
@@ -312,7 +291,7 @@
                     <p class="card-subtitle">Get Premium Profile</p>
 
                     <div class="price-display">
-                        <span class="amount">₹ 500</span>
+                        <span class="amount">₹ 500/Yr</span>
                     </div>
 
                     <ul class="features-list">

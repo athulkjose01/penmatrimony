@@ -13,7 +13,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Your CSS styles are unchanged -->
     <style>
         
         * {
@@ -123,7 +122,6 @@
         }
 
         /* Navigation */
-       /* Navigation */
         nav {
             position: fixed;
             top: 0;
@@ -701,6 +699,28 @@
             .bible-quote::before, .bible-quote::after { font-size: 3rem; }
             .footer-content { grid-template-columns: 1fr; text-align: center;}
             .footer-socials { text-align: center; margin-top: 10px;}
+        }
+
+        /* === UPDATED/ADDED FOR VERY SMALL SCREENS === */
+        @media (max-width: 400px) {
+            .nav-container {
+                padding: 0 15px; /* Reduce side padding to give more space */
+            }
+            .logo {
+                font-size: 1.4rem; /* Reduce logo font size to prevent wrapping */
+            }
+            .hero h1 {
+                font-size: 2.4rem; /* Make hero title smaller */
+            }
+            .hero .tagline {
+                font-size: 1rem; /* Adjust tagline size */
+            }
+            .section-title h2 {
+                font-size: 2rem; /* Make section titles smaller */
+            }
+            .bible-quote blockquote {
+                font-size: 1.1rem; /* Make quotes smaller */
+            }
         }
 
     </style>

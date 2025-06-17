@@ -6,76 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ profile.full_name }}'s Profile - Pentecost Matrimony</title>
     <link rel="manifest" href="{% static 'manifest.json' %}">
-  <meta name="theme-color" content="#000000">
-  <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <!-- BOOTSTRAP CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     {% csrf_token %}
     <style>
-        /* Keep ALL your existing styles for:
-           *, body, body::before, nav, .nav-container, .logo, .nav-links,
-           .main-view-container (its existing max-width, margin, padding are fine),
-           .profile-display-header and its children (.profile-picture-wrapper, .profile-picture-large, etc.),
-           .profile-actions and its children (.btn-profile-action),
-           .django-messages,
-           .profile-detail-section (background, padding, shadow, border, ::before, :hover animations),
-           .profile-section-title, .profile-detail-item, .detail-value, .not-specified, .about-text,
-           .post-item (most styles, width will be by Bootstrap col), .post-item img, .post-caption-overlay, .no-posts-message, .delete-post-btn,
-           footer and its children,
-           @keyframes fadeInUp and its applications to .profile-display-header, .profile-detail-section
-        */
-
-        /* --- CSS TO REMOVE OR MODIFY --- */
-
-        /* REMOVE these .profile-view-grid styles */
-        /*
-        .profile-view-grid {
-            display: grid; ...
-        }
-        */
-        /* Add this for background if you still want it on the row */
-        .profile-view-grid.row { /* Target the Bootstrap row specifically */
-             background-image:
-                linear-gradient(45deg, rgba(221, 160, 221, 0.03) 25%, transparent 25%, transparent 75%, rgba(221, 160, 221, 0.03) 75%),
-                linear-gradient(45deg, rgba(221, 160, 221, 0.03) 25%, transparent 25%, transparent 75%, rgba(221, 160, 221, 0.03) 75%);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
-            position: relative; /* If needed for z-indexing or other absolute children */
-        }
-
-        .nav-pending-badge {
-            display: inline-block;
-            background-color: #f39c12; /* A warm orange for "pending" status */
-            color: white;
-            border-radius: 10px;
-            padding: 1px 7px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 6px;
-            vertical-align: middle;
-            line-height: 1.4; /* Helps with vertical alignment */
-        }
-
-
-        /* REMOVE these media queries for grid layout and ordering */
-        /*
-        @media (min-width: 993px) { ... }
-        @media (max-width: 992px) { ... }
-        */
-
-        /* MODIFY .posts-grid */
-        .posts-grid { /* Bootstrap row will handle display and gap. Keep margin-top */
-            margin-top: 15px; /* Slightly more margin */
-        }
-        .post-item {
-             height: 100%; /* if aspect-ratio is primary, this might not be needed */
-             aspect-ratio: 1 / 1; /* Keep this for square posts */
-        }
-
-
-        /* --- Your existing styles that should be kept --- */
+        /* --- General and Existing Styles --- */
         * {
             margin: 0;
             padding: 0;
@@ -158,11 +97,21 @@
              border-color: #DDA0DD;
         }
 
+        .nav-pending-badge {
+            display: inline-block;
+            background-color: #f39c12; /* A warm orange for "pending" status */
+            color: white;
+            border-radius: 10px;
+            padding: 1px 7px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 6px;
+            vertical-align: middle;
+            line-height: 1.4; /* Helps with vertical alignment */
+        }
+
         .main-view-container {
             flex-grow: 1;
-            /* max-width: 1200px; From Bootstrap .container-lg */
-            /* margin: 40px auto; From Bootstrap .container-lg */
-            /* padding: 0 20px; From Bootstrap .container-lg */
             margin-top: 50px;
             margin-bottom: 40px;
         }
@@ -172,13 +121,11 @@
             display: none;
         }
 
-
         .profile-display-header {
             text-align: center;
             margin-bottom: 40px;
             color: white;
         }
-
         .profile-display-header .page-main-title {
             font-family: 'Playfair Display', serif;
             font-size: 2.8rem;
@@ -189,7 +136,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
         .profile-display-header .profile-subtitle {
             font-size: 1.1rem;
             opacity: 0.9;
@@ -227,12 +173,12 @@
             border: 5px solid #8A2BE2;
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
-         .profile-no-picture i {
+        .profile-no-picture i {
             font-size: 3rem;
             margin-bottom: 0.3em;
         }
 
-         .profile-actions {
+        .profile-actions {
             margin-top: 20px;
             margin-bottom: 40px;
             text-align: center;
@@ -273,7 +219,6 @@
              box-shadow: 0 15px 40px rgba(32, 121, 89, 0.4);
         }
 
-
         .django-messages {
             list-style: none;
             padding: 0;
@@ -293,6 +238,14 @@
         .django-messages li.error { background: linear-gradient(45deg, #dc3545, #e83e8c); }
         .django-messages li.info { background: linear-gradient(45deg, #17a2b8, #6610f2); }
 
+        .profile-view-grid.row {
+             background-image:
+                linear-gradient(45deg, rgba(221, 160, 221, 0.03) 25%, transparent 25%, transparent 75%, rgba(221, 160, 221, 0.03) 75%),
+                linear-gradient(45deg, rgba(221, 160, 221, 0.03) 25%, transparent 25%, transparent 75%, rgba(221, 160, 221, 0.03) 75%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            position: relative;
+        }
 
         .profile-detail-section {
             background: rgba(30, 0, 40, 0.85);
@@ -306,7 +259,6 @@
             z-index: 1;
             height: 100%;
         }
-
         .profile-detail-section::before {
             content: '';
             position: absolute;
@@ -319,7 +271,6 @@
             border-top-right-radius: 20px;
             z-index: 2;
         }
-
         .profile-detail-section:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.25);
@@ -383,12 +334,15 @@
             z-index: 1;
         }
 
+        .posts-grid {
+            margin-top: 15px;
+        }
         .post-item {
             position: relative;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            /* aspect-ratio: 1 / 1; Kept */
+            aspect-ratio: 1 / 1;
             cursor: pointer;
             background-color: #222;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -440,15 +394,15 @@
 
         .delete-post-btn {
             position: absolute;
-            top: 8px; /* Increased slightly for larger items */
-            right: 8px; /* Increased slightly */
-            background-color: rgba(0, 0, 0, 0.6); /* Slightly darker */
+            top: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.6);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 32px; /* Slightly larger */
-            height: 32px; /* Slightly larger */
-            font-size: 0.9rem; /* Adjusted */
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -470,7 +424,6 @@
             line-height: 1;
         }
 
-
         /* FULL PAGE POST VIEW STYLES */
         .full-page-post-view {
             position: fixed;
@@ -481,31 +434,25 @@
             background-color: #000; 
             z-index: 2000;
             overflow-y: auto;
-            padding-top: 60px; /* Space for the fixed back button */
-            display: none; /* Hidden by default */
-
-            /* New background properties */
+            padding-top: 60px;
+            display: none;
             background-size: cover;
             background-position: center center;
-            background-attachment: fixed; /* Keeps image static if full page scrolls */
+            background-attachment: fixed;
         }
-
-        /* Add an overlay directly using a pseudo-element to dim the background image */
         .full-page-post-view::after {
             content: '';
-            position: absolute; /* Stays within .full-page-post-view */
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.65); /* Semi-transparent black overlay */
-            z-index: 0; /* Sits behind the scroller content but on top of parent's background image */
+            background-color: rgba(0, 0, 0, 0.65);
+            z-index: 0;
         }
-
         .full-page-post-view.visible {
             display: block;
         }
-
         .full-page-post-close-btn {
             position: fixed;
             top: 15px;
@@ -518,7 +465,7 @@
             font-size: 1rem;
             font-family: 'Georgia', serif;
             cursor: pointer;
-            z-index: 2001; /* Ensure it's above everything in full-page-post-view */
+            z-index: 2001;
             transition: background-color 0.3s ease;
             display: flex;
             align-items: center;
@@ -530,22 +477,20 @@
         .full-page-post-close-btn i {
             font-size: 1.1rem;
         }
-
         .full-page-post-scroller {
-            max-width: 700px; /* Max width for content area */
+            max-width: 700px;
             margin: 0 auto;
             padding: 20px 10px;
-            position: relative; /* For z-index stacking context */
-            z-index: 1; /* Ensures scroller content is above the ::after overlay */
+            position: relative;
+            z-index: 1;
         }
-
         .full-page-post-item-wrapper {
-            background-color: #1a1a1a; /* Darker background for each post card */
+            background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 12px;
             margin-bottom: 30px;
             box-shadow: 0 5px 25px rgba(0,0,0,0.3);
-            overflow: hidden; /* Clip image corners if needed */
+            overflow: hidden;
         }
         .full-page-post-header {
             display: flex;
@@ -559,36 +504,33 @@
             border-radius: 50%;
             object-fit: cover;
             margin-right: 12px;
-            background-color: #444; /* Placeholder bg */
+            background-color: #444;
         }
         .full-page-post-author-name {
             font-weight: bold;
             color: #e0e0e0;
             font-size: 1rem;
         }
-
         .full-page-post-image {
             display: block;
             width: 100%;
-            max-height: 80vh; /* Limit image height */
-            object-fit: contain; /* Show full image, letterboxed if necessary */
-            background-color: #101010; /* Background for letterboxing */
+            max-height: 80vh;
+            object-fit: contain;
+            background-color: #101010;
         }
-
         .full-page-post-caption {
-            padding: 20px 25px; /* More spacious padding */
-            font-size: 1rem;    /* Slightly larger, more readable text */
-            color: #e8e8e8;     /* Brighter text for better contrast on dark bg */
-            line-height: 1.7;   /* Improved line spacing */
-            white-space: pre-wrap; /* Respect newlines in caption - KEEP */
-            background-color: rgba(15, 15, 15, 0.75); /* Dark, subtly transparent background */
-            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Clearer separation from image */
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* Text shadow for depth */
+            padding: 20px 25px;
+            font-size: 1rem;
+            color: #e8e8e8;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            background-color: rgba(15, 15, 15, 0.75);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
         .full-page-post-caption:empty {
-            display: none; /* KEEP */
+            display: none;
         }
-
 
         /* Footer */
         footer {
@@ -596,7 +538,7 @@
             backdrop-filter: blur(10px);
             color: #e0e0e0;
             padding: 40px 0 20px;
-            margin-top: auto; /* Pushes to bottom if content is short */
+            margin-top: auto;
         }
         .footer-container {
             max-width: 1200px;
@@ -629,7 +571,6 @@
         }
         .footer-section ul li a:hover { color: #DDA0DD; }
         .footer-socials a { margin-right: 12px; font-size: 1.2rem; color: #DDA0DD; }
-
         .footer-bottom {
             text-align: center;
             padding-top: 20px;
@@ -639,21 +580,18 @@
         }
         .footer-bottom p { margin-bottom: 5px; }
 
-                /* --- Styles for Page Bottom Logout Button --- */
         .logout-section {
             text-align: center;
-            margin-bottom: 20px; /* Space between logout button and copyright text */
-            /* This section will appear above the copyright, below the footer-bottom's top border */
+            margin-bottom: 20px;
         }
-
         .btn-logout-page {
             padding: 12px 25px;
-            border: 1px solid #DDA0DD; /* Using your accent color */
-            border-radius: 25px; /* Rounded corners */
+            border: 1px solid #DDA0DD;
+            border-radius: 25px;
             font-weight: 600;
             font-size: 0.95rem;
             color: #DDA0DD;
-            background-color: transparent; /* Or a subtle dark background: rgba(255, 255, 255, 0.05); */
+            background-color: transparent;
             cursor: pointer;
             font-family: 'Georgia', serif;
             display: inline-flex;
@@ -661,32 +599,31 @@
             gap: 8px;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .btn-logout-page:hover {
-            background-color: rgba(221, 160, 221, 0.15); /* Light plum highlight on hover */
+            background-color: rgba(221, 160, 221, 0.15);
             color: white;
             border-color: white;
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(221, 160, 221, 0.2); /* Enhanced shadow on hover */
+            box-shadow: 0 6px 15px rgba(221, 160, 221, 0.2);
         }
         .btn-logout-page i {
-            font-size: 1rem; /* Adjust icon size if needed */
+            font-size: 1rem;
         }
 
         .delete-profile-section {
             text-align: center;
-            margin-top: 15px; /* Space between logout and delete buttons */
-            margin-bottom: 20px; /* Space between delete button and copyright */
+            margin-top: 15px;
+            margin-bottom: 20px;
         }
-
         .btn-delete-profile-page {
             padding: 12px 25px;
-            border: 1px solid #dc3545; /* Red border for danger */
+            border: 1px solid #dc3545;
             border-radius: 25px;
             font-weight: 600;
             font-size: 0.95rem;
-            color: #dc3545; /* Red text */
+            color: #dc3545;
             background-color: transparent;
             cursor: pointer;
             font-family: 'Georgia', serif;
@@ -696,21 +633,43 @@
             text-decoration: none;
             transition: all 0.3s ease;
         }
-
         .btn-delete-profile-page:hover {
-            background-color: #dc3545; /* Solid red on hover */
+            background-color: #dc3545;
             color: white;
             border-color: #c82333;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
         }
-
         .btn-delete-profile-page i {
             font-size: 1rem;
         }
 
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .profile-display-header, .profile-detail-section {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        .section-user-posts { animation-delay: 0.1s !important; }
+        .section-personal-details { animation-delay: 0.15s !important; }
+        .section-about-interests { animation-delay: 0.25s !important; }
+        .section-partner-prefs { animation-delay: 0.35s !important; }
+        .section-physical-diet { animation-delay: 0.2s !important; }
+        .section-education-career { animation-delay: 0.3s !important; }
+        .section-location-details { animation-delay: 0.4s !important; }
+        .section-lifestyle-choices { animation-delay: 0.45s !important; }
+        .section-family-background { animation-delay: 0.5s !important; }
+        
 
-        /* Media Queries for general adjustments - Keep these */
+        /* --- Responsive Styles --- */
+        @media (max-width: 992px) {
+            .nav-links { gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
+        }
+
         @media (max-width: 768px) {
             .nav-container { flex-direction: column; gap: 10px; }
             .nav-links {
@@ -721,9 +680,9 @@
                 padding-bottom: 10px;
             }
             .main-view-container {
-                margin-top: 20px; /* Corrected from auto */
-                margin-bottom: 20px; /* Corrected from auto */
-                padding: 0 10px; /* Reduced padding for smaller screens */
+                margin-top: 20px;
+                margin-bottom: 20px;
+                padding: 0 10px;
             }
             .profile-display-header .page-main-title { font-size: 2.2rem; }
             .profile-detail-section { padding: 20px; }
@@ -737,37 +696,46 @@
             .full-page-post-scroller { padding: 10px 5px; }
             .full-page-post-close-btn { top: 10px; left: 10px; padding: 8px 12px; font-size: 0.9rem;}
             .full-page-post-view { padding-top: 50px; }
-
-        }
-         @media (max-width: 992px) { /* This breakpoint is for lg in Bootstrap */
-            .nav-links { gap: 15px; }
-            .nav-links a { font-size: 0.9rem; padding: 5px 8px;}
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* === NEW: ADDED FOR VERY SMALL SCREENS (like iPhone SE, etc.) === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
+            }
+            .profile-picture-large, .profile-no-picture {
+                width: 120px; /* Make profile picture smaller */
+                height: 120px;
+            }
+            .profile-display-header .page-main-title {
+                font-size: 1.9rem; /* Make header smaller */
+            }
+            .profile-subtitle {
+                font-size: 1rem; /* Adjust subtitle */
+            }
+            .profile-section-title {
+                font-size: 1.4rem; /* Make section titles more compact */
+            }
+            /* The key change: Stack label and value vertically */
+            .profile-detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+                margin-bottom: 12px;
+            }
+            .profile-detail-item strong {
+                min-width: auto; /* Remove the fixed min-width */
+                margin-right: 0;
+            }
+            .btn-profile-action {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+            .posts-grid.row { /* Make photo grid gutters smaller */
+                --bs-gutter-x: 0.5rem;
+                --bs-gutter-y: 0.5rem;
+            }
         }
-        .profile-display-header,
-        .profile-detail-section {
-            animation: fadeInUp 0.6s ease-out forwards;
-            opacity: 0;
-        }
-
-        /* Animation delays adjusted for new layout */
-        /* Gallery is first, then left column items, then right column items */
-        .section-user-posts { animation-delay: 0.1s !important; } /* 1st overall */
-
-        .section-personal-details { animation-delay: 0.15s !important; } /* 1st in Left Col */
-        .section-about-interests { animation-delay: 0.25s !important; }  /* 2nd in Left Col */
-        .section-partner-prefs { animation-delay: 0.35s !important; }   /* 3rd in Left Col */
-
-        .section-physical-diet { animation-delay: 0.2s !important; }   /* 1st in Right Col */
-        .section-education-career { animation-delay: 0.3s !important; }/* 2nd in Right Col */
-        .section-location-details { animation-delay: 0.4s !important; }/* 3rd in Right Col */
-        .section-lifestyle-choices { animation-delay: 0.45s !important; }/* 4th in Right Col */
-        .section-family-background { animation-delay: 0.5s !important; }/* 5th in Right Col */
-
     </style>
 </head>
 <body>
@@ -1020,20 +988,6 @@
                     <p>Dedicated to helping Pentecostal believers find their God-ordained life partners through faith, prayer, and divine guidance.</p>
                 </div>
                 <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="{% url 'index' %}">Home</a></li>
-                        {% if user.is_authenticated and user_has_profile %}
-                        <li><a href="{% url 'search_users' %}">Search Members</a></li>
-                        <li><a href="{% url 'view_user_profile' %}">My Profile</a></li>
-                        {% elif user.is_authenticated and not user_has_profile %}
-                        <li><a href="{% url 'create_user_profile' %}">Create Profile</a></li>
-                        {% else %}
-                        <li><a href="{% url 'login' %}">Login / Register</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-                <div class="footer-section">
                     <h4>Contact & Support</h4>
                     <p>Email: <a href="mailto:keralapentecostmatrimony@gmail.com" style="color:#DDA0DD;">keralapentecostmatrimony@gmail.com</a></p>
                 </div>
@@ -1065,8 +1019,8 @@
     </footer>
 
     <script>
+    // --- ALL JAVASCRIPT REMAINS UNCHANGED ---
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Navigation Active Link Script ---
         const currentPath = window.location.pathname;
         const navLinks = document.querySelectorAll('.nav-links a');
         navLinks.forEach(link => {
@@ -1077,16 +1031,15 @@
             }
         });
 
-        // --- Full Page Post View Functionality ---
         const fullPagePostView = document.getElementById('fullPagePostView');
         const fullPagePostScroller = document.getElementById('fullPagePostScroller');
         const fullPagePostCloseBtn = document.getElementById('fullPagePostCloseBtn');
-        const mainProfileContainer = document.querySelector('.main-view-container'); // For hiding/showing
+        const mainProfileContainer = document.querySelector('.main-view-container');
 
-        let postImageSources = []; // Array to store {id, src, caption} of all posts
+        let postImageSources = [];
 
         function initializePostItems() {
-            postImageSources = []; // Reset
+            postImageSources = [];
             const postItems = document.querySelectorAll('.posts-grid .post-item');
 
             if (postItems.length > 0) {
@@ -1095,11 +1048,9 @@
                         id: item.dataset.postId,
                         src: item.dataset.imgSrc,
                         caption: item.dataset.caption,
-                        elementId: `full-post-${item.dataset.postId}` // For scrolling
+                        elementId: `full-post-${item.dataset.postId}`
                     };
                     postImageSources.push(postData);
-
-                    // Add click listener to the grid item (image or whole item)
                     item.addEventListener('click', () => {
                         openFullPagePostView(postData.id);
                     });
@@ -1111,9 +1062,8 @@
         function createFullPagePostElement(post) {
             const postWrapper = document.createElement('div');
             postWrapper.classList.add('full-page-post-item-wrapper');
-            postWrapper.id = post.elementId; // For scrolling into view
+            postWrapper.id = post.elementId;
 
-            // Author data (using profile data from the page context)
             const authorName = "{{ profile.full_name|escapejs }}";
             const authorAvatarUrl = "{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% endif %}";
 
@@ -1136,7 +1086,7 @@
         function openFullPagePostView(clickedPostId) {
             if (!fullPagePostView || !fullPagePostScroller || postImageSources.length === 0) return;
 
-            fullPagePostScroller.innerHTML = ''; // Clear previous posts
+            fullPagePostScroller.innerHTML = '';
 
             postImageSources.forEach(post => {
                 const postElement = createFullPagePostElement(post);
@@ -1144,11 +1094,10 @@
             });
 
             document.body.classList.add('full-post-view-active');
-            document.body.style.overflow = 'hidden'; // Prevent main page scroll
+            document.body.style.overflow = 'hidden';
             fullPagePostView.classList.add('visible');
-            fullPagePostView.scrollTop = 0; // Scroll viewer to top
+            fullPagePostView.scrollTop = 0;
 
-            // Scroll the specifically clicked post into view
             const targetPostElement = document.getElementById(`full-post-${clickedPostId}`);
             if (targetPostElement) {
                 targetPostElement.scrollIntoView({ behavior: 'auto', block: 'start' });
@@ -1166,32 +1115,27 @@
         if (fullPagePostCloseBtn) {
             fullPagePostCloseBtn.addEventListener('click', closeFullPagePostView);
         }
-        // Optional: Close on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && fullPagePostView && fullPagePostView.classList.contains('visible')) {
                 closeFullPagePostView();
             }
         });
 
-        // --- Delete Post Functionality ---
         function initializeDeleteButtons() {
-            // Re-bind event listeners to ensure they are fresh, especially if posts are added dynamically later (not in this exact code, but good practice)
              document.querySelectorAll('.delete-post-btn').forEach(button => {
-                // Clone and replace to remove old listeners if any, then add new one
                 const newButton = button.cloneNode(true);
                 button.parentNode.replaceChild(newButton, button);
                 newButton.addEventListener('click', handleDeletePost);
             });
         }
 
-
         function handleDeletePost(event) {
-            event.stopPropagation(); // Prevent triggering post click to open full view
+            event.stopPropagation();
 
             const button = event.currentTarget;
             const postId = button.dataset.postId;
             const deleteUrl = button.dataset.deleteUrl;
-            const gridItemCol = button.closest('.col'); // The Bootstrap column wrapper for the grid item
+            const gridItemCol = button.closest('.col');
 
             if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
                 return;
@@ -1222,29 +1166,21 @@
 
                         setTimeout(() => {
                             gridItemCol.remove();
-
-                            // Remove from postImageSources array
                             const deletedIndex = postImageSources.findIndex(p => p.id === postId);
                             if (deletedIndex > -1) {
                                 postImageSources.splice(deletedIndex, 1);
                             }
-
-                            // If full page view is open, remove the post from there too
                             if (fullPagePostView.classList.contains('visible')) {
                                 const fullPagePostElement = document.getElementById(`full-post-${postId}`);
                                 if (fullPagePostElement) {
                                     fullPagePostElement.remove();
                                 }
-                                // If no posts left in full view, close it
                                 if (postImageSources.length === 0) {
                                     closeFullPagePostView();
                                 }
                             }
                             updateNoPostsMessageVisibility();
-                            // Consider a less obtrusive success message (e.g., a toast notification)
-                            // alert(data.message || 'Post deleted successfully!');
                             addDjangoMessage(data.message || 'Post deleted successfully!', 'success');
-
                         }, 400);
                     }
                 } else {
@@ -1261,21 +1197,18 @@
             const messagesContainer = document.querySelector('.django-messages');
             if (messagesContainer) {
                 const li = document.createElement('li');
-                li.className = level; // 'success', 'error', etc.
+                li.className = level;
                 li.textContent = message;
                 messagesContainer.appendChild(li);
-                 // Optional: Auto-remove message after a few seconds
                 setTimeout(() => {
                     li.style.transition = 'opacity 0.5s ease';
                     li.style.opacity = '0';
                     setTimeout(() => li.remove(), 500);
                 }, 5000);
             } else {
-                // Fallback if .django-messages container isn't found
                 alert(message);
             }
         }
-
 
         function updateNoPostsMessageVisibility() {
             const postsGrid = document.querySelector('.posts-grid');
@@ -1286,12 +1219,9 @@
             }
         }
 
-        // Initializations
         initializePostItems();
         initializeDeleteButtons();
     });
     </script>
-     <!-- Optional: Bootstrap JS Bundle (Popper.js included) if you use Bootstrap components requiring JS -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script> -->
 </body>
 </html>
