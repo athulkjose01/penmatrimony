@@ -94,8 +94,8 @@
         .footer-socials a { margin-right: 12px; font-size: 1.2rem; color: #DDA0DD; }
         .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #5b4c6c; color: #aaa; font-size: 0.85rem; }
         .footer-bottom p { margin-bottom: 5px; }
-        @media (max-width: 768px) { .nav-container { flex-direction: column; gap: 10px; } .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; } .main-view-container { margin-top: 20px; margin-bottom: 20px; padding: 0 10px; } .profile-display-header .page-main-title { font-size: 2.2rem; } .profile-detail-section { padding: 20px; } .profile-section-title { font-size: 1.5rem; } .footer-content { grid-template-columns: 1fr; text-align: center;} .footer-socials { text-align: center; margin-top: 10px;} .profile-picture-large, .profile-no-picture { width: 150px; height: 150px;} .profile-detail-item strong { min-width: 120px; } .full-page-post-scroller { padding: 10px 5px; } .full-page-post-close-btn { top: 10px; left: 10px; padding: 8px 12px; font-size: 0.9rem;} .full-page-post-view { padding-top: 50px; } }
         @media (max-width: 992px) { .nav-links { gap: 15px; } .nav-links a { font-size: 0.9rem; padding: 5px 8px;} }
+        @media (max-width: 768px) { .nav-container { flex-direction: column; gap: 10px; } .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; } .main-view-container { margin-top: 20px; margin-bottom: 20px; padding: 0 10px; } .profile-display-header .page-main-title { font-size: 2.2rem; } .profile-detail-section { padding: 20px; } .profile-section-title { font-size: 1.5rem; } .footer-content { grid-template-columns: 1fr; text-align: center;} .footer-socials { text-align: center; margin-top: 10px;} .profile-picture-large, .profile-no-picture { width: 150px; height: 150px;} .profile-detail-item strong { min-width: 120px; } .full-page-post-scroller { padding: 10px 5px; } .full-page-post-close-btn { top: 10px; left: 10px; padding: 8px 12px; font-size: 0.9rem;} .full-page-post-view { padding-top: 50px; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .profile-display-header, .profile-detail-section { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
         .section-user-posts { animation-delay: 0.1s !important; } .section-personal-details { animation-delay: 0.15s !important; } .section-about-interests { animation-delay: 0.25s !important; } .section-partner-prefs { animation-delay: 0.35s !important; } .section-physical-diet { animation-delay: 0.2s !important; } .section-education-career { animation-delay: 0.3s !important; } .section-location-details { animation-delay: 0.4s !important; } .section-lifestyle-choices { animation-delay: 0.45s !important; } .section-family-background { animation-delay: 0.5s !important; }
@@ -107,9 +107,34 @@
         .btn-info { background: #0dcaf0; color: white; border: 2px solid transparent; } /* Bootstrap's info color */
         .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
+        /* === MODIFICATION: ADDED FOR RESPONSIVENESS ON VERY SMALL SCREENS === */
+        @media (max-width: 420px) {
+            .logo {
+                font-size: 1.5rem; /* Reduce logo size to prevent wrapping */
+            }
+            .profile-picture-large, .profile-no-picture {
+                width: 120px; /* Make profile picture smaller */
+                height: 120px;
+            }
+            .profile-display-header .page-main-title {
+                font-size: 1.9rem; /* Make header smaller */
+            }
+            .profile-section-title {
+                font-size: 1.4rem; /* Make section titles more compact */
+            }
+            .posts-grid.row { /* Make photo grid gutters smaller */
+                --bs-gutter-x: 0.5rem;
+                --bs-gutter-y: 0.5rem;
+            }
+            .btn { /* Adjust button size on small screens */
+                padding: 12px 24px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- The rest of your HTML remains unchanged -->
     <nav>
         <div class="nav-container">
             <a href="{% url 'index' %}" class="logo">
@@ -153,16 +178,16 @@
                 {% endif %}
             </div>
             <h2 class="page-main-title">{{ profile.full_name }}</h2>
-            
+
             <!-- ======================= MODIFIED ACTION BUTTONS BLOCK ======================= -->
             <div class="profile-actions mt-3">
-                
+
                 {% if interest_status == 'sent_pending' %}
                     <!-- This status is informational and shown to everyone -->
                     <button class="btn btn-secondary" disabled>
                         <i class="fas fa-hourglass-start"></i> Interest Sent (Pending)
                     </button>
-                
+
                 {% elif interest_status == 'accepted' %}
                     <!-- This status is informational, but the MESSAGE button is gated -->
                     <p class="text-success fw-bold"><i class="fas fa-handshake"></i> Interest Accepted</p>
@@ -182,7 +207,7 @@
                 {% else %}
                     <!-- For 'none' and 'received_pending', the action itself requires premium -->
                     {% if request.user.userprofile.is_premium_member %}
-                        
+
                         {% if interest_status == 'none' %}
                             <form action="{% url 'send_interest' profile_id=profile.id %}" method="POST" style="display: inline;">
                                 {% csrf_token %}
@@ -191,7 +216,7 @@
                                 </button>
                                 <br><small class="mt-2 d-block">Contact details will be visible after they accept.</small>
                             </form>
-                        
+
                         {% elif interest_status == 'received_pending' %}
                             <form action="{% url 'accept_interest' interest_id=interest_request.id %}" method="POST" style="display: inline;">
                                 {% csrf_token %}
@@ -437,7 +462,7 @@
         const fullPagePostView = document.getElementById('fullPagePostView');
         const fullPagePostScroller = document.getElementById('fullPagePostScroller');
         const fullPagePostCloseBtn = document.getElementById('fullPagePostCloseBtn');
-        const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+        const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
                         (document.cookie.match(/csrftoken=([^;]+)/) || [])[1];
 
         let postImageSources = [];
@@ -497,7 +522,7 @@
 
         function openFullPagePostView(clickedPostId) {
             if (!fullPagePostView || !fullPagePostScroller || postImageSources.length === 0) return;
-            
+
             fullPagePostScroller.innerHTML = '';
             postImageSources.forEach(post => {
                 const postElement = createFullPagePostElement(post);
@@ -508,7 +533,7 @@
             document.body.style.overflow = 'hidden';
             fullPagePostView.classList.add('visible');
             fullPagePostView.scrollTop = 0;
-            
+
             const targetPostElement = document.getElementById(`full-post-${clickedPostId}`);
             if (targetPostElement) {
                 targetPostElement.scrollIntoView({ behavior: 'auto', block: 'start' });
@@ -522,7 +547,7 @@
         }
 
         if (fullPagePostCloseBtn) fullPagePostCloseBtn.addEventListener('click', closeFullPagePostView);
-        
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && fullPagePostView?.classList.contains('visible')) {
                 closeFullPagePostView();
@@ -535,7 +560,7 @@
             const isCurrentlyLiked = heartIcon.classList.contains('fas');
 
             if (forceLike && isCurrentlyLiked) return;
-            
+
             heartIcon.classList.toggle('far', isCurrentlyLiked);
             heartIcon.classList.toggle('fas', !isCurrentlyLiked);
 
@@ -548,7 +573,7 @@
                 if (data.status === 'success') {
                     const postInArray = postImageSources.find(p => p.id === postId);
                     if (postInArray) postInArray.isLiked = (data.action === 'liked');
-                    
+
                     if (data.action === 'liked') {
                         buttonElement.style.transform = 'scale(1.2)';
                         setTimeout(() => buttonElement.style.transform = 'scale(1)', 200);
@@ -563,7 +588,7 @@
                 heartIcon.classList.toggle('fas', isCurrentlyLiked);
             });
         }
-        
+
         function showLikeFeedback(imageContainer) {
             const heartOverlay = imageContainer.querySelector('.like-heart-overlay');
             if (!heartOverlay) return;
@@ -599,7 +624,7 @@
                 const postWrapper = imageContainer.closest('.full-page-post-item-wrapper');
                 const postId = postWrapper.id.split('-').pop();
                 const likeButton = postWrapper.querySelector(`.like-btn-full-view[data-post-id="${postId}"]`);
-                
+
                 showLikeFeedback(imageContainer);
                 toggleLikeVisual(likeButton, true);
             }

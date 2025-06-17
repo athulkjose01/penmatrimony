@@ -431,7 +431,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000; 
+            background-color: #000;
             z-index: 2000;
             overflow-y: auto;
             padding-top: 60px;
@@ -662,7 +662,7 @@
         .section-location-details { animation-delay: 0.4s !important; }
         .section-lifestyle-choices { animation-delay: 0.45s !important; }
         .section-family-background { animation-delay: 0.5s !important; }
-        
+
 
         /* --- Responsive Styles --- */
         @media (max-width: 992px) {
@@ -716,17 +716,9 @@
             .profile-section-title {
                 font-size: 1.4rem; /* Make section titles more compact */
             }
-            /* The key change: Stack label and value vertically */
-            .profile-detail-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 2px;
-                margin-bottom: 12px;
-            }
-            .profile-detail-item strong {
-                min-width: auto; /* Remove the fixed min-width */
-                margin-right: 0;
-            }
+            /* MODIFICATION: The rules that stacked detail items vertically have been removed */
+            /* This ensures key and value stay on the same line on all screen sizes. */
+
             .btn-profile-action {
                 padding: 10px 20px;
                 font-size: 0.85rem;
@@ -739,6 +731,7 @@
     </style>
 </head>
 <body>
+    <!-- The rest of your HTML remains unchanged -->
     <nav>
         <!-- NAV HTML REMAINS UNCHANGED -->
         <div class="nav-container">
@@ -1011,7 +1004,7 @@
                     </button>
                 </form>
             </div>
-            
+
                 {% endif %}
                 <p>© {% now "Y" %} Pentecost Matrimony. All rights reserved.</p>
                 <p>"Love binds them all together in perfect unity." - Colossians 3:14</p>
@@ -1192,7 +1185,7 @@
                 alert('An unexpected error occurred. Please try again.');
             });
         }
-        
+
         function addDjangoMessage(message, level) {
             const messagesContainer = document.querySelector('.django-messages');
             if (messagesContainer) {
