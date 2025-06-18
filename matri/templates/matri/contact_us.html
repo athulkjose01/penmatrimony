@@ -67,7 +67,13 @@
             border-radius: 12px;
             padding: 30px;
         }
-        .contact-card ul { list-style: none; }
+        .contact-card ul {
+            list-style: none;
+            /* UPDATED: These 3 lines center the list items */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         .contact-card li {
             display: flex;
             align-items: center;
@@ -107,16 +113,21 @@
     <main class="content-container">
         <h1 class="page-title">Get In Touch</h1>
         <p>We're here to help and answer any question you might have. We look forward to hearing from you.</p>
-        
+
         <div class="contact-card">
             <ul>
                 <li>
-                    <span class="icon"><i class="fas fa-user-tie"></i></span>
                     <span>Athul K Jose</span>
                 </li>
                 <li>
-                    <span class="icon"><i class="fas fa-phone-alt"></i></span>
                     <a href="tel:8078538160">7736435815</a>
+                </li>
+                <li>
+                    <center>Kokkapuzha, Karithodu,
+                    <br>
+                    Kanakappalam P.O Erumely,
+                    <br>
+                    Kottayam, Kerala</center>
                 </li>
             </ul>
         </div>
