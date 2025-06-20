@@ -39,7 +39,6 @@ urlpatterns = [
     path('reset/done/', views.password_reset_complete, name='password_reset_complete'),
     path('subscribe/', views.subscribe_page, name='subscribe'),
     path('payment/initiate/', views.phonepe_initiate_payment, name='phonepe_initiate'),
-    path('payment/callback/', views.phonepe_callback, name='phonepe_callback'),
     path('payment/redirect/', views.phonepe_redirect, name='phonepe_redirect'),
     path('serviceworker.js', views.service_worker, name='service_worker'),
     path('privacy-policy/', views.privacy_policy_view, name='privacy_policy'),
