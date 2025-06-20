@@ -1443,7 +1443,7 @@ def subscribe_page(request):
     Displays the subscription page. Amount is set for testing.
     """
     context = {
-        'plan_amount': 1,  # Set to 1 for live testingggg
+        'plan_amount': 1,  # Set to 1 for live testing
     }
     return render(request, 'payment/subscribe.html', context)
 
