@@ -60,6 +60,7 @@ import uuid
 from phonepe.sdk.pg.payments.v1.payment_client import PhonePePaymentClient
 from phonepe.sdk.pg.payments.v1.models.request.pg_pay_request import PgPayRequest
 from django.core.cache import cache # Using Django's cache to store the token
+from django.db import transaction
 
 
 
@@ -1433,11 +1434,17 @@ from .models import UserProfile, Payment
 
 logger = logging.getLogger(__name__)
 
-
-# VIEW 1: RENDER THE SUBSCRIPTION PAGE (No change)
+# ===================================================================
+# VIEW 1: RENDER THE SUBSCRIPTION PAGE
+# ===================================================================
 @login_required
 def subscribe_page(request):
-    context = {'plan_amount': 1}
+    """
+    Displays the subscription page. Amount is set for testing.
+    """
+    context = {
+        'plan_amount': 1,  # Set to 1 for live testing
+    }
     return render(request, 'payment/subscribe.html', context)
 
 
@@ -1476,12 +1483,12 @@ def get_phonepe_auth_token():
         expires_at = new_token_data.get('expires_at')
 
         if not access_token or not expires_at:
-            logger.error("Failed to get a valid access token from PhonePe response.")
+            logger.error(f"Failed to get a valid access token from PhonePe. Response: {new_token_data}")
             return None
         
-        # Cache the new token data
-        # The 'expires_in' value from PhonePe is not reliable, so we use 'expires_at'
-        cache.set('phonepe_auth_token', new_token_data, timeout=(expires_at - time.time()))
+        # Cache the new token, ensuring timeout is a positive number
+        timeout_seconds = max(1, expires_at - time.time())
+        cache.set('phonepe_auth_token', new_token_data, timeout=timeout_seconds)
         
         logger.info("Successfully fetched and cached a new PhonePe auth token.")
         return access_token
@@ -1490,32 +1497,28 @@ def get_phonepe_auth_token():
         logger.error(f"Error fetching PhonePe auth token: {e}")
         return None
 
+
 # ===================================================================
-# VIEW 2: INITIATE PAYMENT (New V2 Flow)
+# VIEW 2: INITIATE PAYMENT (V2 Flow with Robust Response Handling)
 # ===================================================================
 @login_required
 def phonepe_initiate_payment(request):
     if request.method == "POST":
-        # Step A: Get the auth token
         access_token = get_phonepe_auth_token()
         if not access_token:
             return render(request, 'payment/payment_error.html', {'message': 'Could not authenticate with payment gateway. Please try again later.'})
 
-        # Step B: Create the payment
-        payment_amount = 1
+        payment_amount = 1  # Amount for live testing
         amount_in_paise = int(payment_amount * 100)
-        
-        # This is now the 'merchantOrderId' as per V2 docs
         merchant_order_id = f"MUID_{request.user.id}_{uuid.uuid4().hex[:6].upper()}"
 
         payload = {
             "merchantOrderId": merchant_order_id,
             "amount": amount_in_paise,
-            "expireAfter": 1200, # 20 minutes
+            "expireAfter": 1200,
             "paymentFlow": {
                 "type": "PG_CHECKOUT",
                 "merchantUrls": {
-                    # NOTE: The V2 API seems to use only one redirectUrl for both success and failure
                     "redirectUrl": request.build_absolute_uri(reverse('phonepe_redirect'))
                 }
             }
@@ -1528,7 +1531,6 @@ def phonepe_initiate_payment(request):
 
         try:
             with transaction.atomic():
-                # We save our merchant_transaction_id as merchant_order_id now
                 Payment.objects.create(
                     user=request.user,
                     merchant_transaction_id=merchant_order_id,
@@ -1540,11 +1542,20 @@ def phonepe_initiate_payment(request):
             logger.info(f"PhonePe Pay API Response: Status={response.status_code}, Body={response.text}")
             response_data = response.json()
             
-            if response_data.get("orderId"): # Success is indicated by presence of orderId
-                return redirect(response_data["redirectUrl"])
+            # ** THIS IS THE ROBUST CHECK **
+            redirect_url = response_data.get("redirectUrl")
+
+            if response_data.get("orderId") and redirect_url:
+                logger.info(f"Successfully created order. Redirecting to: {redirect_url}")
+                return redirect(redirect_url)
             else:
-                error_message = response_data.get("message", "An unknown error occurred.")
-                get_object_or_404(Payment, merchant_transaction_id=merchant_order_id).update(status='FAILURE')
+                logger.error(f"PhonePe response was missing required keys. Full response: {response_data}")
+                error_message = response_data.get("message", "Payment gateway returned an unexpected response.")
+                
+                payment = get_object_or_404(Payment, merchant_transaction_id=merchant_order_id)
+                payment.status = 'FAILURE'
+                payment.save()
+
                 return render(request, 'payment/payment_error.html', {'message': error_message})
 
         except Exception as e:
@@ -1553,24 +1564,21 @@ def phonepe_initiate_payment(request):
 
     return redirect('subscribe')
 
+
 # ===================================================================
-# VIEW 3: HANDLE WEBHOOK (S2S CALLBACKKKKK)
+# VIEW 3: HANDLE WEBHOOK (S2S CALLBACK) - Placeholder
 # ===================================================================
 @csrf_exempt
 def phonepe_callback(request):
-    # The V2 docs suggest a different webhook validation (SHA256 of username:password)
-    # Since we don't have that set up, we will rely on the redirect and a final status check.
-    # This view can be a placeholder or be built out later if you configure webhook auth.
     logger.info(f"Received a request on the callback URL. Body: {request.body.decode('utf-8')}")
     return JsonResponse({'status': 'ok'}) # Acknowledge receipt
 
+
 # ===================================================================
-# VIEW 4: HANDLE USER REDIRECT (Now with final status check)
+# VIEW 4: HANDLE USER REDIRECT (with Final Status Check)
 # ===================================================================
 @csrf_exempt
 def phonepe_redirect(request):
-    # The user is redirected here from PhonePe after payment attempt.
-    # The query parameters will tell us the status.
     merchant_order_id = request.GET.get('merchantOrderId')
     
     if not merchant_order_id:
@@ -1579,12 +1587,10 @@ def phonepe_redirect(request):
     try:
         payment = Payment.objects.get(merchant_transaction_id=merchant_order_id)
         
-        # Step A: Get a fresh auth token to check status
         access_token = get_phonepe_auth_token()
         if not access_token:
             return render(request, 'payment/payment_error.html', {'message': 'Could not verify payment status.'})
             
-        # Step B: Call the Order Status API
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"O-Bearer {access_token}",
@@ -1598,8 +1604,9 @@ def phonepe_redirect(request):
         with transaction.atomic():
             if status_data.get("state") == "COMPLETED" and payment.status != 'SUCCESS':
                 payment.status = 'SUCCESS'
-                # The V2 status response has more details if needed
-                payment.phonepe_transaction_id = status_data.get("paymentDetails", [{}])[0].get("transactionId")
+                payment_details = status_data.get("paymentDetails", [{}])[0]
+                payment.phonepe_transaction_id = payment_details.get("transactionId")
+                
                 user_profile = get_object_or_404(UserProfile, user=payment.user)
                 user_profile.is_premium_member = True
                 user_profile.save()
@@ -1616,7 +1623,7 @@ def phonepe_redirect(request):
     except Exception as e:
         logger.error(f"Error during redirect handling for {merchant_order_id}: {e}")
         return render(request, 'payment/payment_error.html', {'message': 'An error occurred while verifying your payment.'})
-
+    
 
 
 
