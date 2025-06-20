@@ -60,7 +60,6 @@ import uuid
 from phonepe.sdk.pg.payments.v2.standard_checkout_client import StandardCheckoutClient
 from phonepe.sdk.pg.env import Env
 from phonepe.sdk.pg.payments.v2.models.request.standard_checkout_pay_request import StandardCheckoutPayRequest
-from phonepe.sdk.pg.payments.v2.models.response.order_status_response import OrderStatusResponse
 from django.core.cache import cache # Using Django's cache to store the token
 from django.db import transaction
 
@@ -1543,7 +1542,7 @@ def phonepe_redirect(request):
     try:
         client = get_phonepe_client()
         # Use the SDK to check the order status
-        status_response: OrderStatusResponse = client.get_order_status(merchant_order_id=merchant_order_id)
+        status_response = client.get_order_status(merchant_order_id=merchant_order_id)
         
         logger.info(f"Status check for {merchant_order_id}: {status_response.state}")
 
