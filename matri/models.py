@@ -15,7 +15,7 @@ class Profile(models.Model):
         return f'{self.user.username} Profile (Basic)'
 
 class UserProfile(models.Model):
-    # Define CHOICES as static attributes for easier access in forms
+    # Define CHOICES as static attributes for easier access in formsssss
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')]
     MARITAL_STATUS_CHOICES = [
         ('Never Married', 'Never Married'), ('Divorced', 'Divorced'),
