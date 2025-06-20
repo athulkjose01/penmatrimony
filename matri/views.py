@@ -1522,16 +1522,10 @@ def phonepe_initiate_payment(request):
 # ===================================================================
 @csrf_exempt
 def phonepe_redirect(request):
-    """
-    The user is sent back here from PhonePe. This view verifies the final
-    payment status by making a server-to-server API call.
-    """
-    # The 'merchantOrderId' should be passed back by PhonePe in the redirect URL's query parameters.
     merchant_order_id = request.GET.get('merchantOrderId')
 
     if not merchant_order_id:
-        logger.warning("PhonePe redirect received without a merchantOrderId.")
-        # Fallback for safety: try to get the user's latest pending payment.
+        logger.warning("PhonePe redirect received without a merchantOrderId. Using fallback.")
         try:
             payment = Payment.objects.filter(user=request.user, status='PENDING').latest('created_at')
             merchant_order_id = payment.merchant_transaction_id
@@ -1541,20 +1535,26 @@ def phonepe_redirect(request):
     
     try:
         client = get_phonepe_client()
-        # Use the SDK to check the order status
         status_response = client.get_order_status(merchant_order_id=merchant_order_id)
         
-        logger.info(f"Status check for {merchant_order_id}: {status_response.state}")
+        logger.info(f"Status check for {merchant_order_id}: State is '{status_response.state}'")
+        
+        # Log the full payment_details object to see its structure
+        if hasattr(status_response, 'payment_details'):
+            logger.info(f"Payment Details object from SDK: {status_response.payment_details}")
 
         payment = get_object_or_404(Payment, merchant_transaction_id=merchant_order_id)
 
         with transaction.atomic():
-            # Check the final state of the transaction
             if status_response.state == "COMPLETED" and payment.status != 'SUCCESS':
                 payment.status = 'SUCCESS'
-                payment.phonepe_transaction_id = status_response.payment_details.transaction_id
                 
-                # Grant premium access to the user
+                # ==================== THE FIX IS HERE ====================
+                # Safely access the first element of the list, then get the transactionId.
+                if hasattr(status_response, 'payment_details') and isinstance(status_response.payment_details, list) and len(status_response.payment_details) > 0:
+                    payment.phonepe_transaction_id = status_response.payment_details[0].transaction_id
+                # =========================================================
+                
                 user_profile = get_object_or_404(UserProfile, user=payment.user)
                 user_profile.is_premium_member = True
                 user_profile.save()
@@ -1562,7 +1562,6 @@ def phonepe_redirect(request):
                 payment.save()
                 return render(request, 'payment/payment_success.html')
             else:
-                # If the status is not COMPLETED (e.g., FAILED), mark our record as failed.
                 payment.status = 'FAILURE'
                 payment.save()
                 return render(request, 'payment/payment_error.html', {'message': 'Payment was not successful.'})
