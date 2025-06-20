@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Pentecost Matrimony</title>
+    
+    <!-- FONT AWESOME & GOOGLE FONTS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* --- CORE STYLES (Copied from subscribe.html for consistency) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Georgia', serif; line-height: 1.6; color: #E0E0E0; background: black;
+            min-height: 100vh; display: flex; flex-direction: column; position: relative;
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            pointer-events: none; z-index: -1;
+        }
+        .main-view-container {
+            flex-grow: 1; display: flex; align-items: center; justify-content: center;
+            padding-top: 30px; padding-bottom: 40px;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- STYLES FOR THE STATUS CARD --- */
+        .status-card {
+            background: rgba(30, 0, 40, 0.85); backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 40px 30px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative; z-index: 1; text-align: center;
+            animation: fadeInUp 0.6s ease-out forwards; opacity: 0;
+            width: 100%; max-width: 550px; /* Optimal width for status message */
+            margin: 0 auto;
+        }
+        .status-card::before { /* Top border accent */
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            /* SUCCESS: Green Gradient */
+            background: linear-gradient(45deg, #1D976C, #93F9B9);
+        }
+        .card-icon {
+            font-size: 4rem; margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(40, 167, 69, 0.6);
+            /* SUCCESS: Green Icon */
+            color: #28a745;
+        }
+        .card-title {
+            font-family: 'Playfair Display', serif; font-size: 2.2rem; color: white;
+            margin-bottom: 10px;
+        }
+        .card-message {
+            font-size: 1.1rem; color: #c0c0c0; margin-bottom: 30px;
+        }
+        .action-button {
+            padding: 15px 35px; border: none; border-radius: 50px;
+            font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;
+            color: white; cursor: pointer; font-family: 'Georgia', serif;
+            display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+            transition: all 0.3s ease;
+            /* SUCCESS: Green Button */
+            background: linear-gradient(45deg, #1D976C, #28a745);
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+        }
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(40, 167, 69, 0.4);
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .status-card { padding: 30px 25px; }
+            .card-title { font-size: 1.8rem; }
+            .card-icon { font-size: 3rem; }
+            .action-button { padding: 12px 25px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-view-container container">
+        <div class="row justify-content-center">
+            <div class="col-11 col-md-8 col-lg-6">
+                <div class="status-card">
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h1 class="card-title">Payment Successful!</h1>
+                    <p class="card-message">
+                        Welcome to the club! You are now a Premium Member and have unlocked all exclusive benefits.
+                    </p>
+                    <a href="{% url 'view_user_profile' %}" class="action-button">
+                        <i class="fas fa-user-circle"></i> Go to Your Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

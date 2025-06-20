@@ -54,6 +54,12 @@ import logging
 import time
 from .models import Notification # Import the new model
 from django.contrib.humanize.templatetags.humanize import naturaltime
+import hashlib
+import base64
+import uuid
+from phonepe.sdk.pg.payments.v1.payment_client import PhonePePaymentClient
+from phonepe.sdk.pg.payments.v1.models.request.pg_pay_request import PgPayRequest
+from django.core.cache import cache # Using Django's cache to store the token
 
 
 
@@ -1418,138 +1424,198 @@ def password_reset_complete(request):
 
 
 
-# It's good practice to get a logger instance
+# You can remove the razorpay client initialization
+logger = logging.getLogger(__name__) # Keep this, it's good practice
+
+
+# Import your models
+from .models import UserProfile, Payment
+
 logger = logging.getLogger(__name__)
 
-# Initialize Razorpay client once
-try:
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-except Exception as e:
-    logger.critical(f"Failed to initialize Razorpay client: {e}")
-    client = None
 
+# VIEW 1: RENDER THE SUBSCRIPTION PAGE (No change)
 @login_required
-def initiate_payment(request):
-    """
-    View to display the subscription page and create a Razorpay Order.
-    Includes error handling for the API call.
-    """
-    if not client:
-        # Handle case where Razorpay client failed to initialize
-        # You might want to render an error page or a message
-        # For now, let's add a message to the context
-        context = {'error_message': 'Payment service is currently unavailable. Please try again later.'}
-        return render(request, 'payment/subscribe.html', context)
-        
-    # It's better to store this in settings.py
-    payment_amount = 500
-    amount_in_paise = payment_amount * 100
+def subscribe_page(request):
+    context = {'plan_amount': 1}
+    return render(request, 'payment/subscribe.html', context)
 
-    order_data = {
-        "amount": amount_in_paise,
-        "currency": "INR",
-        "receipt": f"receipt_user_{request.user.id}_{int(time.time())}", # More unique receipt
-        "notes": {
-            "plan": "Lifetime Premium",
-            "user_id": request.user.id,
-            "email": request.user.email
-        }
+
+# ===================================================================
+# HELPER FUNCTION: Get a valid OAuth token from PhonePe
+# ===================================================================
+def get_phonepe_auth_token():
+    """
+    Fetches a new token if the cached one is expired or doesn't exist.
+    """
+    token_data = cache.get('phonepe_auth_token')
+    
+    # Check if token exists and is not expired (with a 60-second buffer)
+    if token_data and token_data.get('expires_at', 0) > time.time() + 60:
+        logger.info("Using cached PhonePe auth token.")
+        return token_data.get('access_token')
+
+    # If no valid token, fetch a new one
+    logger.info("Fetching a new PhonePe auth token...")
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    data = {
+        "client_id": settings.PHONEPE_CLIENT_ID,
+        "client_secret": settings.PHONEPE_CLIENT_SECRET,
+        "client_version": settings.PHONEPE_CLIENT_VERSION,
+        "grant_type": "client_credentials"
     }
 
     try:
-        # --- IMPROVEMENT 1: WRAP API CALL IN TRY/EXCEPT ---
-        order = client.order.create(data=order_data)
+        response = requests.post(settings.PHONEPE_AUTH_URL, headers=headers, data=data, timeout=10)
+        response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
         
-        # Get user profile for pre-filling checkout form
-        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+        new_token_data = response.json()
+        access_token = new_token_data.get('access_token')
+        expires_at = new_token_data.get('expires_at')
 
-        context = {
-            'razorpay_order_id': order['id'],
-            'razorpay_key': settings.RAZORPAY_KEY_ID,
-            'amount': order['amount'],
-            'currency': order['currency'],
-            'user_profile': user_profile,
-            'user': request.user,
-            'plan_amount': payment_amount,
-        }
-        return render(request, 'payment/subscribe.html', context)
+        if not access_token or not expires_at:
+            logger.error("Failed to get a valid access token from PhonePe response.")
+            return None
+        
+        # Cache the new token data
+        # The 'expires_in' value from PhonePe is not reliable, so we use 'expires_at'
+        cache.set('phonepe_auth_token', new_token_data, timeout=(expires_at - time.time()))
+        
+        logger.info("Successfully fetched and cached a new PhonePe auth token.")
+        return access_token
 
-    except Exception as e:
-        # This will catch the ConnectionError and any other Razorpay API errors
-        logger.error(f"Razorpay order creation failed for user {request.user.id}: {e}")
-        context = {
-            'error_message': 'Could not connect to the payment gateway. Please check your internet connection and try again.'
-        }
-        return render(request, 'payment/subscribe.html', context)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching PhonePe auth token: {e}")
+        return None
 
-
-# --- IMPROVEMENT 3: REMOVED @csrf_exempt ---
-# Your JS is sending the CSRF token, so this is more secure.
+# ===================================================================
+# VIEW 2: INITIATE PAYMENT (New V2 Flow)
+# ===================================================================
 @login_required
-def verify_payment(request):
-    """
-    View to verify the payment signature from Razorpay.
-    Uses an atomic transaction to ensure data integrity.
-    """
+def phonepe_initiate_payment(request):
     if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            razorpay_order_id = data.get('razorpay_order_id')
-            razorpay_payment_id = data.get('razorpay_payment_id')
-            razorpay_signature = data.get('razorpay_signature')
-            
-            params_dict = {
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_payment_id': razorpay_payment_id,
-                'razorpay_signature': razorpay_signature
+        # Step A: Get the auth token
+        access_token = get_phonepe_auth_token()
+        if not access_token:
+            return render(request, 'payment/payment_error.html', {'message': 'Could not authenticate with payment gateway. Please try again later.'})
+
+        # Step B: Create the payment
+        payment_amount = 1
+        amount_in_paise = int(payment_amount * 100)
+        
+        # This is now the 'merchantOrderId' as per V2 docs
+        merchant_order_id = f"MUID_{request.user.id}_{uuid.uuid4().hex[:6].upper()}"
+
+        payload = {
+            "merchantOrderId": merchant_order_id,
+            "amount": amount_in_paise,
+            "expireAfter": 1200, # 20 minutes
+            "paymentFlow": {
+                "type": "PG_CHECKOUT",
+                "merchantUrls": {
+                    # NOTE: The V2 API seems to use only one redirectUrl for both success and failure
+                    "redirectUrl": request.build_absolute_uri(reverse('phonepe_redirect'))
+                }
             }
+        }
 
-            # Verify the payment signature
-            client.utility.verify_payment_signature(params_dict)
-            
-            # --- IMPROVEMENT 2: USE ATOMIC TRANSACTION ---
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"O-Bearer {access_token}",
+        }
+
+        try:
             with transaction.atomic():
-                # 1. Fetch the order details to get the correct amount
-                order = client.order.fetch(razorpay_order_id)
-                amount_paid = order['amount'] / 100 # Convert from paise to rupees
-
-                # 2. Log the payment details in the Payment model
+                # We save our merchant_transaction_id as merchant_order_id now
                 Payment.objects.create(
                     user=request.user,
-                    razorpay_order_id=razorpay_order_id,
-                    razorpay_payment_id=razorpay_payment_id,
-                    razorpay_signature=razorpay_signature,
-                    amount=amount_paid
+                    merchant_transaction_id=merchant_order_id,
+                    amount=payment_amount,
+                    status='PENDING'
                 )
 
-                # 3. Update UserProfile to premium
-                user_profile = UserProfile.objects.get(user=request.user)
-                user_profile.is_premium_member = True
-                user_profile.save()
+            response = requests.post(settings.PHONEPE_PAY_URL, json=payload, headers=headers, timeout=10)
+            logger.info(f"PhonePe Pay API Response: Status={response.status_code}, Body={response.text}")
+            response_data = response.json()
             
-            return JsonResponse({'status': 'success', 'message': 'Payment successful!'})
+            if response_data.get("orderId"): # Success is indicated by presence of orderId
+                return redirect(response_data["redirectUrl"])
+            else:
+                error_message = response_data.get("message", "An unknown error occurred.")
+                get_object_or_404(Payment, merchant_transaction_id=merchant_order_id).update(status='FAILURE')
+                return render(request, 'payment/payment_error.html', {'message': error_message})
 
         except Exception as e:
-            # --- IMPROVEMENT 4: BETTER ERROR LOGGING ---
-            logger.error(f"Payment verification failed for user {request.user.id}: {e}")
-            return JsonResponse({'status': 'failure', 'message': 'Payment verification failed. Please contact support.'}, status=400)
+            logger.error(f"An unexpected error occurred during V2 payment initiation: {e}")
+            return render(request, 'payment/payment_error.html', {'message': 'An unexpected error occurred.'})
+
+    return redirect('subscribe')
+
+# ===================================================================
+# VIEW 3: HANDLE WEBHOOK (S2S CALLBACK)
+# ===================================================================
+@csrf_exempt
+def phonepe_callback(request):
+    # The V2 docs suggest a different webhook validation (SHA256 of username:password)
+    # Since we don't have that set up, we will rely on the redirect and a final status check.
+    # This view can be a placeholder or be built out later if you configure webhook auth.
+    logger.info(f"Received a request on the callback URL. Body: {request.body.decode('utf-8')}")
+    return JsonResponse({'status': 'ok'}) # Acknowledge receipt
+
+# ===================================================================
+# VIEW 4: HANDLE USER REDIRECT (Now with final status check)
+# ===================================================================
+@csrf_exempt
+def phonepe_redirect(request):
+    # The user is redirected here from PhonePe after payment attempt.
+    # The query parameters will tell us the status.
+    merchant_order_id = request.GET.get('merchantOrderId')
     
-    return JsonResponse({'status': 'failure', 'message': 'Invalid request method.'}, status=405)
+    if not merchant_order_id:
+        return render(request, 'payment/payment_error.html', {'message': 'Invalid redirect from payment gateway.'})
+        
+    try:
+        payment = Payment.objects.get(merchant_transaction_id=merchant_order_id)
+        
+        # Step A: Get a fresh auth token to check status
+        access_token = get_phonepe_auth_token()
+        if not access_token:
+            return render(request, 'payment/payment_error.html', {'message': 'Could not verify payment status.'})
+            
+        # Step B: Call the Order Status API
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"O-Bearer {access_token}",
+        }
+        status_url = f"{settings.PHONEPE_STATUS_URL_BASE}/{merchant_order_id}/status"
+        response = requests.get(status_url, headers=headers, timeout=10)
+        status_data = response.json()
 
+        logger.info(f"Order Status API Response for {merchant_order_id}: {status_data}")
 
+        with transaction.atomic():
+            if status_data.get("state") == "COMPLETED" and payment.status != 'SUCCESS':
+                payment.status = 'SUCCESS'
+                # The V2 status response has more details if needed
+                payment.phonepe_transaction_id = status_data.get("paymentDetails", [{}])[0].get("transactionId")
+                user_profile = get_object_or_404(UserProfile, user=payment.user)
+                user_profile.is_premium_member = True
+                user_profile.save()
+                payment.save()
+                return render(request, 'payment/payment_success.html')
+            else:
+                payment.status = 'FAILURE'
+                payment.save()
+                error_message = status_data.get("errorContext", {}).get("description", "Payment was not successful.")
+                return render(request, 'payment/payment_error.html', {'message': error_message})
 
-
-
-
-
-
-
-
-
-    
-
-
-
+    except Payment.DoesNotExist:
+        return render(request, 'payment/payment_error.html', {'message': 'Transaction not found.'})
+    except Exception as e:
+        logger.error(f"Error during redirect handling for {merchant_order_id}: {e}")
+        return render(request, 'payment/payment_error.html', {'message': 'An error occurred while verifying your payment.'})
 
 
 

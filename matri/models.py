@@ -30,12 +30,15 @@ class UserProfile(models.Model):
     ]
     FAMILY_TYPE_CHOICES = [('Joint', 'Joint'), ('Nuclear', 'Nuclear')]
 
+    YES_NO_CHOICES = [('Yes', 'Yes'), ('No', 'No')]
+
     DENOMINATION_CHOICES = [
         ('IPC', 'IPC'),
         ('AG', 'AG'),
-        ('Full Gospel', 'Full Gospel'),
+        ('Church of God', 'Church of God'),
         ('TPM', 'TPM'),
         ('Sharon Fellowship', 'Sharon Fellowship'),
+        ('Independent Church', 'Independent Church'),
         ('Other Independent Church', 'Other Independent Church'),
     ]
 
@@ -48,6 +51,8 @@ class UserProfile(models.Model):
     denomination = models.CharField(max_length=50, choices=DENOMINATION_CHOICES, blank=True, verbose_name="Denomination (Church)")
     mother_tongue = models.CharField(max_length=50, default="Malayalam")
     marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES)
+    is_baptized = models.CharField(max_length=5, choices=YES_NO_CHOICES, blank=True, null=True, verbose_name="Are you baptized?")
+    wears_ornaments = models.CharField(max_length=5, choices=YES_NO_CHOICES, blank=True, null=True, verbose_name="Do you wear ornaments?")
     height = models.IntegerField(help_text="Height in Cm (e.g. 172)", null=True, blank=True)
     weight = models.IntegerField(help_text="Weight in kg (e.g. 70)", null=True, blank=True)
     education = models.CharField(max_length=100, blank=True, null=True)
@@ -230,15 +235,25 @@ class ChatMessage(models.Model):
 
 
 class Payment(models.Model):
+    # Choices for payment status
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('SUCCESS', 'Success'),
+        ('FAILURE', 'Failure'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    razorpay_order_id = models.CharField(max_length=100)
-    razorpay_payment_id = models.CharField(max_length=100)
-    razorpay_signature = models.CharField(max_length=200)
+    # This is your unique ID for the transaction (e.g., receipt_user_123)
+    merchant_transaction_id = models.CharField(max_length=100, unique=True, null=True) 
+    # This is the ID PhonePe returns
+    phonepe_transaction_id = models.CharField(max_length=100, null=True, blank=True) 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Payment {self.id} by {self.user.username}"
+        return f"Payment {self.id} ({self.status}) by {self.user.username if self.user else 'Anonymous'}"
 
 
 

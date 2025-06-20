@@ -290,6 +290,8 @@
                             <p class="profile-detail-item"><strong>Community:</strong> <span class="detail-value">{{ profile.category|default:"-" }}</span></p>
                             <p class="profile-detail-item"><strong>Mother Tongue:</strong> <span class="detail-value">{{ profile.mother_tongue|default:"-" }}</span></p>
                             <p class="profile-detail-item"><strong>Marital Status:</strong> <span class="detail-value">{{ profile.get_marital_status_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Baptized:</strong> <span class="detail-value">{{ profile.get_is_baptized_display|default:"-" }}</span></p>
+                            <p class="profile-detail-item"><strong>Wears Ornaments:</strong> <span class="detail-value">{{ profile.get_wears_ornaments_display|default:"-" }}</span></p>
                         </div>
                     </div>
                     <!-- Other sections like 'About Me', 'Partner Prefs' etc. remain unchanged -->
