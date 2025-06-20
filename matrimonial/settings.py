@@ -267,36 +267,14 @@ EMAIL_USE_TLS = True
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
 
+
+PHONEPE_CLIENT_ID = os.environ.get('PHONEPE_MERCHANT_ID')
+PHONEPE_CLIENT_SECRET = os.environ.get('PHONEPE_SALT_KEY')
+PHONEPE_CLIENT_VERSION = int(os.environ.get('PHONEPE_SALT_INDEX', '1'))
+
+# Environment Setting
+# This will read DJANGO_ENV=PRODUCTION from your .env file on the server.
 APP_ENVIRONMENT = os.environ.get('DJANGO_ENV', 'DEVELOPMENT')
-
-# Common Credentials (loaded from .env file)
-# The variable names here are based on the V2 API documentation.
-PHONEPE_CLIENT_ID = os.environ.get('PHONEPE_MERCHANT_ID')      # This should be your LIVE Merchant ID
-PHONEPE_CLIENT_SECRET = os.environ.get('PHONEPE_SALT_KEY')      # This should be your LIVE Salt Key/Client Secret
-PHONEPE_CLIENT_VERSION = os.environ.get('PHONEPE_SALT_INDEX', '1')  # This should be your LIVE Client Version
-
-# Environment-specific Endpoints
-# This 'if' block automatically selects the correct URLs based on the DJANGO_ENV setting.
-if APP_ENVIRONMENT == 'PRODUCTION':
-    # --- PRODUCTION (LIVE) URLS ---
-    # These are the URLs for real transactions.
-    print("--------------------------------------------------")
-    print("Django is running in PRODUCTION mode.")
-    print("PhonePe Endpoints are set to LIVE.")
-    print("--------------------------------------------------")
-    PHONEPE_AUTH_URL = "https://api.phonepe.com/apis/identity-manager/v1/oauth/token"
-    PHONEPE_PAY_URL = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
-    PHONEPE_STATUS_URL_BASE = "https://api.phonepe.com/apis/pg/checkout/v2/order"
-else:
-    # --- UAT (TEST) URLS ---
-    # These are the URLs for testing.
-    print("--------------------------------------------------")
-    print("Django is running in DEVELOPMENT mode.")
-    print("PhonePe Endpoints are set to UAT (Test).")
-    print("--------------------------------------------------")
-    PHONEPE_AUTH_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token"
-    PHONEPE_PAY_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay"
-    PHONEPE_STATUS_URL_BASE = "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/order"
 
 
 # Your Site's Base URL (loaded from .env file)
