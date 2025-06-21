@@ -350,55 +350,75 @@ class Notification(models.Model):
 def send_notification_email(sender, instance, created, **kwargs):
     """
     A signal that sends an email to the recipient when a new Notification is created.
+    -- MODIFIED to prevent spamming emails for continuous chat messages. --
     """
-    # We only want to send an email when a notification is first created.
-    if created:
-        notification = instance
-        recipient = notification.recipient
+    if not created:
+        return # Only act on newly created notifications
 
-        # Ensure the recipient has an email address configured.
-        if not recipient.email:
-            # You might want to log this event for debugging.
-            print(f"Could not send email: User {recipient.username} has no email address.")
-            return
+    notification = instance
 
-        # Build the full URL for the link in the email
-        # The SITE_URL must be defined in your settings.py (e.g., 'https://yourdomain.com')
-        site_url = getattr(settings, 'MY_SITE_BASE_URL', 'http://127.0.0.1:8000')
-        full_link = site_url + notification.link
+    # --- NEW LOGIC TO PREVENT EMAIL SPAM FOR CHATS ---
+    if notification.notification_type == 'new_message':
+        # Count how many unread messages the recipient has in this specific chat room.
+        # This query checks for messages that are unread AND were not sent by the recipient themselves.
+        # We assume a reverse one-to-one link from User to UserProfile exists as `userprofile`.
+        unread_count = ChatMessage.objects.filter(
+            room=notification.chat_room,
+            is_read=False
+        ).exclude(
+            sender=notification.recipient.userprofile
+        ).count()
 
-        # Prepare email context
-        context = {
-            'recipient_name': recipient.first_name or recipient.username,
-            'notification_text': notification.text,
-            'notification_sender_name': notification.sender_name,
-            'full_link': full_link,
-            'site_name': 'Pentecost Matrimony' # Replace with your actual site name
-        }
+        # If the count is greater than 1, it means the recipient already had at
+        # least one unread message, and an email should have already been sent.
+        # We only send an email when the unread count transitions from 0 to 1.
+        if unread_count > 1:
+            print(f"Skipping email for new message in room {notification.chat_room.id}. User already has unread messages.")
+            return # Exit the function, do not send an email.
+    # --- END OF NEW LOGIC ---
 
-        # Render the HTML and plain text email templates
-        html_message = render_to_string('notifications/email/new_notification.html', context)
-        plain_message = render_to_string('notifications/email/new_notification.txt', context)
+    recipient = notification.recipient
 
-        # Send the email
-        try:
-            send_mail(
-                subject=f"You have a new notification on Pentecost Matrimony",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[recipient.email],
-                html_message=html_message,
-                fail_silently=True # Change to True in production if you don't want email errors to crash the app
-            )
-        except Exception as e:
-            # Log the error for troubleshooting
-            print(f"Error sending notification email to {recipient.email}: {e}")
-    
+    # Ensure the recipient has an email address configured.
+    if not recipient.email:
+        print(f"Could not send email: User {recipient.username} has no email address.")
+        return
 
-    
-    
+    # Build the full URL for the link in the email
+    site_url = getattr(settings, 'MY_SITE_BASE_URL', 'http://127.0.0.1:8000')
+    full_link = site_url + notification.link
 
+    # Customize the subject based on notification type for a better user experience
+    if notification.notification_type == 'new_message':
+        subject = f"You have a new message on Pentecost Matrimony"
+    else:
+        subject = f"You have a new notification on Pentecost Matrimony"
 
+    # Prepare email context
+    context = {
+        'recipient_name': recipient.first_name or recipient.username,
+        'notification_text': notification.text,
+        'notification_sender_name': notification.sender_name,
+        'full_link': full_link,
+        'site_name': 'Pentecost Matrimony'
+    }
 
+    # Render the HTML and plain text email templates
+    html_message = render_to_string('notifications/email/new_notification.html', context)
+    plain_message = render_to_string('notifications/email/new_notification.txt', context)
+
+    # Send the email
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient.email],
+            html_message=html_message,
+            fail_silently=True
+        )
+    except Exception as e:
+        # Log the error for troubleshooting
+        print(f"Error sending notification email to {recipient.email}: {e}")
 
 
