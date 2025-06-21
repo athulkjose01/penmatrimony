@@ -585,6 +585,10 @@ def edit_user_profile_view(request):
 
 @login_required
 def search_users_view(request):
+    """
+    Handles both username search and advanced search for user profiles.
+    Uses Groq AI for an enhanced, semantic search on the 'profession' field.
+    """
     current_user_profile = None
     try:
         current_user_profile = UserProfile.objects.get(user=request.user)
@@ -592,7 +596,7 @@ def search_users_view(request):
         messages.warning(request, "Please create your profile before searching for others.")
         return redirect('create_user_profile')
 
-    # Start with all profiles except the current user
+    # Start with all profiles except the current user and those without a profile picture
     results_queryset = UserProfile.objects.exclude(user=request.user).select_related('user')
     form_submitted_with_data = False
 
@@ -632,16 +636,13 @@ def search_users_view(request):
                 today = date.today()
                 age_min, age_max = cleaned_data.get('age_min'), cleaned_data.get('age_max')
                 if age_min:
-                    # Profiles with date_of_birth on or before (today - age_min years)
                     results_queryset = results_queryset.filter(date_of_birth__lte=date(today.year - age_min, today.month, today.day))
                 if age_max:
-                    # Profiles with date_of_birth after (today - (age_max + 1) years)
                     results_queryset = results_queryset.filter(date_of_birth__gt=date(today.year - (age_max + 1), today.month, today.day))
                 
                 if cleaned_data.get('marital_status'):
                     results_queryset = results_queryset.filter(marital_status=cleaned_data.get('marital_status'))
                 
-                # --- NEW: Denomination filter added ---
                 if cleaned_data.get('denomination'):
                     results_queryset = results_queryset.filter(denomination=cleaned_data.get('denomination'))
 
@@ -688,17 +689,26 @@ def search_users_view(request):
                                     all_groq_matched_professions.add(term)
                             
                             if groq_call_failed_for_any_term:
+                                print("DEBUG: Groq call failed, falling back to simple icontains search.")
                                 q_objects_prof = Q()
                                 for term in user_entered_professions:
                                     q_objects_prof |= Q(profession__icontains=term)
                                 results_queryset = results_queryset.filter(q_objects_prof)
                             else:
                                 if all_groq_matched_professions:
+                                    print(f"DEBUG: Querying database with Groq-matched professions: {all_groq_matched_professions}")
                                     q_objects_prof = Q()
+                                    # ==================================================================
+                                    # THE FIX IS HERE: Using __icontains for reliable matching
+                                    # of the exact profession titles returned by Groq.
+                                    # ==================================================================
                                     for p_term in all_groq_matched_professions:
-                                        q_objects_prof |= Q(profession__iregex=r'\b' + re.escape(p_term) + r'\b')
+                                        q_objects_prof |= Q(profession__icontains=p_term)
+                                    # ==================================================================
+                                    
                                     results_queryset = results_queryset.filter(q_objects_prof)
                                 else:
+                                    print("DEBUG: Groq ran successfully but found no matching professions.")
                                     results_queryset = results_queryset.none()
                 # --- End of Enhanced Profession Search ---
 
@@ -706,8 +716,6 @@ def search_users_view(request):
                     results_queryset = results_queryset.filter(drinking=cleaned_data.get('drinking'))
                 if cleaned_data.get('smoking'):
                     results_queryset = results_queryset.filter(smoking=cleaned_data.get('smoking'))
-                
-                # --- REMOVED: family_type filter is no longer here ---
             
             else: # Invalid or no search_type
                 if request.GET:
@@ -715,11 +723,9 @@ def search_users_view(request):
                 results_queryset = UserProfile.objects.none()
 
             if not results_queryset.exists() and form_submitted_with_data:
-                # This message now appears in the template, so a blank message is fine.
                 messages.info(request, "")
         
         else: # Form is not valid
-            # Check if the user actually tried to submit data, not just an empty form
             was_attempted_submit = any(val for key, val in request.GET.items() if key != 'search_type' and val)
             if was_attempted_submit:
                 messages.error(request, "There were errors in your search criteria. Please check the form.")
