@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Notification</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+        <h2 style="color: #333;">New Notification on {{ site_name }}</h2>
+        <p>Hi {{ recipient_name }},</p>
+        
+        <p>You have received a new notification:</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0;">
+            <p style="margin: 0;">"{{ notification_text }}"</p>
+            <em style="font-size: 0.9em; color: #555;">— from {{ notification_sender_name }}</em>
+        </div>
+
+        <p>Click the button below to view it on the site:</p>
+        
+        <a href="{{ full_link }}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 3px;">
+            View Notification
+        </a>
+        
+        <p style="margin-top: 30px; font-size: 0.8em; color: #888;">
+            If you cannot click the button, copy and paste this link into your browser:<br>
+            <a href="{{ full_link }}">{{ full_link }}</a>
+        </p>
+        
+        <p style="font-size: 0.8em; color: #888;">
+            Thanks,<br>
+            The {{ site_name }} Team
+        </p>
+    </div>
+</body>
+</html>

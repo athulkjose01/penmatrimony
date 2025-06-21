@@ -1,0 +1,11 @@
+Hi {{ recipient_name }},
+
+You have received a new notification on {{ site_name }}:
+"{{ notification_text }}"
+-- from {{ notification_sender_name }}
+
+You can view it by following this link:
+{{ full_link }}
+
+Thanks,
+The {{ site_name }} Team

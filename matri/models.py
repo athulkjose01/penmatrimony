@@ -6,6 +6,13 @@ from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 
 
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
+
 
 
 class Profile(models.Model):
@@ -336,6 +343,56 @@ class Notification(models.Model):
             return "#"
         
         return "#" # Default fallback
+    
+
+
+@receiver(post_save, sender=Notification)
+def send_notification_email(sender, instance, created, **kwargs):
+    """
+    A signal that sends an email to the recipient when a new Notification is created.
+    """
+    # We only want to send an email when a notification is first created.
+    if created:
+        notification = instance
+        recipient = notification.recipient
+
+        # Ensure the recipient has an email address configured.
+        if not recipient.email:
+            # You might want to log this event for debugging.
+            print(f"Could not send email: User {recipient.username} has no email address.")
+            return
+
+        # Build the full URL for the link in the email
+        # The SITE_URL must be defined in your settings.py (e.g., 'https://yourdomain.com')
+        site_url = getattr(settings, 'MY_SITE_BASE_URL', 'http://127.0.0.1:8000')
+        full_link = site_url + notification.link
+
+        # Prepare email context
+        context = {
+            'recipient_name': recipient.first_name or recipient.username,
+            'notification_text': notification.text,
+            'notification_sender_name': notification.sender_name,
+            'full_link': full_link,
+            'site_name': 'Pentecost Matrimony' # Replace with your actual site name
+        }
+
+        # Render the HTML and plain text email templates
+        html_message = render_to_string('notifications/email/new_notification.html', context)
+        plain_message = render_to_string('notifications/email/new_notification.txt', context)
+
+        # Send the email
+        try:
+            send_mail(
+                subject=f"You have a new notification on Pentecost Matrimony",
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[recipient.email],
+                html_message=html_message,
+                fail_silently=True # Change to True in production if you don't want email errors to crash the app
+            )
+        except Exception as e:
+            # Log the error for troubleshooting
+            print(f"Error sending notification email to {recipient.email}: {e}")
     
 
     
