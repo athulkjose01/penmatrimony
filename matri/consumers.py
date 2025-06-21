@@ -37,11 +37,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = data['message']
         sender_profile = await self.get_user_profile(self.user)
 
+        # First, save the message to the database
         chat_message = await self.save_message(message, sender_profile)
         
-        # --- Create notification for other participants ---
-        await self.create_chat_notification(sender_profile, chat_message.room)
+        # Then, conditionally create a notification based on the new logic
+        await self.create_chat_notification_if_needed(sender_profile, chat_message.room)
 
+        # Finally, broadcast the message to the room
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -91,17 +93,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
             content=message_content
         )
 
-    # --- ADDED: Method to create notifications for new messages ---
+    # --- MODIFIED: Renamed and updated to only create a notification when needed ---
     @database_sync_to_async
-    def create_chat_notification(self, sender_profile, room):
+    def create_chat_notification_if_needed(self, sender_profile, room):
+        """
+        Creates a 'new_message' notification but only if the recipient doesn't
+        already have unread messages in this room.
+        """
+        # Get the recipient(s) of the message
         other_participants = room.participants.exclude(user=self.user)
         
-        for participant_profile in other_participants:
-            if participant_profile.user != self.user:
+        for recipient_profile in other_participants:
+            # Count unread messages for this recipient in this room.
+            # This includes the message we just saved.
+            unread_count = ChatMessage.objects.filter(
+                room=room,
+                is_read=False
+            ).exclude(sender=recipient_profile).count()
+
+            # If the count is exactly 1, it means this is the first unread message.
+            # This is the moment to create a notification.
+            if unread_count == 1:
                 Notification.objects.create(
-                    recipient=participant_profile.user,
+                    recipient=recipient_profile.user,
                     sender_profile=sender_profile,
                     notification_type='new_message',
                     text=f"You have a new message from {sender_profile.full_name}.",
                     chat_room=room
                 )
+                print(f"Created notification for {recipient_profile.user.username} in room {room.id}")
+            else:
+                # If unread_count > 1, a notification already exists. Do nothing.
+                print(f"Skipped notification for {recipient_profile.user.username}. Unread count: {unread_count}")
