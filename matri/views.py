@@ -1639,6 +1639,21 @@ def refund_policy_view(request):
 
 
 
+def assetlinks(request):
+    """
+    View to serve the assetlinks.json file.
+    """
+    # Construct the full path to the file
+    file_path = os.path.join(settings.BASE_DIR, 'assetlinks.json')
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    return JsonResponse(data, safe=False)
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "in.co.pentecostmatrimony.twa",
+        "sha256_cert_fingerprints": ["6D:80:5A:2E:23:CA:03:E6:5D:90:20:F8:F6:D4:5E:5C:82:C6:98:B3:36:D0:D7:13:04:61:ED:7D:AD:69:F8:A6"]
+      }
+    }]

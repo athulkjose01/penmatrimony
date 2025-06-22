@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings # Add this import
 from django.conf.urls.static import static # Add this import
+from matri import views
 
 
 
@@ -25,6 +26,7 @@ from django.conf.urls.static import static # Add this import
 urlpatterns = [
     path('penadmin/', admin.site.urls),
     path('', include('matri.urls')),
+    path(".well-known/assetlinks.json", views.assetlinks, name="assetlinks"),
 ]
 
 
