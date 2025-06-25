@@ -862,13 +862,11 @@ def post_feed_view(request):
         post.is_liked_by_user = post.id in liked_post_ids
     # --- END OF UPDATED LOGIC ---
 
-    # Pagination
-    paginator = Paginator(all_posts_list, 9)
-    page_number = request.GET.get('page')
-    posts_page = paginator.get_page(page_number)
-
+    # --- PAGINATION REMOVED ---
+    # The entire list of posts will be sent to the template.
+    
     context = {
-        'posts_page': posts_page,
+        'posts': all_posts_list, # Changed from 'posts_page' to 'posts'
         'user_has_profile': True,
         'page_title': "Community Feed", 
     }

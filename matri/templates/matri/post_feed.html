@@ -196,8 +196,8 @@
         {% endif %}
 
         <div class="feed-container">
-            {% if posts_page.object_list %}
-                {% for post in posts_page %}
+            {% if posts %}
+                {% for post in posts %}
                 <div class="post" style="animation-delay: {{ forloop.counter0|stringformat:".2f"|slice:"1:" }}s;">
                     <div class="post-header">
                         
@@ -255,35 +255,7 @@
                 </div>
                 {% endfor %}
 
-                {% if posts_page.has_other_pages %}
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        {% if posts_page.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?page=1" aria-label="First"><i class="fas fa-angle-double-left"></i></a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.previous_page_number }}" aria-label="Previous"><i class="fas fa-angle-left"></i></a></li>
-                        {% else %}
-                            <li class="page-item disabled"><span class="page-link" aria-label="First"><i class="fas fa-angle-double-left"></i></span></li>
-                            <li class="page-item disabled"><span class="page-link" aria-label="Previous"><i class="fas fa-angle-left"></i></span></li>
-                        {% endif %}
-                        {% for num in posts_page.paginator.page_range %}
-                            {% if posts_page.number == num %}
-                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                            {% elif num > posts_page.number|add:'-3' and num < posts_page.number|add:'3' %}
-                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                            {% elif num == posts_page.number|add:'-3' or num == posts_page.number|add:'3' %}
-                                 <li class="page-item disabled"><span class="page-link">...</span></li>
-                            {% endif %}
-                        {% endfor %}
-                        {% if posts_page.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.next_page_number }}" aria-label="Next"><i class="fas fa-angle-right"></i></a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.paginator.num_pages }}" aria-label="Last"><i class="fas fa-angle-double-right"></i></a></li>
-                        {% else %}
-                            <li class="page-item disabled"><span class="page-link" aria-label="Next"><i class="fas fa-angle-right"></i></span></li>
-                            <li class="page-item disabled"><span class="page-link" aria-label="Last"><i class="fas fa-angle-double-right"></i></span></li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
+                <!-- PAGINATION BLOCK ENTIRELY REMOVED -->
 
             {% else %}
                 <div class="no-feed-items">
