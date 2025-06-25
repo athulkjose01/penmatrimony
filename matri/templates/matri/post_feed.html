@@ -46,12 +46,11 @@
         .post-date { font-size: 0.85rem; color: #b0b0b0; }
         .post-image-container { width: 100%; background-color: #1a1a1a; cursor: pointer; }
         
-        /* === MODIFIED STYLE FOR POST IMAGE === */
         .post-image {
             display: block;
             width: 100%;
-            aspect-ratio: 4 / 5; /* This creates a taller, consistent post size */
-            object-fit: cover;   /* This ensures the image fills the space without distortion */
+            aspect-ratio: 4 / 5;
+            object-fit: cover;
         }
         
         .post-content { padding: 1rem 1.5rem; }
@@ -61,11 +60,6 @@
         .action-btn .fas.fa-heart { color: #e74c3c; }
         .caption { line-height: 1.6; color: #E0E0E0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .username-in-caption { margin-right: 0.5rem; }
-        .pagination { justify-content: center; margin-top: 40px; margin-bottom: 20px; }
-        .pagination .page-item .page-link { background-color: rgba(75, 0, 130, 0.5); border-color: rgba(221, 160, 221, 0.3); color: #DDA0DD; margin: 0 3px; border-radius: 8px; transition: all 0.3s ease; }
-        .pagination .page-item .page-link:hover { background-color: rgba(221, 160, 221, 0.3); border-color: #DDA0DD; color: white; }
-        .pagination .page-item.active .page-link { background-color: #DDA0DD; border-color: #DDA0DD; color: #4B0082; font-weight: bold; }
-        .pagination .page-item.disabled .page-link { background-color: rgba(75, 0, 130, 0.2); border-color: rgba(221, 160, 221, 0.1); color: #888; }
         .no-feed-items { text-align: center; color: #E0E0E0; font-style: italic; padding: 50px 20px; font-size: 1.1rem; background: rgba(30, 0, 40, 0.85); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
         .no-feed-items p i { color: #DDA0DD; }
         .btn-profile-action.btn-add-post { background: linear-gradient(45deg, #28a745, #20c997, #17a2b8); padding: 12px 25px; border: none; border-radius: 50px; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; color: white; cursor: pointer; font-family: 'Georgia', serif; display: inline-flex; align-items: center; gap: 10px; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(32, 121, 89, 0.2); }
@@ -87,7 +81,6 @@
             .nav-links { flex-wrap: wrap; justify-content: center; width: 100%; background: rgba(75, 0, 130, 0.98); padding-bottom: 10px; }
             .feed-container { margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 0 0.5rem; }
             .post { margin-bottom: 1.5rem; border-radius: 15px; }
-            /* REMOVED: .post-image { height: 300px; } to allow aspect-ratio to work */
             .post-header { padding: 0.75rem 1rem; }
             .avatar-wrapper { width: 40px; height: 40px; }
             .username { font-size: 0.95rem; }
@@ -132,33 +125,24 @@
             .caption {
                 font-size: 0.85rem;
             }
-            .pagination .page-link {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.85rem;
-            }
         }
 
-        /* === NEW STYLES FOR DESKTOP VIEW TO ENSURE FULL POST VISIBILITY === */
         @media (min-width: 769px) {
             .post {
-                /* Set a max-height relative to the viewport, accounting for nav and margins. */
                 max-height: calc(100vh - 140px); 
                 display: flex;
                 flex-direction: column;
             }
-
             .post-image-container {
-                flex: 1 1 auto; /* Allow the image container to grow/shrink. */
-                min-height: 0;  /* Crucial for preventing overflow in flex containers. */
-                position: relative; /* Retain for JS overlays. */
-                background-color: #101010; /* Add a background for potential letterboxing. */
+                flex: 1 1 auto;
+                min-height: 0;
+                position: relative;
+                background-color: #101010;
             }
-
             .post-image {
-                /* Override mobile-first styles for desktop. */
                 height: 100%;
-                aspect-ratio: unset; /* Disable the fixed aspect ratio to allow flexible height. */
-                object-fit: contain; /* Show the entire image, letterboxed if necessary. */
+                aspect-ratio: unset;
+                object-fit: contain;
             }
         }
     </style>
@@ -196,8 +180,8 @@
         {% endif %}
 
         <div class="feed-container">
-            {% if posts_page.object_list %}
-                {% for post in posts_page %}
+            {% if posts %}
+                {% for post in posts %}
                 <div class="post" style="animation-delay: {{ forloop.counter0|stringformat:".2f"|slice:"1:" }}s;">
                     <div class="post-header">
                         
@@ -254,36 +238,6 @@
                     </div>
                 </div>
                 {% endfor %}
-
-                {% if posts_page.has_other_pages %}
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        {% if posts_page.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?page=1" aria-label="First"><i class="fas fa-angle-double-left"></i></a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.previous_page_number }}" aria-label="Previous"><i class="fas fa-angle-left"></i></a></li>
-                        {% else %}
-                            <li class="page-item disabled"><span class="page-link" aria-label="First"><i class="fas fa-angle-double-left"></i></span></li>
-                            <li class="page-item disabled"><span class="page-link" aria-label="Previous"><i class="fas fa-angle-left"></i></span></li>
-                        {% endif %}
-                        {% for num in posts_page.paginator.page_range %}
-                            {% if posts_page.number == num %}
-                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                            {% elif num > posts_page.number|add:'-3' and num < posts_page.number|add:'3' %}
-                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                            {% elif num == posts_page.number|add:'-3' or num == posts_page.number|add:'3' %}
-                                 <li class="page-item disabled"><span class="page-link">...</span></li>
-                            {% endif %}
-                        {% endfor %}
-                        {% if posts_page.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.next_page_number }}" aria-label="Next"><i class="fas fa-angle-right"></i></a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ posts_page.paginator.num_pages }}" aria-label="Last"><i class="fas fa-angle-double-right"></i></a></li>
-                        {% else %}
-                            <li class="page-item disabled"><span class="page-link" aria-label="Next"><i class="fas fa-angle-right"></i></span></li>
-                            <li class="page-item disabled"><span class="page-link" aria-label="Last"><i class="fas fa-angle-double-right"></i></span></li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
 
             {% else %}
                 <div class="no-feed-items">
