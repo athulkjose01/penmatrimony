@@ -845,30 +845,31 @@ def post_feed_view(request):
         'user_profile__user'
     ).distinct().order_by('-created_at')
 
-    # --- LIKED POSTS LOGIC (UPDATED TO USE PostLike MODEL) ---
+    # --- LIKED POSTS LOGIC (This part is correct and remains) ---
     if request.user.is_authenticated:
-        # Get a set of post IDs from the feed that the current user has liked.
         liked_post_ids = set(
             PostLike.objects.filter(
                 user=request.user,
-                post__in=all_posts_list  # Check only against posts in our feed
+                post__in=all_posts_list
             ).values_list('post_id', flat=True)
         )
     else:
         liked_post_ids = set()
 
-    # Annotate each post object with a new attribute 'is_liked_by_user'.
     for post in all_posts_list:
         post.is_liked_by_user = post.id in liked_post_ids
-    # --- END OF UPDATED LOGIC ---
+    # --- END OF LOGIC ---
 
-    # Pagination
-    paginator = Paginator(all_posts_list, 9)
-    page_number = request.GET.get('page')
-    posts_page = paginator.get_page(page_number)
+    # --- REMOVED PAGINATION LOGIC ---
+    # paginator = Paginator(all_posts_list, 9)
+    # page_number = request.GET.get('page')
+    # posts_page = paginator.get_page(page_number)
 
+    # --- CORRECTED CONTEXT ---
+    # The key change is here: pass the entire list 'all_posts_list'
+    # with the key 'posts' to match the template.
     context = {
-        'posts_page': posts_page,
+        'posts': all_posts_list,
         'user_has_profile': True,
         'page_title': "Community Feed", 
     }
