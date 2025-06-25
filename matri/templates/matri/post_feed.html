@@ -137,6 +137,30 @@
                 font-size: 0.85rem;
             }
         }
+
+        /* === NEW STYLES FOR DESKTOP VIEW TO ENSURE FULL POST VISIBILITY === */
+        @media (min-width: 769px) {
+            .post {
+                /* Set a max-height relative to the viewport, accounting for nav and margins. */
+                max-height: calc(100vh - 140px); 
+                display: flex;
+                flex-direction: column;
+            }
+
+            .post-image-container {
+                flex: 1 1 auto; /* Allow the image container to grow/shrink. */
+                min-height: 0;  /* Crucial for preventing overflow in flex containers. */
+                position: relative; /* Retain for JS overlays. */
+                background-color: #101010; /* Add a background for potential letterboxing. */
+            }
+
+            .post-image {
+                /* Override mobile-first styles for desktop. */
+                height: 100%;
+                aspect-ratio: unset; /* Disable the fixed aspect ratio to allow flexible height. */
+                object-fit: contain; /* Show the entire image, letterboxed if necessary. */
+            }
+        }
     </style>
 </head>
 <body>
