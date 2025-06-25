@@ -38,7 +38,12 @@ DEBUG = False
 
 
 # ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'www.pentecostmatrimony.co.in',
+    'pentecostmatrimony.co.in',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 dotenv_path = BASE_DIR / '.env' # Add this
