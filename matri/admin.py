@@ -40,5 +40,9 @@ admin.site.register(Notification)
 admin.site.register(InterestRequest)
 admin.site.register(ChatMessage)
 admin.site.register(ChatRoom)
-admin.site.register(Payment)
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'amount', 'status', 'created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at']
 # admin.site.register(UserPost) # Already registered with custom admin
