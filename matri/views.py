@@ -1477,7 +1477,7 @@ def phonepe_initiate_payment(request):
         client = get_phonepe_client()
         
         # Set to 1 for testing, change to 1500 for final production
-        payment_amount = 299
+        payment_amount = 2
         amount_in_paise = int(payment_amount * 100)
         
         # This is the unique order ID for your system
